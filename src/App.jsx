@@ -12,6 +12,7 @@ function App() {
         <div>test1</div>
         <div>test 2334885</div>
         <div>test 3</div>
+        <div>test 4 colloborator</div>
         <a href="https://vite.dev" target="_blank">
           <img src={viteLogo} className="logo" alt="Vite logo" />
         </a>
@@ -36,3 +37,4 @@ function App() {
 }
 
 export default App
+
