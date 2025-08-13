@@ -2,11 +2,10 @@
 
 export default function Button({
   children,
-  variant = "primary", // primary | secondary | ghost
-  size = "md",         // sm | md | lg
+  variant = "primary", // primary | secondary | ghost      // sm | md | lg
   ...props
 }) {
-  const base = "inline-flex items-center justify-center rounded-md font-medium transition disabled:opacity-50";
+  const base = "inline-flex items-center justify-center rounded-md font-medium transition disabled:opacity-50 p-2 cursor-pointer";
   // const sizes = {
   //   sm: "h-9 px-3 text-sm",
   //   md: "h-11 px-5",
@@ -14,12 +13,12 @@ export default function Button({
   // };
   const variants = {
     primary: "bg-sandy-beige text-white hover:opacity-80 shadow",
-    secondary: "bg-amber-100 text-amber-900 hover:bg-amber-200",
-    ghost: "bg-transparent hover:bg-amber-50",
+    secondary: "bg-white text-sandy-beige border border-sandy-beige hover:opacity-80",
+    ghost: "bg-transparent hover:opacity-80",
   };
 
   return (
-    <button className={`bg-sandy-beige text-white hover:opacity-80 shadow ${base}`} {...props}>
+    <button className={`${variants[variant]} ${base}`} {...props}>
       {children}
     </button>
   );
