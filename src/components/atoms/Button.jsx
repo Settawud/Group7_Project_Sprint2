@@ -1,8 +1,7 @@
-
-
 export default function Button({
   children,
-  variant = "primary", // primary | secondary | ghost      // sm | md | lg
+  variant = "primary",
+  className = "", // primary | secondary | ghost      // sm | md | lg
   ...props
 }) {
   const base = "inline-flex items-center justify-center rounded-md font-medium transition disabled:opacity-50 p-2 cursor-pointer";
@@ -18,7 +17,7 @@ export default function Button({
   };
 
   return (
-    <button className={`${variants[variant]} ${base}`} {...props}>
+    <button className={`${variants[variant]} ${base} ${className}`} {...props}>
       {children}
     </button>
   );
