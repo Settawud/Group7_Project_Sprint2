@@ -1,0 +1,14 @@
+export default function Input({ className = "", left, right, ...props }) {
+  return (
+    <div className={`relative ${className}`}>
+      {left && <span className="absolute inset-y-0 left-3 flex items-center">{left}</span>}
+      <input
+        className={`w-full rounded-xl border border-amber-200 bg-white/70 px-4 py-2.5 outline-none 
+                    focus:border-amber-400 focus:ring-2 focus:ring-amber-200
+                    ${left ? "pl-10" : ""} ${right ? "pr-10" : ""}`}
+        {...props}
+      />
+      {right && <span className="absolute inset-y-0 right-3 flex items-center">{right}</span>}
+    </div>
+  );
+}
