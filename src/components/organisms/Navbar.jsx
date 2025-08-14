@@ -9,6 +9,7 @@ export default function Navbar() {
     <header className="sticky top-0 z-50 border-b border-amber-200 bg-amber-50/70 backdrop-blur">
       <Container className="h-14 flex items-center justify-between">
         <div className="flex items-center gap-6">
+          <a href="/" className="font-semibold"><img src="../images/logoCutBackground.webp" alt="logo image" width="60" height="60"/></a>
           <a href="/" className="font-semibold">Livin’ Lab</a>
           <nav className="hidden md:flex gap-6 text-stone-700">
             <a href="/c/chairs" className="hover:opacity-80">เก้าอี้เพื่อสุขภาพ</a>
