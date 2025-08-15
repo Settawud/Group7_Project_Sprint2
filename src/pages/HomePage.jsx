@@ -13,8 +13,10 @@ export default function HomePage() {
       <div className="bg-stone-300/50">
         <Container className="py-16">
           <div className="text-center space-y-3">
-            <p className="text-stone-700">Working ทำงานอย่างมีระดับ GenMate F Style</p>
-            <h1 className="text-5xl font-bold text-stone-700">Well-Being Lab</h1>
+            <p className="text-stone-700">ทำงานอย่างมีระดับ</p>
+            <h1 className="text-5xl font-bold text-stone-700">
+              Well-Being Lab
+            </h1>
           </div>
         </Container>
       </div>
@@ -22,9 +24,21 @@ export default function HomePage() {
       <Container>
         <Section title="เลือกช้อปตามหมวดหมู่">
           <div className="grid gap-6 sm:grid-cols-3">
-            <CategoryCard title="Chairs" href="/c/chairs" subtitle="เก้าอี้เพื่อสุขภาพ" />
-            <CategoryCard title="Tables" href="/c/tables" subtitle="โต๊ะปรับระดับ" />
-            <CategoryCard title="Accessories" href="/c/accessories" subtitle="อุปกรณ์เสริม" />
+            <CategoryCard
+              title="Chairs"
+              href="/c/chairs"
+              subtitle="เก้าอี้เพื่อสุขภาพ"
+            />
+            <CategoryCard
+              title="Tables"
+              href="/c/tables"
+              subtitle="โต๊ะปรับระดับ"
+            />
+            <CategoryCard
+              title="Accessories"
+              href="/c/accessories"
+              subtitle="อุปกรณ์เสริม"
+            />
           </div>
         </Section>
 

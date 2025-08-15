@@ -6,10 +6,11 @@ import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
 import UserDataForm from "./components/organisms/UserDataForm";
 import ProfileImageUploader from "./components/atoms/UserProfile";
 import UserProfile from "./components/atoms/UserProfile";
+import OrderConfirmationMessage from "./components/atoms/OrderConfirmationMessage";
+import ShippingAddress from "./components/atoms/ShippingAddress";
 
 export default function App() {
   return (
-
     <BrowserRouter>
       <Routes>
         <Route index element={<HomePage />} />
@@ -17,7 +18,12 @@ export default function App() {
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/forgot" element={<ForgotPasswordPage />} />
         <Route path="/userprofile" element={<UserProfile />} />
-        
+        <Route
+          path="/OrderConfirmationMessage"
+          element={<OrderConfirmationMessage />}
+        />
+        <Route path="/ShippingAddress" element={<ShippingAddress />} />
+
         {/* TODO: category pages, product detail, cart, etc. */}
       </Routes>
     </BrowserRouter>
