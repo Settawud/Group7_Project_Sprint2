@@ -10,7 +10,7 @@ export default function ProductCard({ img, name, price, rating = 0, onAdd }) {
         <h4 className="font-medium">{name}</h4>
         <Stars value={rating} />
         <div className="flex items-center justify-between pt-2">
-          <div className="font-semibold text-stone-800">฿{price?.toLocaleString?.() ?? price}</div>
+          <div className="font-semibold text-stone-800 mr-2">฿{price?.toLocaleString?.() ?? price}</div>
           <Button onClick={onAdd}>หยิบใส่ตะกร้า</Button>
         </div>
       </div>

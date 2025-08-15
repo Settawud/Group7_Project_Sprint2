@@ -66,7 +66,7 @@ export default function NavUserMenu({
       >
         <ul className="space-y-1 text-slate-700">
           <li>
-            <a href="/account/profile" className="flex items-center gap-3 rounded-xl px-3 py-2 hover:bg-stone-100" role="menuitem">
+            <a href="/userprofile" className="flex items-center gap-3 rounded-xl px-3 py-2 hover:bg-stone-100" role="menuitem">
               <Icon>🧑</Icon> <span>Profile</span>
             </a>
           </li>

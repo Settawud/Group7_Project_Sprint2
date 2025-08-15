@@ -1,6 +1,7 @@
 
 
 export default function Button({
+  className = "",
   children,
   variant = "primary", // primary | secondary | ghost      // sm | md | lg
   ...props
@@ -18,7 +19,7 @@ export default function Button({
   };
 
   return (
-    <button className={`${variants[variant]} ${base}`} {...props}>
+    <button className={`${variants[variant]} ${base} ${className}`} {...props}>
       {children}
     </button>
   );

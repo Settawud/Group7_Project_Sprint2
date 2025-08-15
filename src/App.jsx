@@ -16,7 +16,7 @@ export default function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/forgot" element={<ForgotPasswordPage />} />
-        <Route path="/userProfile" element={<UserProfile />} />
+        <Route path="/userprofile" element={<UserProfile />} />
         
         {/* TODO: category pages, product detail, cart, etc. */}
       </Routes>
