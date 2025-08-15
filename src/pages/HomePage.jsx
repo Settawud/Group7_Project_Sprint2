@@ -13,7 +13,7 @@ export default function HomePage() {
       <div className="bg-stone-300/50">
         <Container className="py-16">
           <div className="text-center space-y-3">
-            <p className="text-stone-700">ทำงานอย่างมีระดับ GenMate F Style</p>
+            <p className="text-stone-700">Working ทำงานอย่างมีระดับ GenMate F Style</p>
             <h1 className="text-5xl font-bold text-stone-700">Well-Being Lab</h1>
           </div>
         </Container>
