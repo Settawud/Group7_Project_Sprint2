@@ -15,3 +15,6 @@ jobs:
 
       - name: Trigger Vercel Deployment
         run: curl -X POST ${{ secrets.VERCEL_DEPLOY_HOOK }}
+
+      - name: Trigger Vercel Deployment (DEV)
+        run: curl -X POST ${{ secrets.VERCEL_DEPLOY_HOOK_DEV }}
