@@ -4,6 +4,7 @@ import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
 import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
 import UserProfile from "./pages/UserProfile";
+import CheckoutPage from "./pages/CheckoutPage";
 
 
 
@@ -17,6 +18,7 @@ export default function App() {
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/forgot" element={<ForgotPasswordPage />} />
         <Route path="/userprofile" element={<UserProfile/>} />
+        <Route path="/checkout" element={<CheckoutPage/>} />
         
         {/* TODO: category pages, product detail, cart, etc. */}
       </Routes>
