@@ -3,9 +3,10 @@ import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
 import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
-import UserDataForm from "./components/organisms/UserDataForm";
-import ProfileImageUploader from "./components/atoms/UserProfile";
-import UserProfile from "./components/atoms/UserProfile";
+import UserProfile from "./pages/UserProfile";
+import CheckoutPage from "./pages/CheckoutPage";
+
+
 import OrderConfirmationMessage from "./components/atoms/OrderConfirmationMessage";
 import ShippingAddress from "./components/atoms/ShippingAddress";
 import Cart from "./pages/Cart";
@@ -24,7 +25,7 @@ export default function App() {
           element={<OrderConfirmationMessage />}
         />
         <Route path="/ShippingAddress" element={<ShippingAddress />} />
-        <Route path="/cart" element={<Cart />} />
+         <Route path="/cart" element={<Cart />} />
 
         {/* TODO: category pages, product detail, cart, etc. */}
       </Routes>
