@@ -7,18 +7,18 @@ import UserProfile from "./pages/UserProfile";
 import CheckoutPage from "./pages/CheckoutPage";
 
 
+import OrderConfirmationMessage from "./components/atoms/OrderConfirmationMessage";
+import ShippingAddress from "./components/atoms/ShippingAddress";
 
 export default function App() {
   return (
-
     <BrowserRouter>
       <Routes>
         <Route index element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/forgot" element={<ForgotPasswordPage />} />
-        <Route path="/userprofile" element={<UserProfile/>} />
-        <Route path="/checkout" element={<CheckoutPage/>} />
+        <Route path="/userprofile" element={<UserProfile />} />
         
         {/* TODO: category pages, product detail, cart, etc. */}
       </Routes>
