@@ -8,6 +8,7 @@ import ProfileImageUploader from "./components/atoms/UserProfile";
 import UserProfile from "./components/atoms/UserProfile";
 import OrderConfirmationMessage from "./components/atoms/OrderConfirmationMessage";
 import ShippingAddress from "./components/atoms/ShippingAddress";
+import Cart from "./pages/Cart";
 
 export default function App() {
   return (
@@ -23,6 +24,7 @@ export default function App() {
           element={<OrderConfirmationMessage />}
         />
         <Route path="/ShippingAddress" element={<ShippingAddress />} />
+        <Route path="/cart" element={<Cart />} />
 
         {/* TODO: category pages, product detail, cart, etc. */}
       </Routes>
