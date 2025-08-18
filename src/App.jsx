@@ -20,13 +20,14 @@ export default function App() {
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/forgot" element={<ForgotPasswordPage />} />
         <Route path="/userprofile" element={<UserProfile />} />
-        <Route
+                <Route
           path="/OrderConfirmationMessage"
           element={<OrderConfirmationMessage />}
         />
         <Route path="/ShippingAddress" element={<ShippingAddress />} />
-         <Route path="/cart" element={<Cart />} />
-
+        <Route path="/cart" element={<Cart />} />
+        <Route path="/checkout" element={<CheckoutPage />} />
+        
         {/* TODO: category pages, product detail, cart, etc. */}
       </Routes>
     </BrowserRouter>
