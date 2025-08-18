@@ -1,0 +1,37 @@
+import React, { useState } from 'react'
+import QuantityButton2 from '../atoms/QuantityButton2'
+import CheckboxWithText from '../atoms/CheckboxWithText';
+
+const CartItem = ({ item,cart,setCart }) => {
+    const subtotal = item.quantity * item.price;
+    //const {subtotal, setSubtotal} = useState(item.price * item.quantity)
+  return (
+    <tr key={item.skuId}>
+                      <td className="p-4 text-center">
+              <CheckboxWithText name="select" setCart={setCart} cart={cart} skuId={item.skuId} />
+                      </td>
+                      <td><img src={item.image}
+                          className="sm:mx-auto max-w-14 max-h-14 p-1 border-1 rounded-sm border-gray-300 shadow-[0_2px_4px_1px_rgba(209,213,219,0.2)]"
+                          alt={item.altText} /></td>
+                      <td className="p-4 text-sm break-words">
+                          <div className="grid grid-cols-2 grid-rows-[1fr_auto] sm:block">
+                              <div className="col-span-2 mx-2">{item.name}</div>
+                              <div
+                                  className="mt-2 mx-2 font-semibold row-start-2 sm:text-center sm:hidden self-end">
+                      ฿{subtotal}</div>
+                  <div className="justify-self-end mt-2 mx-2 ">
+                      <QuantityButton2 item={item} cart={cart} setCart={setCart} className="w-14 sm:hidden p-0 text-center"/></div>
+                          </div>
+                      </td>
+          <td className="hidden sm:table-cell sm:p-4">
+              <div className="flex justify-center items-center">
+                  <QuantityButton2 item={item} cart={cart} setCart={setCart} className="w-14 p-0 text-center"/></div>
+
+                      </td>
+                      
+          <td className="p-4 sm:text-center text-sm hidden sm:table-cell">฿{subtotal}</td>
+                  </tr>
+  )
+}
+
+export default CartItem

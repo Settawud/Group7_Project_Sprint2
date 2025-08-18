@@ -10,6 +10,7 @@ export default function HomePage() {
   return (
     <>
       <Navbar />
+
       <div className="bg-[#c4beb3]">
         <Container className="relative py-10">
   {/* ข้อความใหญ่มากด้านหลัง */}
@@ -43,14 +44,27 @@ export default function HomePage() {
   </div>
 </Container>
 
+
       </div>
 
       <Container>
         <Section title="เลือกช้อปตามหมวดหมู่">
           <div className="grid gap-6 sm:grid-cols-3">
-            <CategoryCard title="Chairs" href="/c/chairs" subtitle="เก้าอี้เพื่อสุขภาพ" />
-            <CategoryCard title="Tables" href="/c/tables" subtitle="โต๊ะปรับระดับ" />
-            <CategoryCard title="Accessories" href="/c/accessories" subtitle="อุปกรณ์เสริม" />
+            <CategoryCard
+              title="Chairs"
+              href="/c/chairs"
+              subtitle="เก้าอี้เพื่อสุขภาพ"
+            />
+            <CategoryCard
+              title="Tables"
+              href="/c/tables"
+              subtitle="โต๊ะปรับระดับ"
+            />
+            <CategoryCard
+              title="Accessories"
+              href="/c/accessories"
+              subtitle="อุปกรณ์เสริม"
+            />
           </div>
         </Section>
 
