@@ -1,34 +1,83 @@
-import React from 'react'
-import CheckboxWithText from '../atoms/CheckboxWithText'
-import Button from '../atoms/Button'
+import React, { useState, useEffect } from "react";
+import CheckboxWithText from "../atoms/CheckboxWithText";
+import Button from "../atoms/Button";
 
-const CartAction = ({ cart,setCart}) => {
-    let total = cart.reduce((accum, item) => {
-        if (item.checked) {
-            return accum + item.price * item.quantity
-        }
-        else { return accum }
-    }, 0)
-    //console.log(total)
-    
+const CartAction = ({ cart, setCart, className="" }) => {
+  const [installChecked, setInstallChecked] = useState(false);
+  const [total, setTotal] = useState(0);
+  const [selectAllChecked, setSelectAllChecked] = useState(false);
+
+  useEffect(() => {
+    let sum = cart.reduce((accum, item) => {
+      return accum + (item.checked ? item.price * item.quantity : 0);
+    }, 0);
+
+    if (installChecked) {
+      sum += 200;
+    }
+    setTotal(sum);
+  }, [cart, installChecked]);
+  //console.log(total)
+
+  const handleDeleteCartItem = () => {
+    setCart(cart.filter((item) => item.checked === false));
+  };
+
+  const handleInstallationChecked = () => {
+    setInstallChecked(!installChecked);
+  };
+
+  const handleSelectAll = (event) => {
+    setSelectAllChecked(!selectAllChecked);
+    setCart((prevCart) =>
+      prevCart.map((item) => ({ ...item, checked: !selectAllChecked }))
+    );
+  };
+
   return (
-      <div className=" border rounded-2xl border-sandy-beige overflow-hidden shadow-[0_2px_4px_rgba(178,_150,_116,_1)] p-4">
-          <div className='flex justify-end px-4 pt-4'>
-              <CheckboxWithText name="install" text="บริการประกอบสินค้าแบบเหมา 200 บาท" className='text-end' />
-          </div>
-          <div className='flex py-4 justify-between'>
-              <div>
-                  <CheckboxWithText name="selectAll" text="เลือกทั้งหมด" className='mx-4 my-2' setCart={setCart} cart={cart} />
-              <Button variant="secondary" className="p-4 font-semibold mx-4 my-2">ลบที่เลือก</Button>
-              </div>
-              <div>
-                  <p className='mx-4'>ยอดรวม {total} บาท</p>
-                  <Button variant="primary" className="p-4 font-semibold mx-4">เริ่มการสั่งซื้อ</Button>
-                  </div>
-          </div>
-
+    <div className={`border rounded-2xl border-sandy-beige overflow-hidden shadow-[0_2px_4px_rgba(178,_150,_116,_1)] p-2 sm:px-4 bg-white ${className}`}>
+      <div className="flex sm:justify-end px-2 sm:px-4 pt-4 pb-2 border-b border-gray-400">
+        <CheckboxWithText
+          name="install"
+          text="บริการประกอบสินค้าแบบเหมา 200 บาท"
+          className="text-end"
+          onChange={handleInstallationChecked}
+          checked={installChecked}
+        />
       </div>
-  )
-}
+      <div className="flex justify-between py-2 sm:mx-4 mx-2">
+        <div className="flex my-4">
+          <CheckboxWithText
+            name="selectAll"
+            text="ทั้งหมด"
+            className="my-2"
+            setCart={setCart}
+            cart={cart}
+            checked={selectAllChecked}
+            onChange={handleSelectAll}
+          />
+          {/* <Button
+            variant="secondary"
+            className="p-2 font-semibold mx-4 my-2 hidden sm:inline-flex"
+            onClick={handleDeleteCartItem}
+          >
+            ลบที่เลือก
+          </Button> */}
+        </div>
 
-export default CartAction
+        <div className="flex">
+          <p className="mr-4 my-5 hidden sm:block">ยอดรวม ฿{total}</p>
+          <p className="mr-2 my-5 sm:hidden">฿{total}</p>
+          <Button variant="primary" size="sm" className="py-2 px-3 my-2">
+            เริ่มการสั่งซื้อ
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default CartAction;
+
+
+//p-4 my-2

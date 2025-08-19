@@ -2,9 +2,9 @@ import React from 'react'
 import CartItem from '../molecules/CartItem'
 
 
-const CartTable = ({cart,setCart}) => {
+const CartTable = ({cart,setCart, className}) => {
   return (
-      <div className=" border rounded-2xl border-sandy-beige overflow-hidden shadow-[0_2px_4px_rgba(178,_150,_116,_1)]">
+      <div className={` border rounded-2xl border-sandy-beige overflow-hidden shadow-[0_2px_4px_rgba(178,_150,_116,_1)] ${className}`}>
           <table className="w-full sm:table-fixed mx-auto bg-white">
               <thead className="hidden sm:contents w-full">
                 <th className="p-4 sm:w-1/10 sm:border-b sm:border-charcoal">เลือก</th>

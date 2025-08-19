@@ -12,13 +12,14 @@ const Cart = () => {
   
 
   return (
-    <div className="bg-off-white sm:max-w-[80%] lg:max-w-[60%] mx-auto px-4">
-      <div className="text-center pt-6 pb-4">
-          <h3>รายการสินค้าในตะกร้า</h3>
+    <div className="bg-avocado-400 min-h-dvh px-4 relative">
+      <div className="text-center mx-auto sm:max-w-[80%] lg:max-w-[60%] bg-white pt-6 pb-4">
+        <h3>รายการสินค้าในตะกร้า</h3>
       </div>
-      <CartTable cart={cart} setCart={setCart} />
-      <div>
-        <CartAction className="" cart={cart} setCart={setCart} />
+      <CartTable cart={cart} setCart={setCart} className="sm:max-w-[80%] lg:max-w-[60%] mx-auto"/>
+      <div className='sm:max-w-[80%] lg:max-w-[60%] mx-auto bottom-0 fixed left-0 right-0 px-4 sm:px-0'>
+        <CartAction cart={cart} setCart={setCart}/>
+
       </div>
     </div>
   )

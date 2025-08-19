@@ -40,9 +40,9 @@ const QuantityButton2 = ({ min = 1, max = 99, onChange, className = "", item = "
 
   return (
     <div className={"flex items-center justify-center text-off-white font-medium p-1 bg-sandy-beige rounded-md " + `${className}`}>
-      <button onClick={handleDecrease} className="px-2 hover:cursor-pointer">−</button>
+      <button onClick={handleDecrease} className="px-3 hover:cursor-pointer">−</button>
       <span>{item ? item.quantity : quantity}</span>
-      <button onClick={handleIncrease} className="px-2 hover:cursor-pointer">+</button>
+      <button onClick={handleIncrease} className="px- hover:cursor-pointer">+</button>
     </div> 
   );
 };

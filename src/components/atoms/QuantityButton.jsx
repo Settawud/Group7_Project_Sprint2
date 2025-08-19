@@ -1,13 +1,20 @@
 import React, { useState } from 'react';
 
-const QuantityButton = ({ min = 1, max = 99, onChange, className="" }) => {
+const QuantityButton = ({ min = 1, max = 99, onChange, className="" ,cart,item = "", setCart}) => {
   const [quantity, setQuantity] = useState(min);
 
-  const handleDecrease = () => {
+        const handleDecrease = () => {
     if (quantity > min) {
       const newQuantity = quantity - 1;
       setQuantity(newQuantity);
-      onChange && onChange(newQuantity);
+      //onChange && onChange(newQuantity);
+    setCart(prevCart =>
+      prevCart.map(cartItem =>
+        cartItem.skuId === item.skuId
+          ? { ...cartItem, quantity: newQuantity }
+          : cartItem
+      )
+    );
     }
   };
 
@@ -15,15 +22,23 @@ const QuantityButton = ({ min = 1, max = 99, onChange, className="" }) => {
     if (quantity < max) {
       const newQuantity = quantity + 1;
       setQuantity(newQuantity);
-      onChange && onChange(newQuantity);
+      //onChange && onChange(newQuantity);
+    setCart(prevCart =>
+      prevCart.map(cartItem =>
+        cartItem.skuId === item.skuId
+          ? { ...cartItem, quantity: newQuantity }
+          : cartItem
+      )
+    );
+      
     }
   };
 
   return (
-    <div className={"flex items-center justify-around text-off-white font-medium p-2 bg-sandy-beige rounded-md " + `${className}`}>
-      <button onClick={handleDecrease} className="px-3">−</button>
-      <span>{quantity}</span>
-      <button onClick={handleIncrease} className="px-3">+</button>
+    <div className={"flex items-center justify-around text-off-white p-1 bg-sandy-beige rounded-md " + `${className}`}>
+      <button onClick={handleDecrease} className="px-2">−</button>
+      <span>{item ? item.quantity : quantity}</span>
+      <button onClick={handleIncrease} className="px-2">+</button>
     </div>
   );
 };
