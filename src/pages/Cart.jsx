@@ -4,7 +4,7 @@ import CartAction from '../components/organisms/CartAction';
 
 const Cart = () => {
     const [cart, setCart] = useState([
-      { skuId: "123", image: ".", name: "เกาอี้test", altText: "เก้าอี้test", price: 800, quantity: 1, checked: false},
+      { skuId: "123", image: ".", name: "เกาอี้testtttttttt", altText: "เก้าอี้test", price: 800, quantity: 1, checked: false},
       { skuId: "124", image: ".", name: "table", altText: "table", price: 2000, quantity: 1, checked: false}
   ]);
 
