@@ -84,7 +84,7 @@ export const users = [
         subdistrict: "บางจาก",
         district: "เมือง",
         province: "นครศรีธรรมราช",
-        postal_code: "80000"
+        postal_code: "80001"
       }
     ]
   }
