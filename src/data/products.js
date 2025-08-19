@@ -1141,6 +1141,3 @@ export const products_category = {
   ],
 };
 
-console.log(chairs[0])
-console.log(tables[0]);
-console.log(accessories[0]);
