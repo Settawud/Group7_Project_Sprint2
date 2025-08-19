@@ -1,4 +1,4 @@
-const orders = [
+export const orders = [
   // --- Order 1: คำสั่งซื้อที่กำลังดำเนินการ พร้อมส่วนลดและค่าติดตั้ง ---
   {
     order_id: "ORD-001",
