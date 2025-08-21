@@ -1,29 +1,19 @@
-import { ValueContext } from "./valueContext,jsx";
+import { ValueContext } from './ValueContext';
 import { useState } from "react";
 
-export const MessageProvider = ({ children }) => {
- const [cart, setCart] = useState([]);
-    
-      const handleDecrease = () => {
-    if (quantity > min) {
-      const newQuantity = quantity - 1;
-      setQuantity(newQuantity);
-      //onChange && onChange(newQuantity);
-    }
-  };
+export const ValueProvider = ({ children }) => {
+     const [cart, setCart] = useState([
+       { skuId: "123", image: ".", name: "เกาอี้testtttttttt", altText: "เก้าอี้test", price: 800, quantity: 1, checked: false},
+       { skuId: "124", image: ".", name: "table", altText: "table", price: 2000, quantity: 1, checked: false}
+     ]);  
+  
+  const [checkoutItem, setCheckoutItem] = useState([])
 
-  const handleIncrease = () => {
-    if (quantity < max) {
-      const newQuantity = quantity + 1;
-      setQuantity(newQuantity);
-      //onChange && onChange(newQuantity);
-    }
-  };
+  const [installChecked, setInstallChecked] = useState(false);
     
-
   return (
     <ValueContext
-      value={{cart, handleQuantityChange}}
+      value={{cart,setCart, checkoutItem, setCheckoutItem, installChecked, setInstallChecked}}
     >
       {children}
     </ValueContext>

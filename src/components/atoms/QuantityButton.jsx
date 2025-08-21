@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
+import { ValueContext } from "../../context/ValueContext";
 
-const QuantityButton = ({ min = 1, max = 99, onChange, className="" ,cart,item = "", setCart}) => {
+const QuantityButton = ({ min = 1, max = 99, onChange, className="" ,item = ""}) => {
   const [quantity, setQuantity] = useState(min);
+  const {setCart} = useContext(ValueContext)
 
         const handleDecrease = () => {
     if (quantity > min) {

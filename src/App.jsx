@@ -10,8 +10,13 @@ import CheckoutPage from "./pages/CheckoutPage";
 import OrderConfirmationMessage from "./components/atoms/OrderConfirmationMessage";
 import ShippingAddress from "./components/atoms/ShippingAddress";
 import Cart from "./pages/Cart";
+import { useContext } from "react";
+import { ValueContext } from "./context/ValueContext";
 
 export default function App() {
+
+  
+  
   return (
     <BrowserRouter>
       <Routes>

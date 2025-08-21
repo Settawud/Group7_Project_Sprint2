@@ -1,15 +1,12 @@
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import CartTable from '../components/organisms/CartTable';
 import CartAction from '../components/organisms/CartAction';
+import { ValueContext } from '../context/ValueContext';
+
 
 const Cart = () => {
-    const [cart, setCart] = useState([
-      { skuId: "123", image: ".", name: "เกาอี้testtttttttt", altText: "เก้าอี้test", price: 800, quantity: 1, checked: false},
-      { skuId: "124", image: ".", name: "table", altText: "table", price: 2000, quantity: 1, checked: false}
-  ]);
 
- // let cart = [{ skuId: "123", image: ".", name: "เกาอี้test", altText: "เก้าอี้test", price: "800", quantity: "1" }]
-  
+  const {cart, setCart} = useContext(ValueContext)
 
   return (
     <div className="bg-avocado-400 min-h-dvh px-4 relative">
