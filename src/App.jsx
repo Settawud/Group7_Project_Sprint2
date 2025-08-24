@@ -5,7 +5,7 @@ import RegisterPage from "./pages/auth/RegisterPage";
 import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
 import UserProfile from "./pages/UserProfile";
 import CheckoutPage from "./pages/CheckoutPage";
-
+import Page_Product_Detail from './pages/Page_Product_Detail'
 
 import OrderConfirmationMessage from "./components/atoms/OrderConfirmationMessage";
 import ShippingAddress from "./components/atoms/ShippingAddress";
@@ -32,6 +32,7 @@ export default function App() {
         <Route path="/ShippingAddress" element={<ShippingAddress />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/checkout" element={<CheckoutPage />} />
+        <Route path="/pageproductdetail" element={<Page_Product_Detail />} />
         
         {/* TODO: category pages, product detail, cart, etc. */}
       </Routes>
