@@ -6,7 +6,7 @@ import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
 import UserProfile from "./pages/UserProfile";
 import CheckoutPage from "./pages/CheckoutPage";
 import Page_Product_Detail from './pages/Page_Product_Detail'
-
+import Page_Product_List from './pages/Page_Product_List'
 import OrderConfirmationMessage from "./components/atoms/OrderConfirmationMessage";
 import ShippingAddress from "./components/atoms/ShippingAddress";
 import Cart from "./pages/Cart";
@@ -33,7 +33,7 @@ export default function App() {
         <Route path="/cart" element={<Cart />} />
         <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/pageproductdetail" element={<Page_Product_Detail />} />
-        
+        <Route path="/pageproductlist" element={<Page_Product_List />} />
         {/* TODO: category pages, product detail, cart, etc. */}
       </Routes>
     </BrowserRouter>
