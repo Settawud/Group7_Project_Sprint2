@@ -48,9 +48,12 @@
   --color-cream: rgba(251, 249, 244, 1);
   --color-sandy-beige: rgba(178, 150, 116, 1);
   --color-wood-brown: rgba(215, 189, 144, 1);
-  --color-charcoal: rgba(73, 69, 58, 1); 
+  --color-charcoal: rgba(73, 69, 58, 1);
   --color-off-white: rgba(254, 253, 249, 1);
   --color-sage-green: rgba(132, 158, 145, 1);
+  --color-footer-border: #334155;
+  --color-footer-link: #CBD5E1;
+  --color-footer-muted: #94A3B8;
   /* ... */
 }
 
