@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import ContactForm from "../components/molecules/ContactForm";
-import PaymentMethod from "../components/molecules/PaymentMethod";
+// import PaymentMethod from "../components/molecules/PaymentMethod";
 import OrderSummary from "../components/molecules/OrderSummary";
 import UserAddress from "../components/organisms/UserAddress";
 import Navbar from "../components/organisms/Navbar";
 
 export default function CheckoutPage() {
   const [contact, setContact] = useState("");
-  const [payment, setPayment] = useState("VISA");
+  // const [payment, setPayment] = useState("VISA");
   const [coupon, setCoupon] = useState("");
 
   const items = [
@@ -23,7 +23,7 @@ export default function CheckoutPage() {
     <div>
         <Navbar/>
     <div className="min-h-screen bg-[#faf6f1]">
-        <h1 className="p-4 text-center">รายละเอียดการจัดส่งสินค้าและวิธีการชำระเงิน</h1>
+        <h1 className="p-4 text-center">รายละเอียดการจัดส่งสินค้าและสรุปคำสั่งซื้อ</h1>
       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
         
         {/* Left side */}
@@ -34,7 +34,7 @@ export default function CheckoutPage() {
             address="54 หมู่บ้าน A แขวงคลองต้นไทร เขตคลองสาน กทม. 10600"
             onEdit={() => alert("แก้ไขที่อยู่")}
           /> */}
-          <PaymentMethod selected={payment} onChange={setPayment} />
+          {/* <PaymentMethod selected={payment} onChange={setPayment} /> */}
         </div>
 
         {/* Right side */}

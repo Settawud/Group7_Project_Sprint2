@@ -3,7 +3,7 @@ import React from "react";
 export default function ContactForm() {
   return (
     <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-lg">
-      <h2 className="text-lg font-semibold text-gray-800 mb-3">Contact</h2>
+      <h2 className="text-lg font-semibold text-gray-800 mb-3">ข้อมูลติดต่อ</h2>
       <div className="flex flex-col gap-2">
       <input
         type="text"

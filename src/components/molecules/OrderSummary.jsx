@@ -1,3 +1,4 @@
+import Button from "../atoms/Button";
 import CouponInput from "./CouponInput";
 
 export default function OrderSummary({ items, coupon, setCoupon, onApplyCoupon }) {
@@ -7,7 +8,7 @@ export default function OrderSummary({ items, coupon, setCoupon, onApplyCoupon }
 
   return (
     <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
-      <h2 className="text-xl font-bold text-gray-800 mb-4">Order Summary</h2>
+      <h2 className="text-xl font-bold text-gray-800 mb-4">สรุปคำสั่งซื้อ</h2>
       
       <table className="w-full text-sm border-collapse">
         <thead>
@@ -60,10 +61,7 @@ export default function OrderSummary({ items, coupon, setCoupon, onApplyCoupon }
         <span>รวมยอดชำระ:</span>
         <span className="text-amber-600">฿{total.toLocaleString()}</span>
       </div>
-
-      <button className="mt-4 w-full py-3 bg-amber-500 text-white rounded-xl font-semibold hover:bg-amber-600 transition">
-        ชำระเงิน
-      </button>
+      <Button className="mt-4 w-full">ยืนยันคำสั่งซื้อ</Button>
     </div>
   );
 }

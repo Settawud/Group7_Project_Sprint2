@@ -43,7 +43,7 @@ export default function AddressCard({ address, isSelected, onClick, onEdit, onDe
             e.stopPropagation();
             onEdit();
           }}
-          className="flex items-center gap-1 text-amber-600 text-sm font-medium hover:underline"
+          className="flex items-center gap-1 text-charcoal text-sm font-medium hover:underline"
         >
           <Pencil className="w-4 h-4" /> แก้ไข
         </button>
