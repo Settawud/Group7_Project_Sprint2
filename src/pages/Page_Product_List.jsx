@@ -3,8 +3,20 @@ import ProductFilterSortTags from "../components/organisms/ProductFilterSortTags
 import ProductGridList from "../components/organisms/ProductGridList";
 import { products as rawProducts } from "../data/products";
 import Navbar from "../components/organisms/Navbar";
+import { useSearchParams } from "react-router-dom";
 
 const App = () => {
+
+  // เพิ่ม searchParams ในการดึงค่าพารามิเตอร์จาก URL
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    const cat = searchParams.get("category");
+    if (cat) {
+    setFilters((f) => ({ ...f, category: cat }));
+    }
+    }, [searchParams]);
+
   const [filters, setFilters] = useState({
     category: null,
     space: null,
@@ -12,12 +24,26 @@ const App = () => {
     availability: null,
   });
 
+  const categoryMap = {
+  chairs: "เก้าอี้",
+  tables: "โต๊ะ",
+  accessories: "อุปกรณ์เสริม",
+  };
+
+  useEffect(() => {
+  const cat = searchParams.get("category");
+  if (cat) {
+  const mapped = categoryMap[cat.toLowerCase?.()] ?? cat;
+  setFilters((f) => ({ ...f, category: mapped }));
+  }
+  }, [searchParams]);
+
   const [sort, setSort] = useState("Price High to Low");
 
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [sortedProducts, setSortedProducts] = useState([]);
-
+  
   useEffect(() => {
     const transformed = rawProducts.map((p) => {
       let selectedVariant;

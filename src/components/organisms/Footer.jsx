@@ -13,6 +13,7 @@ export default function Footer() {
     //   </Container>
     //   <div className="py-4 text-center text-sm text-stone-400">© 2025 Livin’ Lab. All rights reserved.</div>
     // </footer>
+    
     <footer className="bg-[#9f8668] text-[--color-footer-link]">
       {/* ชั้นบน: เนื้อหาหลัก */ }
       <div className="mx-auto max-w-6xl px-6 py-12 grid gap-10 md:grid-cols-4">
@@ -64,7 +65,7 @@ export default function Footer() {
       </div>
 
         {/* เส้นคั่น + ลิขสิทธิ์ */}
-        <div className="border-amber-50 border-t border-[#334155]" />
+        <div className="border-amber-50 border-t" />
           <div className="py-4">
             <p className="text-center text-sm text-white">
               © 2025 Livin’Lab. All Rights Reserved.
