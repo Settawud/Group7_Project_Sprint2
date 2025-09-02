@@ -167,7 +167,7 @@ export default function AddressForm({ onSave, editData, editIndex }) {
 
   const handleSubmit = () => {
     if (!form.building || !form.province || !form.postalCode) {
-      alert("กรุณากรอกข้อมูลให้ครบถ้วน");
+      alert("Please complete all required fields.");
       return;
     }
 
@@ -177,13 +177,13 @@ export default function AddressForm({ onSave, editData, editIndex }) {
   return (
     <div className="bg-white rounded-2xl p-6 shadow-md border border-gray-100">
       <h3 className="text-lg font-semibold text-gray-800 mb-5">
-        {editData ? "แก้ไขที่อยู่" : "เพิ่มที่อยู่ใหม่"}
+        {editData ? "Edit Address" : "Add Address"}
       </h3>
 
       <div className="space-y-4">
         <input
           type="text"
-          placeholder="เลขที่อาคาร"
+          placeholder="Building No."
           value={form.building}
           onChange={(e) => handleChange("building", e.target.value)}
           className="w-full px-4 py-2 rounded-xl border border-gray-300 bg-white focus:border-amber-500 focus:ring focus:ring-amber-100 transition"
@@ -191,7 +191,7 @@ export default function AddressForm({ onSave, editData, editIndex }) {
 
         <input
           type="text"
-          placeholder="อาคาร ซอย ถนน และรายละเอียดอื่นๆ"
+          placeholder="Detail"
           value={form.detail}
           onChange={(e) => handleChange("detail", e.target.value)}
           className="w-full px-4 py-2 rounded-xl border border-gray-300 bg-white focus:border-amber-500 focus:ring focus:ring-amber-100 transition"
@@ -203,7 +203,7 @@ export default function AddressForm({ onSave, editData, editIndex }) {
             onChange={(e) => handleChange("province", e.target.value)}
             className="w-full px-4 py-2 rounded-xl border border-gray-300 bg-white focus:border-amber-500 focus:ring focus:ring-amber-100 transition"
           >
-            <option value="">จังหวัด</option>
+            <option value="">province</option>
             {provinces.map((p, i) => (
               <option key={i} value={p}>{p}</option>
             ))}
@@ -214,7 +214,7 @@ export default function AddressForm({ onSave, editData, editIndex }) {
             onChange={(e) => handleChange("district", e.target.value)}
             className="w-full px-4 py-2 rounded-xl border border-gray-300 bg-white focus:border-amber-500 focus:ring focus:ring-amber-100 transition"
           >
-            <option value="">อำเภอ</option>
+            <option value="">District</option>
             {districts.map((d, i) => (
               <option key={i} value={d}>{d}</option>
             ))}
@@ -225,7 +225,7 @@ export default function AddressForm({ onSave, editData, editIndex }) {
             onChange={(e) => handleChange("subDistrict", e.target.value)}
             className="w-full px-4 py-2 rounded-xl border border-gray-300 bg-white focus:border-amber-500 focus:ring focus:ring-amber-100 transition"
           >
-            <option value="">ตำบล</option>
+            <option value="">Subdistrict</option>
             {subDistricts.map((s, i) => (
               <option key={i} value={s}>{s}</option>
             ))}
@@ -234,7 +234,7 @@ export default function AddressForm({ onSave, editData, editIndex }) {
 
         <input
           type="text"
-          placeholder="รหัสไปรษณีย์"
+          placeholder="Postal Code"
           value={form.postalCode}
           onChange={(e) => handleChange("postalCode", e.target.value)}
           className="w-full px-4 py-2 rounded-xl border border-gray-300 bg-white focus:border-amber-500 focus:ring focus:ring-amber-100 transition"
@@ -250,7 +250,7 @@ export default function AddressForm({ onSave, editData, editIndex }) {
             className="mr-2"
           />
           <label htmlFor="isDefault" className="text-sm text-gray-700">
-            ตั้งเป็นที่อยู่เริ่มต้น
+            Set as default address
           </label>
         </div>
       </div>
@@ -258,7 +258,7 @@ export default function AddressForm({ onSave, editData, editIndex }) {
       {/* Action Button */}
       <div className="flex justify-end mt-6">
         <Button onClick={handleSubmit} className="px-4">
-          {editData ? "อัปเดต" : "บันทึก"}
+          {editData ? "Update" : "Save"}
         </Button>
       </div>
     </div>

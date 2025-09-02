@@ -45,7 +45,7 @@ export default function AddressCard({ address, isSelected, onClick, onEdit, onDe
           }}
           className="flex items-center gap-1 text-charcoal text-sm font-medium hover:underline"
         >
-          <Pencil className="w-4 h-4" /> แก้ไข
+          <Pencil className="w-4 h-4" /> Edit
         </button>
         <button
           onClick={(e) => {
@@ -54,7 +54,7 @@ export default function AddressCard({ address, isSelected, onClick, onEdit, onDe
           }}
           className="flex items-center gap-1 text-red-500 text-sm font-medium hover:underline"
         >
-          <Trash2 className="w-4 h-4" /> ลบ
+          <Trash2 className="w-4 h-4" /> Delete
         </button>
       </div>
     </div>

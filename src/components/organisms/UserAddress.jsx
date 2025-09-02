@@ -70,7 +70,7 @@ export default function UserAddress() {
       <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-md p-6">
         {/* Header */}
         <h2 className="text-xl font-bold text-gray-800 border-gray-200 pb-4">
-          ที่อยู่จัดส่งสินค้า
+          Shipping Address
         </h2>
 
         {/* Address List */}
@@ -94,7 +94,7 @@ export default function UserAddress() {
             className="flex items-center justify-center gap-1 px-4 py-3 text-charcoal hover:underline"
           >
             <CirclePlus />
-            <span className="font-medium">เพิ่มที่อยู่ใหม่</span>
+            <span className="font-medium">Add new address</span>
           </button>
           
         </div>

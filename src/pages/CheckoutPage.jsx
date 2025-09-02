@@ -16,14 +16,14 @@ export default function CheckoutPage() {
   ];
 
   const handleApplyCoupon = () => {
-    alert(`ใช้โค้ด: ${coupon}`);
+    alert(`Apply code: ${coupon}`);
   };
 
   return (
     <div>
         <Navbar/>
     <div className="min-h-screen bg-[#faf6f1]">
-        <h1 className="p-4 text-center">รายละเอียดการจัดส่งสินค้าและสรุปคำสั่งซื้อ</h1>
+        <h1 className="p-4 text-center">Checkout</h1>
       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
         
         {/* Left side */}

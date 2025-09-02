@@ -40,10 +40,10 @@ export default function ProfileData() {
     <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
       {/* Header */}
       <div className="flex justify-between items-start mb-6">
-        <h2 className="text-xl font-bold text-gray-800">ข้อมูลผู้ใช้</h2>
+        <h2 className="text-xl font-bold text-sand">User Data</h2>
         {!isEditing && (
           <button onClick={() => setIsEditing(true)}>
-            <Edit className="w-5 h-5 text-charcoal" />
+            <Edit className="w-5 h-5 text-stone-800" />
           </button>
         )}
       </div>
@@ -61,7 +61,7 @@ export default function ProfileData() {
           {isEditing && (
             <div className="flex flex-col items-center mt-3 text-sm">
               <label className="text-amber-600 font-medium cursor-pointer hover:underline mt-1">
-                เลือกรูปภาพ
+                Upload Picture
                 <input
                   type="file"
                   accept="image/*"
@@ -74,7 +74,7 @@ export default function ProfileData() {
                   onClick={handleRemoveImage}
                   className="text-red-500 mt-1 hover:underline"
                 >
-                  ลบรูปภาพ
+                  Delete Picture
                 </button>
               )}
             </div>
@@ -85,7 +85,7 @@ export default function ProfileData() {
         <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-5">
           <div>
             <label className="block text-sm font-medium text-gray-700">
-              ชื่อจริง
+              Name
             </label>
             <input
               type="text"
@@ -95,12 +95,12 @@ export default function ProfileData() {
               disabled={!isEditing}
               className={`w-full px-4 py-2 mt-1 rounded-xl border ${
                 isEditing ? "bg-white" : "bg-gray-50"
-              } border-gray-300 focus:border-amber-500 focus:ring focus:ring-amber-100 transition`}
+              } border-gray-300  focus:ring focus:ring-amber-100 transition`}
             />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700">
-              นามสกุล
+              Lastname
             </label>
             <input
               type="text"
@@ -115,7 +115,7 @@ export default function ProfileData() {
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700">
-              อีเมล
+              E-mail
             </label>
             <input
               type="email"
@@ -131,7 +131,7 @@ export default function ProfileData() {
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700">
-              เบอร์โทรศัพท์
+              Phone
             </label>
             <input
               type="text"
@@ -151,8 +151,8 @@ export default function ProfileData() {
       {/* Action Buttons */}
       {isEditing && (
         <div className="flex justify-end gap-4 mt-8">
-          <Button onClick={() => setIsEditing(false)}>ยกเลิก</Button>
-          <Button onClick={handleSave}>บันทึก</Button>
+          <Button onClick={() => setIsEditing(false)}>Cancel</Button>
+          <Button onClick={handleSave}>Save</Button>
         </div>
       )}
     </div>
