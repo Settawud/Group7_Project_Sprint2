@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import PriceRangeSlider from "./PriceRangeSlider";
+import { ChevronDown, X as XIcon } from "lucide-react";
 
 const Dropdown = ({
   label,
@@ -54,12 +55,11 @@ const Dropdown = ({
         >
           {renderLabel()}
         </span>
-        <img
-          src="./icon/chevron_down.svg"
-          alt="chevron down"
-          className={`w-4 h-3 transition-transform duration-300 ${
+        <ChevronDown
+          className={`w-4 h-4 text-stone-500 transition-transform duration-300 ${
             open ? "rotate-180" : ""
           }`}
+          aria-hidden
         />
       </button>
 
@@ -181,7 +181,7 @@ export const Tags = ({ filters, removeFilter, clearAll }) => {
                   ? `฿${label[0].toLocaleString()} - ฿${label[1].toLocaleString()}`
                   : label}
               </span>
-              <img src="./icon/X.svg" alt="remove" className="w-4 h-4" />
+              <XIcon className="w-4 h-4" aria-hidden />
             </div>
           ))
         ) : (

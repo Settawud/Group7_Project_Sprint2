@@ -1,15 +1,22 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { ValueContext } from "../../context/ValueContext";
 
 const QuantityButton = ({ min = 1, max = 99, onChange, className="" ,item = ""}) => {
-  const [quantity, setQuantity] = useState(min);
+  const [quantity, setQuantity] = useState(item?.quantity ?? min);
   const {setCart} = useContext(ValueContext)
+
+  // sync internal state when item.quantity changes
+  useEffect(() => {
+    if (typeof item?.quantity === 'number') {
+      setQuantity(item.quantity);
+    }
+  }, [item?.quantity]);
 
         const handleDecrease = () => {
     if (quantity > min) {
       const newQuantity = quantity - 1;
       setQuantity(newQuantity);
-      //onChange && onChange(newQuantity);
+      onChange && onChange(newQuantity);
     setCart(prevCart =>
       prevCart.map(cartItem =>
         cartItem.skuId === item.skuId
@@ -24,7 +31,7 @@ const QuantityButton = ({ min = 1, max = 99, onChange, className="" ,item = ""})
     if (quantity < max) {
       const newQuantity = quantity + 1;
       setQuantity(newQuantity);
-      //onChange && onChange(newQuantity);
+      onChange && onChange(newQuantity);
     setCart(prevCart =>
       prevCart.map(cartItem =>
         cartItem.skuId === item.skuId

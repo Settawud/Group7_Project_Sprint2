@@ -4,29 +4,33 @@ import ScrollableThumbnails from "../components/organisms/ScrollableThumbnails";
 import UsersReviewSection from "../components/organisms/UsersReviewSection";
 import { products } from "../data/products";
 import Navbar from "../components/organisms/Navbar";
+import { useSearchParams } from "react-router-dom";
 
 const App = () => {
-  const images = [
-    "/images/product1.jpg",
-    "/images/product2.jpg",
-    "/images/product3.jpg",
-    "/images/product4.jpg",
-    "/images/product5.jpg",
-  ];
+  const [searchParams] = useSearchParams();
+  const selectedProductID = searchParams.get("id") || products[0]?.productID;
+  const selectedProducts = products.filter((product) => product.productID === selectedProductID);
+  const product = selectedProducts[0] || products[0];
 
-  const selectedProductID = "EGC-001";
-  const selectedProducts = products.filter(
-    (product) => product.productID === selectedProductID
-  );
+  // Build images from product variants/images if available
+  const variantImages = Array.isArray(product?.variants)
+    ? product.variants
+        .map((v) => v.image)
+        .filter(Boolean)
+        .map((img) => (String(img).startsWith("/") ? img : `/images/${img}`))
+    : [];
+  const images = variantImages.length > 0
+    ? Array.from(new Set(variantImages))
+    : [product?.image ? `/images/${product.image}` : "/images/logo.png"];
 
-  const productData = selectedProducts.map((product) => ({
+  const productData = {
     Name: product.Name,
     tag: product.tag,
     Description: product.Description,
     material: product.material,
     trial: product.trial,
     variants: product.variants,
-  }))[0];
+  };
 
   const reviews = [
     {
@@ -59,7 +63,7 @@ const App = () => {
     <div>
       <Navbar />
       <div className="grid lg:grid-cols-[2fr_1fr] gap-10 mx-auto px-4 py-10 bg-[#fefdf9]">
-        <StickyImage src={selectedProducts[0].image} />
+        <StickyImage src={product?.image ? `/images/${product.image}` : images[0]} />
         <ProductContent product={productData} />
       </div>
       <ScrollableThumbnails images={images} />

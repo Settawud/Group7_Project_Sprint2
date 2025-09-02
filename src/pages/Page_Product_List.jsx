@@ -10,32 +10,37 @@ const App = () => {
   // เพิ่ม searchParams ในการดึงค่าพารามิเตอร์จาก URL
   const [searchParams] = useSearchParams();
 
-  useEffect(() => {
-    const cat = searchParams.get("category");
-    if (cat) {
-    setFilters((f) => ({ ...f, category: cat }));
-    }
-    }, [searchParams]);
+  // category and search params are handled below with mapping
 
   const [filters, setFilters] = useState({
     category: null,
     space: null,
     price: null,
     availability: null,
+    search: null,
   });
 
   const categoryMap = {
-  chairs: "เก้าอี้",
-  tables: "โต๊ะ",
-  accessories: "อุปกรณ์เสริม",
+    chair: "เก้าอี้",
+    chairs: "เก้าอี้",
+    table: "โต๊ะ",
+    tables: "โต๊ะ",
+    accessories: "อุปกรณ์เสริม",
+    // also accept Thai directly
+    "เก้าอี้": "เก้าอี้",
+    "โต๊ะ": "โต๊ะ",
+    "อุปกรณ์เสริม": "อุปกรณ์เสริม",
   };
 
   useEffect(() => {
-  const cat = searchParams.get("category");
-  if (cat) {
-  const mapped = categoryMap[cat.toLowerCase?.()] ?? cat;
-  setFilters((f) => ({ ...f, category: mapped }));
-  }
+    const cat = searchParams.get("category");
+    if (cat) {
+      const key = String(cat).toLowerCase();
+      const mapped = categoryMap[key] ?? cat;
+      setFilters((f) => ({ ...f, category: mapped }));
+    } else {
+      setFilters((f) => ({ ...f, category: null }));
+    }
   }, [searchParams]);
 
   const [sort, setSort] = useState("Price High to Low");
@@ -99,6 +104,14 @@ const App = () => {
         if (p.price < min || p.price > max) return false;
       }
 
+      if (filters.search) {
+        const q = String(filters.search).toLowerCase();
+        const inTitle = p.title?.toLowerCase().includes(q);
+        const inTags = Array.isArray(p.tag) && p.tag.some((t) => String(t).toLowerCase().includes(q));
+        const inSpace = Array.isArray(p.space) && p.space.some((s) => String(s).toLowerCase().includes(q));
+        if (!(inTitle || inTags || inSpace)) return false;
+      }
+
       return true;
     });
 
@@ -116,6 +129,12 @@ const App = () => {
     }
     setSortedProducts(sorted);
   }, [filteredProducts, sort]);
+
+  // Read search query from URL: ?q=...
+  useEffect(() => {
+    const q = searchParams.get("q");
+    setFilters((f) => ({ ...f, search: q || null }));
+  }, [searchParams]);
 
   return (
     <div>

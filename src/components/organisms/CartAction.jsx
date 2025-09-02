@@ -5,7 +5,7 @@ import { ValueContext } from "../../context/ValueContext";
 
 
 const CartAction = ({ className = "" }) => {
-  const {cart, setCart,setCheckoutItem,checkoutItem,installChecked, setInstallChecked} = useContext(ValueContext)
+  const {cart, setCart,setCheckoutItem,checkoutItem,installChecked, setInstallChecked, removeChecked} = useContext(ValueContext)
   const [total, setTotal] = useState(0);
   const [selectAllChecked, setSelectAllChecked] = useState(false);
 
@@ -22,7 +22,7 @@ const CartAction = ({ className = "" }) => {
   //console.log(total)
 
   const handleDeleteCartItem = () => {
-    setCart(cart.filter((item) => item.checked === false));
+    removeChecked();
   };
 
   const handleInstallationChecked = () => {
@@ -64,13 +64,14 @@ const CartAction = ({ className = "" }) => {
             checked={selectAllChecked}
             onChange={handleSelectAll}
           />
-          {/* <Button
+          <Button
             variant="secondary"
-            className="p-2 font-semibold mx-4 my-2 hidden sm:inline-flex"
+            className="p-2 font-semibold mx-4 my-2 inline-flex"
             onClick={handleDeleteCartItem}
+            disabled={!cart.some((i) => i.checked)}
           >
             ลบที่เลือก
-          </Button> */}
+          </Button>
         </div>
 
         <div className="flex">
