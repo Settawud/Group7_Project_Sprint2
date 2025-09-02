@@ -34,7 +34,7 @@ export default function Navbar() {
   }, [location.pathname, location.search]);
 
   return (
-    <header className={`sticky top-0 z-50 border-b border-stone-200 bg-white/70 backdrop-blur ${scrolled || open ? "shadow-sm" : ""}`}>
+    <header className={`sticky top-0 z-50 border-b border-stone-200 bg-off-white backdrop-blur ${scrolled || open ? "shadow-sm" : ""} font-ibm-thai`}>
       <Container className="h-16 flex items-center justify-between">
         <div className="flex items-center gap-6">
           <Link to="/" className="font-semibold"><img src="/images/logoCutBackground.webp" alt="logo image" width="56" height="56"/></Link>

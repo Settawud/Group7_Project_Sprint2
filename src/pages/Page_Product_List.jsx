@@ -74,6 +74,7 @@ const App = () => {
       }
 
       return {
+        id: p.productID,
         imageSrc: p.image,
         title: p.Name,
         tag: p.tag,

@@ -22,8 +22,6 @@ export default function Footer() {
           <h3 className="text-white font-bold text-lg mb-4">Livin' Lab</h3>
           <ul className="space-y-2">
             <li><a href="#" className="hover:text-white">About Us</a></li>
-            <li><a href="#" className="hover:text-white">Showroom</a></li>
-            <li><a href="#" className="hover:text-white">Careers</a></li>
           </ul>
         </div>
         {/* คอลัมน์ที่ 2: Support */ }
@@ -31,17 +29,16 @@ export default function Footer() {
           <h3 className="text-white font-bold text-lg mb-4">Support</h3>
           <ul className="space-y-2">
             <li><a href="#" className="hover:text-white">FAQs</a></li>
-            <li><a href="#" className="hover:text-white">Shipping & Payment</a></li>
-            <li><a href="#" className="hover:text-white">Return Policy</a></li>
-            <li><a href="#" className="hover:text-white">Warranty</a></li>
           </ul>
         </div>
           {/* คอลัมน์ที่ 3: Contact */ }
          <div>
           <h3 className="text-white font-bold text-lg mb-4">Contact Us</h3>
           <ul className="space-y-2">
-            <li><a href="#" className="hover:text-white">123 Sukhumvit Road,</a></li>
-            <li><a href="#" className="hover:text-white">Bangkok 10110, Thailand</a></li>
+            <div className="hover:text-white">
+              <li><a href="#">123 Sukhumvit Road,</a></li>
+              <li><a href="#">Bangkok 10110, Thailand</a></li>
+            </div>
             <li><a href="#" className="hover:text-white">Email: support@livinlab.th</a></li>
             <li><a href="#" className="hover:text-white">Tel: +66 2-123-4567</a></li>
           </ul>

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { User, MapPin, ShoppingBag, CreditCard, LogOut } from "lucide-react";
+import { User, MapPin, ShoppingBag, CreditCard, LogOut, Wallet } from "lucide-react";
 
 function Icon({ children }) {
   return <span className="inline-flex h-5 w-5 items-center justify-center">{children}</span>;
@@ -73,11 +73,11 @@ export default function NavUserMenu({
             </Link>
           </li>
           <li>
-            <Link to="/ShippingAddress" onClick={() => setOpen(false)} className="flex items-center gap-3 rounded-xl px-3 py-2 hover:bg-stone-100" role="menuitem">
-              <Icon><MapPin className="w-4 h-4" /></Icon> <span>Address</span>
+            <Link to="/checkoutpage" onClick={() => setOpen(false)} className="flex items-center gap-3 rounded-xl px-3 py-2 hover:bg-stone-100" role="menuitem">
+              <Icon><Wallet className="w-4 h-4" /></Icon> <span>Purchase</span>
             </Link>
           </li>
-          <li>
+          {/* <li>
             <Link to="/cart" onClick={() => setOpen(false)} className="flex items-center gap-3 rounded-xl px-3 py-2 hover:bg-stone-100" role="menuitem">
               <Icon><ShoppingBag className="w-4 h-4" /></Icon> <span>Cart</span>
             </Link>
@@ -86,7 +86,7 @@ export default function NavUserMenu({
             <Link to="/checkout" onClick={() => setOpen(false)} className="flex items-center gap-3 rounded-xl px-3 py-2 hover:bg-stone-100" role="menuitem">
               <Icon><CreditCard className="w-4 h-4" /></Icon> <span>Checkout</span>
             </Link>
-          </li>
+          </li> */}
 
           <li className="my-1 border-t border-stone-200" />
           <li>

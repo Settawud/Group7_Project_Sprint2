@@ -1,7 +1,8 @@
 import { useState, useContext, useMemo } from "react";
+import { Link } from "react-router-dom";
 import { ValueContext } from "../../context/ValueContext";
 
-const ProductCardList = ({ imageSrc, title, tag, size, price }) => {
+const ProductCardList = ({ id, imageSrc, title, tag, size, price }) => {
   const [quantity, setQuantity] = useState(1);
   const { addToCart } = useContext(ValueContext) || {};
 
@@ -20,7 +21,13 @@ const ProductCardList = ({ imageSrc, title, tag, size, price }) => {
 
   return (
     <div className="w-full max-w-sm overflow-hidden bg-white border border-[#b29675] rounded-xl shadow transition-transform duration-300 ease-in-out hover:scale-105">
-      <img src={resolvedSrc} alt={title} />
+      {id ? (
+        <Link to={`/pageproductdetail?id=${encodeURIComponent(id)}`}>
+          <img src={resolvedSrc} alt={title} />
+        </Link>
+      ) : (
+          <img src={resolvedSrc} alt={title} />
+      )}
       <div className="p-4 space-y-3">
         <div className="flex flex-wrap gap-2">
           {tag.map((t, index) => (
@@ -32,9 +39,15 @@ const ProductCardList = ({ imageSrc, title, tag, size, price }) => {
             </div>
           ))}
         </div>
-        <h3 className="text-xl text-black truncate overflow-hidden whitespace-nowrap">
-          {title}
-        </h3>
+        {id ? (
+          <Link to={`/pageproductdetail?id=${encodeURIComponent(id)}`} className="block">
+            <h3 className="text-xl text-black truncate overflow-hidden whitespace-nowrap hover:underline">
+              {title}
+            </h3>
+          </Link>
+        ) : (
+          <h3 className="text-xl text-black truncate overflow-hidden whitespace-nowrap">{title}</h3>
+        )}
         <div className="flex items-center justify-between">
           <span className="text-sm text-[#A8A8A8] truncate overflow-hidden whitespace-nowrap">
             {size}
