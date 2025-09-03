@@ -8,6 +8,7 @@ import CheckoutPage from "./pages/CheckoutPage";
 import Page_Product_Detail from './pages/Page_Product_Detail'
 import Page_Product_List from './pages/Page_Product_List'
 import Order_History_List from './pages/Order_History_List'
+import Order_History_Detail from './pages/Order_History_Detail'
 import OrderConfirmationMessage from "./components/atoms/OrderConfirmationMessage";
 import ShippingAddress from "./components/atoms/ShippingAddress";
 import Cart from "./pages/Cart";
@@ -36,6 +37,7 @@ export default function App() {
         <Route path="/pageproductdetail" element={<Page_Product_Detail />} />
         <Route path="/pageproductlist" element={<Page_Product_List />} />
         <Route path="/orderhistorylist" element={<Order_History_List />} />
+        <Route path="/orderhistorydetail" element={<Order_History_Detail />} />
         {/* TODO: category pages, product detail, cart, etc. */}
       </Routes>
     </BrowserRouter>
