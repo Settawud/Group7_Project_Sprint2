@@ -95,7 +95,7 @@ export default function ProfileData() {
               disabled={!isEditing}
               className={`w-full px-4 py-2 mt-1 rounded-xl border ${
                 isEditing ? "bg-white" : "bg-gray-50"
-              } border-gray-300  focus:ring focus:ring-amber-100 transition`}
+              } border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#B29674] `}
             />
           </div>
           <div>
@@ -110,7 +110,7 @@ export default function ProfileData() {
               disabled={!isEditing}
               className={`w-full px-4 py-2 mt-1 rounded-xl border ${
                 isEditing ? "bg-white" : "bg-gray-50"
-              } border-gray-300 focus:border-amber-500 focus:ring focus:ring-amber-100 transition`}
+              } border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#B29674]`}
             />
           </div>
           <div>
@@ -126,7 +126,7 @@ export default function ProfileData() {
               placeholder="your@email.com"
               className={`w-full px-4 py-2 mt-1 rounded-xl border ${
                 isEditing ? "bg-white" : "bg-gray-50"
-              } border-gray-300 focus:border-amber-500 focus:ring focus:ring-amber-100 transition`}
+              } border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#B29674]`}
             />
           </div>
           <div>
@@ -142,7 +142,7 @@ export default function ProfileData() {
               placeholder="08xxxxxxxx"
               className={`w-full px-4 py-2 mt-1 rounded-xl border ${
                 isEditing ? "bg-white" : "bg-gray-50"
-              } border-gray-300 focus:border-amber-500 focus:ring focus:ring-amber-100 transition`}
+              } border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#B29674]`}
             />
           </div>
         </div>

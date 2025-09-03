@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { CirclePlus } from 'lucide-react';
+import { CirclePlus } from "lucide-react";
 import AddressList from "../molecules/AddressList";
 import AddressForm from "../molecules/AddressForm";
 import Modal from "../layout/Modal";
@@ -48,6 +48,12 @@ export default function UserAddress() {
     setAddresses(updated);
     setShowPopup(false);
     setEditIndex(null);
+
+    // ✅ ตั้ง selected address เป็น default address
+    const defaultIndex = updated.findIndex((a) => a.isDefault);
+    if (defaultIndex !== -1) {
+      setSelectedAddress(defaultIndex);
+    }
   };
 
   const handleDelete = (index) => {
@@ -62,8 +68,10 @@ export default function UserAddress() {
 
   const formatAddress = (addr) => {
     const full = `${addr.building} ${addr.detail} ${addr.subDistrict} ${addr.district} ${addr.province} ${addr.postalCode}`;
-    return addr.isDefault ? `[ค่าเริ่มต้น] ${full}` : full; // ✅ แสดงผลว่าที่อยู่นี้เป็น default
+    return addr.isDefault ? `[Default] ${full}` : full; // ✅ แสดงผลว่าที่อยู่นี้เป็น default
   };
+
+ 
 
   return (
     <div>
@@ -96,7 +104,6 @@ export default function UserAddress() {
             <CirclePlus />
             <span className="font-medium">Add new address</span>
           </button>
-          
         </div>
       </div>
 

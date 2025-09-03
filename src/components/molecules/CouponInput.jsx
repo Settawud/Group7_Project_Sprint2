@@ -8,7 +8,8 @@ export default function CouponInput({ value, onChange, onApply }) {
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder="Enter discount code"
-        className="flex-1 px-4 py-2 rounded-xl border border-gray-300 focus:border-amber-500 focus:ring focus:ring-amber-100 transition"
+        className="flex-1 px-4 py-2 rounded-xl border border-gray-300 w-full px-4 py-2 rounded-xl border border-gray-300 
+                   focus:outline-none focus:ring-1 focus:ring-[#B29674] bg-white"
       />
       <Button onClick={onApply} className="px-4">
         Apply

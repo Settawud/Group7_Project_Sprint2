@@ -9,15 +9,13 @@ export default function ContactForm() {
         type="text"
         placeholder="Name"
         className="w-full px-4 py-2 rounded-xl border border-gray-300 
-                   focus:border-amber-500 focus:ring focus:ring-amber-100 
-                   transition bg-white"
+                   focus:outline-none focus:ring-1 focus:ring-[#B29674] bg-white"
       />
       <input
         type="text"
         placeholder="Phone"
         className="w-full px-4 py-2 rounded-xl border border-gray-300 
-                   focus:border-amber-500 focus:ring focus:ring-amber-100 
-                   transition bg-white"
+                   focus:outline-none focus:ring-1 focus:ring-[#B29674] bg-white"
       />
       </div>
     </div>
