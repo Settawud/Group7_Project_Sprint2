@@ -17,6 +17,7 @@ const ProductContent = ({ product }) => {
   const [selected, setSelected] = useState("buy");
   const [quantity, setQuantity] = useState(1);
   const [selectedColor, setSelectedColor] = useState(null);
+  const [selectedSkuId, setSelectedSkuId] = useState(null);
 
   const filteredVariants = variants.filter((v) =>
     selected === "trial"
