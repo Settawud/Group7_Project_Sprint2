@@ -3,6 +3,8 @@ import StatusFilter from "../components/organisms/StatusFilter";
 import OrderCard from "../components/organisms/OrderCard";
 import FilterOrder from "../components/organisms/FilterOrder";
 import Sidebar from "../components/organisms/Sidebar";
+import Navbar from "../components/organisms/Navbar";
+import Footer from "../components/organisms/Footer";
 
 const App = () => {
   const orders = [
@@ -106,20 +108,24 @@ const App = () => {
   });
 
   return (
-    <div className="flex flex-col lg:flex-row gap-8 mx-auto">
-      <Sidebar />
-      <main className="flex-1 p-4">
-        <FilterOrder onFilterChange={setFilters} />
-        <StatusFilter currentStatus={status} onStatusChange={setStatus} />
+    <div>
+      <Navbar />
+      <div className="flex flex-col lg:flex-row gap-8 mx-auto">
+        <Sidebar />
+        <main className="flex-1 p-4">
+          <FilterOrder onFilterChange={setFilters} />
+          <StatusFilter currentStatus={status} onStatusChange={setStatus} />
 
-        {filteredOrders.length > 0 ? (
-          filteredOrders.map((order) => (
-            <OrderCard key={order.id} order={order} />
-          ))
-        ) : (
-          <p className="text-center text-gray-500 mt-6">No orders found</p>
-        )}
-      </main>
+          {filteredOrders.length > 0 ? (
+            filteredOrders.map((order) => (
+              <OrderCard key={order.id} order={order} />
+            ))
+          ) : (
+            <p className="text-center text-gray-500 mt-6">No orders found</p>
+          )}
+        </main>
+      </div>
+      <Footer />
     </div>
   );
 };
