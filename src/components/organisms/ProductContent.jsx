@@ -84,7 +84,7 @@ const ProductContent = ({ product }) => {
                   ? "border-black"
                   : ""
               }`}
-              style={{ backgroundColor: v.variantOption }}
+              style={{ backgroundColor: v.variantOption[1] }}
             />
           ))}
         </div>
