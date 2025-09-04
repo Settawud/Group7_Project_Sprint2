@@ -6,10 +6,10 @@ import { Link } from "react-router-dom";
 export default function ProductCard({ img, name, price, rating = 0, onAdd, href }) {
   const imgSrc = img?.startsWith("/") ? img : img ? `/images/${img}` : null;
   return (
-    <Card className="p-0">
+    <Card className="p-0 ring-1 ring-black/5 hover:shadow-md transition">
       {href ? (
         <Link to={href} className="block">
-          <div className="aspect-[4/3] w-full overflow-hidden rounded-t-2xl bg-stone-100">
+          <div className="aspect-[4/3] w-full overflow-hidden rounded-t-2xl bg-stone-100 shadow-sm">
             {imgSrc && (
               <img
                 src={imgSrc}
@@ -21,7 +21,7 @@ export default function ProductCard({ img, name, price, rating = 0, onAdd, href 
           </div>
         </Link>
       ) : (
-        <div className="aspect-[4/3] w-full overflow-hidden rounded-t-2xl bg-stone-100">
+        <div className="aspect-[4/3] w-full overflow-hidden rounded-t-2xl bg-stone-100 shadow-sm">
           {imgSrc && (
             <img
               src={imgSrc}

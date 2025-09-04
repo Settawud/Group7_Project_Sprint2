@@ -3,6 +3,7 @@ import ProductFilterSortTags from "../components/organisms/ProductFilterSortTags
 import ProductGridList from "../components/organisms/ProductGridList";
 import { products as rawProducts } from "../data/products";
 import Navbar from "../components/organisms/Navbar";
+import Footer from "../components/organisms/Footer";
 import { useSearchParams } from "react-router-dom";
 
 const App = () => {
@@ -138,19 +139,22 @@ const App = () => {
   }, [searchParams]);
 
   return (
-    <div>
+    <div className="min-h-screen flex flex-col">
       <Navbar />
-      <div className="flex min-h-screen justify-center px-4 py-10 bg-[#fefdf9]">
-        <div className="w-full">
-          <ProductFilterSortTags
-            filters={filters}
-            setFilters={setFilters}
-            sort={sort}
-            setSort={setSort}
-          />
-          <ProductGridList products={sortedProducts} />
+      <main className="flex-1">
+        <div className="flex justify-center px-4 py-10 bg-[#fefdf9]">
+          <div className="w-full">
+            <ProductFilterSortTags
+              filters={filters}
+              setFilters={setFilters}
+              sort={sort}
+              setSort={setSort}
+            />
+            <ProductGridList products={sortedProducts} />
+          </div>
         </div>
-      </div>
+      </main>
+      <Footer />
     </div>
   );
 };

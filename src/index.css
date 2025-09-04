@@ -2,6 +2,11 @@
 
 @tailwind utilities;
 
+/* Ensure the app can stretch full-height for a sticky footer layout */
+html, body, #root {
+  height: 100%;
+}
+
 @font-face {
   font-family: "tradewinds"; /* Choose a name for your font */
   src: url("./assets/fonts/TradeWinds-Regular.ttf") format("truetype"); /* Adjust the path and filename */

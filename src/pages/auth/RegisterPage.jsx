@@ -26,8 +26,9 @@ export default function RegisterPage() {
   };
 
   return (
-    <>
+    <div className="min-h-screen flex flex-col">
       <Navbar />
+      <main className="flex-1">
       <div className="py-16">
         <AuthCard title="Register">
           <form onSubmit={onSubmit} className="space-y-3">
@@ -46,7 +47,8 @@ export default function RegisterPage() {
           </form>
         </AuthCard>
       </div>
+      </main>
       <Footer />
-    </>
+    </div>
   );
 }

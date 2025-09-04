@@ -22,8 +22,9 @@ export default function LoginPage() {
   };
 
   return (
-    <>
+    <div className="min-h-screen flex flex-col">
       <Navbar />
+      <main className="flex-1">
       <div className="py-16">
         <AuthCard title="Login" footer={<p>Don’t have an account? <Link to="/register" className="underline">Register</Link></p>}>
           <form onSubmit={onSubmit} className="space-y-3">
@@ -37,7 +38,8 @@ export default function LoginPage() {
           </form>
         </AuthCard>
       </div>
+      </main>
       <Footer />
-    </>
+    </div>
   );
 }

@@ -4,6 +4,7 @@ import ContactForm from "../components/molecules/ContactForm";
 import OrderSummary from "../components/molecules/OrderSummary";
 import UserAddress from "../components/organisms/UserAddress";
 import Navbar from "../components/organisms/Navbar";
+import Footer from "../components/organisms/Footer";
 
 export default function CheckoutPage() {
   const [contact, setContact] = useState("");
@@ -20,9 +21,9 @@ export default function CheckoutPage() {
   };
 
   return (
-    <div>
+    <div className="min-h-screen flex flex-col bg-[#faf6f1]">
         <Navbar/>
-    <div className="min-h-screen bg-[#faf6f1]">
+    <main className="flex-1">
         <h1 className="p-4 text-center">รายละเอียดการจัดส่งสินค้าและสรุปคำสั่งซื้อ</h1>
       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
         
@@ -45,7 +46,8 @@ export default function CheckoutPage() {
           onApplyCoupon={handleApplyCoupon}
         />
       </div>
-    </div>
+    </main>
+    <Footer />
     </div>
   );
 }

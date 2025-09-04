@@ -4,7 +4,7 @@ export default function CategoryCard({ title, subtitle, href = "#", imageSrc }) 
   return (
     <Link
       to={href}
-      className="group block overflow-hidden rounded-2xl shadow hover:shadow-lg transition"
+      className="group block overflow-hidden rounded-2xl shadow ring-1 ring-black/5 hover:shadow-lg hover:-translate-y-0.5 transition"
     >
       {imageSrc ? (
         <div className="relative h-64">
