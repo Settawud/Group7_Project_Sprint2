@@ -9,7 +9,7 @@ const Cart = () => {
   const {cart, setCart} = useContext(ValueContext)
 
   return (
-    <div className="bg-avocado-400 min-h-dvh px-4 relative">
+    <div className="bg-off-white min-h-dvh px-4 relative">
       <div className="text-center mx-auto sm:max-w-[80%] lg:max-w-[60%] bg-white pt-6 pb-4">
         <h3>รายการสินค้าในตะกร้า</h3>
       </div>

@@ -64,13 +64,13 @@ const CartAction = ({ className = "" }) => {
             checked={selectAllChecked}
             onChange={handleSelectAll}
           />
-          {/* <Button
+          <Button
             variant="secondary"
             className="p-2 font-semibold mx-4 my-2 hidden sm:inline-flex"
             onClick={handleDeleteCartItem}
           >
             ลบที่เลือก
-          </Button> */}
+          </Button> 
         </div>
 
         <div className="flex">

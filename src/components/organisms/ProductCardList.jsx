@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
+import { ValueContext } from "../../context/ValueContext";
 
 const ProductCardList = ({ imageSrc, title, tag, size, price }) => {
   const [quantity, setQuantity] = useState(1);

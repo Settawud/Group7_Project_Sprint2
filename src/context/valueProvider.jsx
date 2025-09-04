@@ -10,10 +10,16 @@ export const ValueProvider = ({ children }) => {
   const [checkoutItem, setCheckoutItem] = useState([])
 
   const [installChecked, setInstallChecked] = useState(false);
+
+  function addToCart(product,quantity) {
+    const item = { image: product.variants.image, name: product.name, variant:product.variant.option, selectQuantity: quantity, price:product.variant.price, itemChecked: false }
+    setCart([...cart, item])
+    //fetchCart
+  }
     
   return (
     <ValueContext
-      value={{cart,setCart, checkoutItem, setCheckoutItem, installChecked, setInstallChecked}}
+      value={{cart,setCart, checkoutItem, setCheckoutItem, installChecked, setInstallChecked, addToCart}}
     >
       {children}
     </ValueContext>

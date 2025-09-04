@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
+import { ValueContext } from "../../context/ValueContext";
 
 const ProductContent = ({ product }) => {
   const {
@@ -9,6 +10,8 @@ const ProductContent = ({ product }) => {
     trial,
     variants = [],
   } = product;
+
+  const {cart,setCart} = useContext(ValueContext)
 
   const [selected, setSelected] = useState("buy");
   const [quantity, setQuantity] = useState(1);
@@ -29,6 +32,14 @@ const ProductContent = ({ product }) => {
 
   const quantityInStock = currentVariant.quantityInStock || 0;
   const price = currentVariant.price || 0;
+
+  
+  // function addToCart(name, color, quantity, price) {
+  //   const item = {name: name, variantOption: color, quantity: quantity, price: price, itemChecked: false }
+  //   console.log(item)
+  //   setCart([...cart, item])
+  //   //fetchCart
+  // }
 
   return (
     <div className="flex flex-col gap-3 text-black">
@@ -151,6 +162,7 @@ const ProductContent = ({ product }) => {
         </div>
 
         <button
+          //onClick={() => addToCart(Name, selectedColor, quantity, price)}
           disabled={quantityInStock === 0}
           className={`h-12 px-4 py-2 rounded text-sm w-full lg:w-1/2 transition ${
             quantityInStock === 0
