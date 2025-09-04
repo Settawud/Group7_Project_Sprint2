@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { CirclePlus } from 'lucide-react';
+import { CirclePlus } from "lucide-react";
 import AddressList from "../molecules/AddressList";
 import AddressForm from "../molecules/AddressForm";
 import Modal from "../layout/Modal";
@@ -48,6 +48,12 @@ export default function UserAddress() {
     setAddresses(updated);
     setShowPopup(false);
     setEditIndex(null);
+
+    // ✅ ตั้ง selected address เป็น default address
+    const defaultIndex = updated.findIndex((a) => a.isDefault);
+    if (defaultIndex !== -1) {
+      setSelectedAddress(defaultIndex);
+    }
   };
 
   const handleDelete = (index) => {
@@ -62,15 +68,17 @@ export default function UserAddress() {
 
   const formatAddress = (addr) => {
     const full = `${addr.building} ${addr.detail} ${addr.subDistrict} ${addr.district} ${addr.province} ${addr.postalCode}`;
-    return addr.isDefault ? `[ค่าเริ่มต้น] ${full}` : full; // ✅ แสดงผลว่าที่อยู่นี้เป็น default
+    return addr.isDefault ? `[Default] ${full}` : full; // ✅ แสดงผลว่าที่อยู่นี้เป็น default
   };
+
+ 
 
   return (
     <div>
       <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-md p-6">
         {/* Header */}
         <h2 className="text-xl font-bold text-gray-800 border-gray-200 pb-4">
-          ที่อยู่จัดส่งสินค้า
+          Shipping Address
         </h2>
 
         {/* Address List */}
@@ -94,9 +102,8 @@ export default function UserAddress() {
             className="flex items-center justify-center gap-1 px-4 py-3 text-charcoal hover:underline"
           >
             <CirclePlus />
-            <span className="font-medium">เพิ่มที่อยู่ใหม่</span>
+            <span className="font-medium">Add new address</span>
           </button>
-          
         </div>
       </div>
 
