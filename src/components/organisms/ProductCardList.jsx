@@ -1,8 +1,15 @@
-import { useState, useContext } from "react";
+import { useState, useContext, useMemo } from "react";
+import { Link } from "react-router-dom";
 import { ValueContext } from "../../context/ValueContext";
 
-const ProductCardList = ({ imageSrc, title, tag, size, price }) => {
+const ProductCardList = ({ id, imageSrc, title, tag, size, price }) => {
   const [quantity, setQuantity] = useState(1);
+  const { addToCart } = useContext(ValueContext) || {};
+
+  const resolvedSrc = useMemo(() => {
+    if (!imageSrc) return "";
+    return imageSrc.startsWith("/") ? imageSrc : `/images/${imageSrc}`;
+  }, [imageSrc]);
 
   const increase = () => {
     setQuantity((prev) => prev + 1);
@@ -14,7 +21,13 @@ const ProductCardList = ({ imageSrc, title, tag, size, price }) => {
 
   return (
     <div className="w-full max-w-sm overflow-hidden bg-white border border-[#b29675] rounded-xl shadow transition-transform duration-300 ease-in-out hover:scale-105">
-      <img src={imageSrc} alt={title} />
+      {id ? (
+        <Link to={`/pageproductdetail?id=${encodeURIComponent(id)}`}>
+          <img src={resolvedSrc} alt={title} />
+        </Link>
+      ) : (
+          <img src={resolvedSrc} alt={title} />
+      )}
       <div className="p-4 space-y-3">
         <div className="flex flex-wrap gap-2">
           {tag.map((t, index) => (
@@ -26,9 +39,15 @@ const ProductCardList = ({ imageSrc, title, tag, size, price }) => {
             </div>
           ))}
         </div>
-        <h3 className="text-xl text-black truncate overflow-hidden whitespace-nowrap">
-          {title}
-        </h3>
+        {id ? (
+          <Link to={`/pageproductdetail?id=${encodeURIComponent(id)}`} className="block">
+            <h3 className="text-xl text-black truncate overflow-hidden whitespace-nowrap hover:underline">
+              {title}
+            </h3>
+          </Link>
+        ) : (
+          <h3 className="text-xl text-black truncate overflow-hidden whitespace-nowrap">{title}</h3>
+        )}
         <div className="flex items-center justify-between">
           <span className="text-sm text-[#A8A8A8] truncate overflow-hidden whitespace-nowrap">
             {size}
@@ -52,7 +71,20 @@ const ProductCardList = ({ imageSrc, title, tag, size, price }) => {
             </button>
           </div>
           <div className="flex items-center justify-center sm:w-2/3 h-12 bg-[#B29675] rounded-lg hover:bg-[#B2967590] transition">
-            <button className="text-lg">Add to Cart</button>
+            <button
+              className="text-lg"
+              onClick={() =>
+                addToCart?.({
+                  skuId: `${title}`,
+                  image: resolvedSrc,
+                  name: title,
+                  altText: title,
+                  price: typeof price === "number" ? price : Number(String(price).replace(/[^0-9]/g, "")),
+                }, quantity)
+              }
+            >
+              Add to Cart
+            </button>
           </div>
         </div>
       </div>

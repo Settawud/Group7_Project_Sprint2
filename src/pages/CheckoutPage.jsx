@@ -1,13 +1,14 @@
 import React, { useState } from "react";
 import ContactForm from "../components/molecules/ContactForm";
-import PaymentMethod from "../components/molecules/PaymentMethod";
+// import PaymentMethod from "../components/molecules/PaymentMethod";
 import OrderSummary from "../components/molecules/OrderSummary";
 import UserAddress from "../components/organisms/UserAddress";
 import Navbar from "../components/organisms/Navbar";
+import Footer from "../components/organisms/Footer";
 
 export default function CheckoutPage() {
   const [contact, setContact] = useState("");
-  const [payment, setPayment] = useState("VISA");
+  // const [payment, setPayment] = useState("VISA");
   const [coupon, setCoupon] = useState("");
 
   const items = [
@@ -16,14 +17,15 @@ export default function CheckoutPage() {
   ];
 
   const handleApplyCoupon = () => {
-    alert(`ใช้โค้ด: ${coupon}`);
+    alert(`Apply code: ${coupon}`);
   };
 
   return (
-    <div>
+    <div className="min-h-screen flex flex-col bg-[#faf6f1]">
         <Navbar/>
-    <div className="min-h-screen bg-[#faf6f1]">
-        <h1 className="p-4 text-center">รายละเอียดการจัดส่งสินค้าและวิธีการชำระเงิน</h1>
+    <main className="flex-1">
+        <h1 className="p-4 text-center">รายละเอียดการจัดส่งสินค้าและสรุปคำสั่งซื้อ</h1>
+
       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
         
         {/* Left side */}
@@ -34,7 +36,7 @@ export default function CheckoutPage() {
             address="54 หมู่บ้าน A แขวงคลองต้นไทร เขตคลองสาน กทม. 10600"
             onEdit={() => alert("แก้ไขที่อยู่")}
           /> */}
-          <PaymentMethod selected={payment} onChange={setPayment} />
+          {/* <PaymentMethod selected={payment} onChange={setPayment} /> */}
         </div>
 
         {/* Right side */}
@@ -45,7 +47,8 @@ export default function CheckoutPage() {
           onApplyCoupon={handleApplyCoupon}
         />
       </div>
-    </div>
+    </main>
+    <Footer />
     </div>
   );
 }

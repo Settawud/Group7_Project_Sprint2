@@ -5,7 +5,7 @@ import { ValueContext } from "../../context/ValueContext";
 
 
 const CartAction = ({ className = "" }) => {
-  const {cart, setCart,setCheckoutItem,checkoutItem,installChecked, setInstallChecked} = useContext(ValueContext)
+  const {cart, setCart,setCheckoutItem,checkoutItem,installChecked, setInstallChecked, removeChecked} = useContext(ValueContext)
   const [total, setTotal] = useState(0);
   const [selectAllChecked, setSelectAllChecked] = useState(false);
 
@@ -22,7 +22,7 @@ const CartAction = ({ className = "" }) => {
   //console.log(total)
 
   const handleDeleteCartItem = () => {
-    setCart(cart.filter((item) => item.checked === false));
+    removeChecked();
   };
 
   const handleInstallationChecked = () => {
@@ -58,25 +58,26 @@ const CartAction = ({ className = "" }) => {
           <CheckboxWithText
             name="selectAll"
             text="ทั้งหมด"
-            className="my-2"
+            className="my-3"
             setCart={setCart}
             cart={cart}
             checked={selectAllChecked}
             onChange={handleSelectAll}
           />
-          <Button
+{/*           <Button
             variant="secondary"
-            className="p-2 font-semibold mx-4 my-2 hidden sm:inline-flex"
+            className="p-2 mx-4 inline-flex"
             onClick={handleDeleteCartItem}
+            //disabled={!cart.some((i) => i.checked)}
           >
             ลบที่เลือก
-          </Button> 
+          </Button> */}
         </div>
 
         <div className="flex">
           <p className="mr-4 my-5 hidden sm:block">ยอดรวม ฿{total}</p>
           <p className="mr-2 my-5 sm:hidden">฿{total}</p>
-          <Button variant="primary" size="sm" className="py-2 px-3 my-2">
+          <Button variant="primary" className="py-2 px-3 my-2">
             เริ่มการสั่งซื้อ
           </Button>
         </div>

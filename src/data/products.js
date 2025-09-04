@@ -15,7 +15,7 @@ export const products = [
       {
         skuID: "EGC-EF-01-B",
         variantName: "สี",
-        variantOption: "ดำ",
+        variantOption: ["ดำ", "#000000"],
         price: 5990,
         quantityInStock: 10,
         availability: "In Stock",
@@ -26,7 +26,7 @@ export const products = [
       {
         skuID: "EGC-EF-01-W",
         variantName: "สี",
-        variantOption: "ขาว",
+        variantOption: ["ขาว", "#FFFFFF"],
         price: 6190,
         quantityInStock: 5,
         availability: "In Stock",
@@ -37,7 +37,7 @@ export const products = [
       {
         skuID: "EGC-EF-01-B-TRIAL",
         variantName: "สินค้าทดลอง",
-        variantOption: "สีดำ",
+        variantOption: ["สีดำ", "#000000"],
         price: 599,
         quantityInStock: 2,
         availability: "In Stock",
@@ -48,7 +48,7 @@ export const products = [
       {
         skuID: "EGC-EF-01-W-TRIAL",
         variantName: "สินค้าทดลอง",
-        variantOption: "สีขาว",
+        variantOption: ["สีขาว", "#FFFFFF"],
         price: 619,
         quantityInStock: 0,
         availability: "Out of Stock",
@@ -73,7 +73,7 @@ export const products = [
       {
         skuID: "EGC-LP-02-B",
         variantName: "สี",
-        variantOption: "ดำ",
+        variantOption: ["ดำ", "#000000"],
         price: 7500,
         quantityInStock: 3,
         availability: "In Stock",
@@ -84,7 +84,7 @@ export const products = [
       {
         skuID: "EGC-LP-02-B-TRIAL",
         variantName: "สินค้าทดลอง",
-        variantOption: "ดำ",
+        variantOption: ["ดำ", "#000000"],
         price: 750,
         quantityInStock: 1,
         availability: "In Stock",
@@ -109,7 +109,7 @@ export const products = [
       {
         skuID: "EGC-MA-03-G",
         variantName: "สี",
-        variantOption: "เทา",
+        variantOption: ["เทา", "#808080"],
         price: 4800,
         quantityInStock: 8,
         availability: "In Stock",
@@ -120,7 +120,7 @@ export const products = [
       {
         skuID: "EGC-MA-03-O",
         variantName: "สี",
-        variantOption: "ส้ม",
+        variantOption: ["ส้ม", "#FFA500"],
         price: 4950,
         quantityInStock: 0,
         availability: "Out of Stock",
@@ -145,7 +145,7 @@ export const products = [
       {
         skuID: "EGC-N-04-R",
         variantName: "สี",
-        variantOption: "แดง-ดำ",
+        variantOption: ["แดง-ดำ", "#FF0000", "#000000"],
         price: 8900,
         quantityInStock: 6,
         availability: "In Stock",
@@ -170,7 +170,7 @@ export const products = [
       {
         skuID: "EGC-C-05-BL",
         variantName: "สี",
-        variantOption: "ดำ",
+        variantOption: ["ดำ", "#000000"],
         price: 3200,
         quantityInStock: 7,
         availability: "In Stock",
@@ -181,7 +181,7 @@ export const products = [
       {
         skuID: "EGC-C-05-W",
         variantName: "สี",
-        variantOption: "ขาว",
+        variantOption: ["ขาว", "#FFFFFF"],
         price: 3200,
         quantityInStock: 4,
         availability: "In Stock",
@@ -192,7 +192,7 @@ export const products = [
       {
         skuID: "EGC-C-05-G",
         variantName: "สี",
-        variantOption: "เทา",
+        variantOption: ["เทา", "#808080"],
         price: 3200,
         quantityInStock: 0,
         availability: "Out of Stock",
@@ -203,7 +203,7 @@ export const products = [
       {
         skuID: "EGC-C-05-BL-TRIAL",
         variantName: "สินค้าทดลอง",
-        variantOption: "ดำ",
+        variantOption: ["ดำ", "#000000"],
         price: 320,
         quantityInStock: 1,
         availability: "In Stock",
@@ -214,7 +214,7 @@ export const products = [
       {
         skuID: "EGC-C-05-GR-TRIAL",
         variantName: "สินค้าทดลอง",
-        variantOption: "เทา",
+        variantOption: ["เทา", "#808080"],
         price: 320,
         quantityInStock: 1,
         availability: "In Stock",
@@ -239,8 +239,8 @@ export const products = [
     variants: [
       {
         skuID: "EGT-AP-01-W-120",
-        variantName: "ขนาด",
-        variantOption: "120 x 60 ซม.",
+        variantName: "สี",
+        variantOption: ["ขาว", "#FFFFFF"],
         price: 9500,
         quantityInStock: 5,
         availability: "In Stock",
@@ -249,38 +249,16 @@ export const products = [
         dimensions: { width: 120, height: 75, depth: 60, weight: 35, unit: { width: "cm", height: "cm", depth: "cm", weight: "kg" } },
       },
       {
-        skuID: "EGT-AP-01-W-150",
-        variantName: "ขนาด",
-        variantOption: "150 x 70 ซม.",
-        price: 11000,
-        quantityInStock: 2,
-        availability: "In Stock",
-        image: "EGT-AP-01-W-150.png",
-        altText: "โต๊ะ Ergonomics ปรับระดับไฟฟ้า รุ่น AscendPro ขนาด 150 x 70 ซม.",
-        dimensions: { width: 150, height: 75, depth: 70, weight: 40, unit: { width: "cm", height: "cm", depth: "cm", weight: "kg" } },
-      },
-      {
         skuID: "EGT-AP-01-W-120-TRIAL",
         variantName: "สินค้าทดลอง",
-        variantOption: "120 x 60 ซม.",
+        variantOption: ["สีขาว", "#FFFFFF"],
         price: 950,
         quantityInStock: 1,
         availability: "In Stock",
         image: "EGT-AP-01-W-120.png",
         altText: "สินค้าทดลอง โต๊ะ Ergonomics ปรับระดับไฟฟ้า รุ่น AscendPro ขนาด 120 x 60 ซม.",
         dimensions: { width: 120, height: 75, depth: 60, weight: 35, unit: { width: "cm", height: "cm", depth: "cm", weight: "kg" } },
-      },
-      {
-        skuID: "EGT-AP-01-W-150-TRIAL",
-        variantName: "สินค้าทดลอง",
-        variantOption: "150 x 70 ซม.",
-        price: 1100,
-        quantityInStock: 1,
-        availability: "In Stock",
-        image: "EGT-AP-01-W-150.png",
-        altText: "สินค้าทดลอง โต๊ะ Ergonomics ปรับระดับไฟฟ้า รุ่น AscendPro ขนาด 150 x 70 ซม.",
-        dimensions: { width: 150, height: 75, depth: 70, weight: 40, unit: { width: "cm", height: "cm", depth: "cm", weight: "kg" } },
-      },
+      }
     ],
   },
   {
@@ -298,7 +276,7 @@ export const products = [
       {
         skuID: "EGT-SS-02-B",
         variantName: "สี",
-        variantOption: "น้ำตาลเข้ม",
+        variantOption: ["น้ำตาลเข้ม", "#654321"],
         price: 6800,
         quantityInStock: 0,
         availability: "Out of Stock",
@@ -323,7 +301,7 @@ export const products = [
       {
         skuID: "EGT-ME-03-N",
         variantName: "สี",
-        variantOption: "ไม้ธรรมชาติ",
+        variantOption: ["ไม้ธรรมชาติ", "#A0522D"],
         price: 4200,
         quantityInStock: 12,
         availability: "In Stock",
@@ -334,7 +312,7 @@ export const products = [
       {
         skuID: "EGT-ME-03-N-TRIAL",
         variantName: "สินค้าทดลอง",
-        variantOption: "ไม้ธรรมชาติ",
+        variantOption: ["ไม้ธรรมชาติ", "#A0522D"],
         price: 420,
         quantityInStock: 1,
         availability: "In Stock",
@@ -359,7 +337,7 @@ export const products = [
       {
         skuID: "EGT-CS-04-W",
         variantName: "สี",
-        variantOption: "ขาว",
+        variantOption: ["ขาว", "#FFFFFF"],
         price: 3500,
         quantityInStock: 6,
         availability: "In Stock",
@@ -384,7 +362,7 @@ export const products = [
       {
         skuID: "EGT-CF-05-B",
         variantName: "สี",
-        variantOption: "ดำ",
+        variantOption: ["ดำ", "#000000"],
         price: 11000,
         quantityInStock: 3,
         availability: "In Stock",
@@ -409,19 +387,18 @@ export const products = [
     variants: [
       {
         skuID: "EGA-FR-01",
-        variantName: "รุ่น",
-        variantOption: "มาตรฐาน",
+        variantName: "สี",
+        variantOption: ["ดำ", "#000000"],
         price: 890,
         quantityInStock: 20,
         availability: "In Stock",
         image: "EGA-FR-01.png",
         altText: "ที่วางเท้าปรับระดับ รุ่น FootRest Pro รุ่นมาตรฐาน",
         dimensions: { width: 45, height: 15, depth: 30, weight: 2, unit: { width: "cm", height: "cm", depth: "cm", weight: "kg" } },
-      },
-      {
+      },      {
         skuID: "EGA-FR-01-TRIAL",
         variantName: "สินค้าทดลอง",
-        variantOption: "มาตรฐาน",
+        variantOption: ["ดำ", "#000000"],
         price: 89,
         quantityInStock: 5,
         availability: "In Stock",
@@ -446,7 +423,7 @@ export const products = [
       {
         skuID: "EGA-WP-02-B",
         variantName: "สี",
-        variantOption: "ดำ",
+        variantOption: ["ดำ", "#000000"],
         price: 350,
         quantityInStock: 15,
         availability: "In Stock",
@@ -457,7 +434,7 @@ export const products = [
       {
         skuID: "EGA-WP-02-G",
         variantName: "สี",
-        variantOption: "เทา",
+        variantOption: ["เทา", "#808080"],
         price: 350,
         quantityInStock: 8,
         availability: "In Stock",
@@ -468,7 +445,7 @@ export const products = [
       {
         skuID: "EGA-WP-02-B-TRIAL",
         variantName: "สินค้าทดลอง",
-        variantOption: "ดำ",
+        variantOption: ["ดำ", "#000000"],
         price: 35,
         quantityInStock: 2,
         availability: "In Stock",
@@ -479,7 +456,7 @@ export const products = [
       {
         skuID: "EGA-WP-02-G-TRIAL",
         variantName: "สินค้าทดลอง",
-        variantOption: "เทา",
+        variantOption: ["เทา", "#808080"],
         price: 35,
         quantityInStock: 1,
         availability: "In Stock",
@@ -504,7 +481,7 @@ export const products = [
       {
         skuID: "EGA-MR-03-N",
         variantName: "สี",
-        variantOption: "ไม้ธรรมชาติ",
+        variantOption: ["ไม้ธรรมชาติ", "#A0522D"],
         price: 650,
         quantityInStock: 0,
         availability: "Out of Stock",
@@ -515,7 +492,7 @@ export const products = [
       {
         skuID: "EGA-MR-03-N-TRIAL",
         variantName: "สินค้าทดลอง",
-        variantOption: "ไม้ธรรมชาติ",
+        variantOption: ["ไม้ธรรมชาติ", "#A0522D"],
         price: 65,
         quantityInStock: 1,
         availability: "In Stock",
@@ -540,7 +517,7 @@ export const products = [
       {
         skuID: "EGA-EC-04-B",
         variantName: "สี",
-        variantOption: "ดำ",
+        variantOption: ["ดำ", "#000000"],
         price: 1200,
         quantityInStock: 12,
         availability: "In Stock",
@@ -565,7 +542,7 @@ export const products = [
       {
         skuID: "EGA-GMP-05-B",
         variantName: "สี",
-        variantOption: "ดำ",
+        variantOption: ["ดำ", "#000000"],
         price: 299,
         quantityInStock: 18,
         availability: "In Stock",

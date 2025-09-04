@@ -3,6 +3,7 @@ import { ValueContext } from "../../context/ValueContext";
 
 const ProductContent = ({ product }) => {
   const {
+    id,
     Name,
     Description = [],
     tag,
@@ -33,13 +34,12 @@ const ProductContent = ({ product }) => {
   const quantityInStock = currentVariant.quantityInStock || 0;
   const price = currentVariant.price || 0;
 
-  
-  // function addToCart(name, color, quantity, price) {
-  //   const item = {name: name, variantOption: color, quantity: quantity, price: price, itemChecked: false }
-  //   console.log(item)
-  //   setCart([...cart, item])
-  //   //fetchCart
-  // }
+  function addToCart(name, color, quantity, price) {
+    const item = {name: name, variantOption: color, quantity: quantity, price: price, itemChecked: false }
+    console.log(item)
+    setCart([...cart, item])
+    //fetchCart
+  }
 
   return (
     <div className="flex flex-col gap-3 text-black">
@@ -162,7 +162,7 @@ const ProductContent = ({ product }) => {
         </div>
 
         <button
-          //onClick={() => addToCart(Name, selectedColor, quantity, price)}
+          onClick={() => addToCart(Name, selectedColor, quantity, price)}
           disabled={quantityInStock === 0}
           className={`h-12 px-4 py-2 rounded text-sm w-full lg:w-1/2 transition ${
             quantityInStock === 0
