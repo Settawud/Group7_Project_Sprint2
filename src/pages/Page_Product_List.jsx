@@ -165,16 +165,16 @@ const App = () => {
             onClick={() => setIsModalOpen(false)}
           >
             <div
-              className="bg-yellow-100 border-4 border-black rounded-2xl shadow-[8px_8px_0_0_#000] p-8 w-full max-w-lg relative"
+              className="bg-off-white border-4 border-black rounded-2xl shadow-[8px_8px_0_0_#000] p-8 w-full max-w-lg relative"
               onClick={(e) => e.stopPropagation()}
             >
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="absolute top-4 right-4 text-black bg-white border-2 border-black rounded-full w-8 h-8 flex items-center justify-center shadow-[2px_2px_0_0_#000] hover:bg-pink-200 transition"
+                className="absolute top-4 right-4 text-black bg-white hover:border-2 border-black  rounded-full w-8 h-8 flex items-center justify-center "
               >
                 ✖
               </button>
-              <AddToCartModal product={products.find(item => item.productID === product)} />
+              <AddToCartModal product={rawProducts.find(item => item.productID === product)} />
             </div>
           </div>
         )}

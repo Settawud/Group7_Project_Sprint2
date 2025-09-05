@@ -14,6 +14,7 @@ import ShippingAddress from "./components/atoms/ShippingAddress";
 import Cart from "./pages/Cart";
 import { useContext } from "react";
 import { ValueContext } from "./context/ValueContext";
+import { Toaster } from "sonner";
 
 export default function App() {
 
@@ -40,6 +41,15 @@ export default function App() {
         <Route path="/orderhistorydetail" element={<Order_History_Detail />} />
         {/* TODO: category pages, product detail, cart, etc. */}
       </Routes>
+      <Toaster position="top-center" expand={true} toastOptions={{
+          style: {
+            fontSize: '16px', 
+          padding: '16px',
+          fontFamily: 'Poppins',
+          backgroundColor: 'var(--color-off-white)',
+            color: 'var(--color-charcoal)'
+          },
+        }}/>
     </BrowserRouter>
   );
 }

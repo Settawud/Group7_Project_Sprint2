@@ -1,6 +1,6 @@
 import { ValueContext } from './ValueContext';
 import { useMemo, useState, useEffect } from "react";
-import { products } from '../data/products';
+import { Toaster, toast } from 'sonner';
 
 export const ValueProvider = ({ children }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -92,8 +92,10 @@ export const ValueProvider = ({ children }) => {
       if (index >= 0) {
         const next = [...prev];
         next[index] = { ...next[index], quantity: (next[index].quantity || 0) + quantity };
+        toast.success('Added to cart', {duration: 1000})
         return next;
       }
+      toast.success('Added to cart', {duration: 1000})
       return [
         ...prev,
         {
