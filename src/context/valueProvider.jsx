@@ -78,7 +78,7 @@ export const ValueProvider = ({ children }) => {
 
   function addToCart(productId, name, color, quantity, price, image, altText, sample, variants) {
     if (!color || !productId) {
-      return alert("Please select a color")
+      return toast.warning("Please select a color.")
     }
 
     const variantName = sample === "trial" ? "สินค้าทดลอง" : "สี"

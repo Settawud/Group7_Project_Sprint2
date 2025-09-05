@@ -81,7 +81,7 @@ const AddToCartModal = ({ product}) => {
       </div>
 
       <div className="flex flex-col gap-4 w-full mt-2">
-        <div className="flex flex-col sm:flex-row gap-2 w-full">
+        <div className="flex flex-row gap-2 w-full">
           {trial && (
             <button
               onClick={() => {
@@ -117,7 +117,7 @@ const AddToCartModal = ({ product}) => {
 
 
 
-      <div className="flex flex-col sm:flex-row gap-2 w-full">
+      <div className="flex flex-row gap-2 w-full">
         <div
           className={`flex items-center justify-between h-12 px-4 py-2 border rounded transition w-full lg:w-1/2 ${
             quantityInStock === 0
