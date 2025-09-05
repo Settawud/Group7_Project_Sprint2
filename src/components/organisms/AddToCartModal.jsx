@@ -48,7 +48,7 @@ const AddToCartModal = ({ product}) => {
   return (
     <div className="flex flex-col gap-3 text-black">
       <div className="text-2xl font-semibold leading-snug">{Name}</div>
-      <img src={`../images/${image}`} alt={`${Name}`} className="h-50 w-50 p-1 border-1 mx-auto rounded-sm border-gray-300 shadow-[0_2px_4px_1px_rgba(209,213,219,0.2)]"/>
+      <img src={`../images/${currentVariant.image}`}  alt={`${Name}`} className="h-50 w-50 p-1 border-1 mx-auto rounded-sm border-gray-300 shadow-[0_2px_4px_1px_rgba(209,213,219,0.2)]"/>
           <div className="pt-4">
         <ul className="list-disc list-inside text-sm text-[#A8A8A8]">
  
