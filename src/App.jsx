@@ -10,6 +10,9 @@ import CheckoutPage from "./pages/CheckoutPage";
 import OrderConfirmationMessage from "./components/atoms/OrderConfirmationMessage";
 import ShippingAddress from "./components/atoms/ShippingAddress";
 import Cart from "./pages/Cart";
+import Orderconfirm from "./pages/OrderconfirmPage";
+import { AddProductPage } from "./pages/AddProductPage";
+
 
 export default function App() {
   return (
@@ -27,6 +30,9 @@ export default function App() {
         <Route path="/ShippingAddress" element={<ShippingAddress />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/checkout" element={<CheckoutPage />} />
+        <Route path="/orderconfirm" element={<Orderconfirm />} />
+        <Route path="/AddProductPage" element={<AddProductPage />} />
+      
         
         {/* TODO: category pages, product detail, cart, etc. */}
       </Routes>
