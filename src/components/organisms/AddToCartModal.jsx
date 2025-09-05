@@ -2,9 +2,9 @@ import { useContext, useState } from "react";
 import { ValueContext } from "../../context/ValueContext";
 import { ClipboardType } from "lucide-react";
 
-const ProductContent = ({ product }) => {
+const AddToCartModal = ({ product}) => {
   const {
-    id,
+    productID,
     image,
     altText,
     Name,
@@ -47,33 +47,20 @@ const ProductContent = ({ product }) => {
 
   return (
     <div className="flex flex-col gap-3 text-black">
-      <div className="text-3xl font-semibold leading-snug">{Name}</div>
+      <div className="text-2xl font-semibold leading-snug">{Name}</div>
+      <img src={`../images/${image}`} alt={`${Name}`} className="h-50 w-50 p-1 border-1 mx-auto rounded-sm border-gray-300 shadow-[0_2px_4px_1px_rgba(209,213,219,0.2)]"/>
+          <div className="pt-4">
+        <ul className="list-disc list-inside text-sm text-[#A8A8A8]">
+ 
+    <li>
+      {currentVariant.dimensions.width} {currentVariant.dimensions.unit.width} x{" "}
+      {currentVariant.dimensions.depth} {currentVariant.dimensions.unit.depth} x{" "}
+      {currentVariant.dimensions.height} {currentVariant.dimensions.unit.height}
+    </li>
 
-      <div className="flex flex-wrap gap-2">
-        {tag.map((t, index) => (
-          <div
-            key={index}
-            className="inline-block px-2 py-0.5 text-sm font-medium bg-[#849E9150] text-[#849E91] rounded"
-          >
-            {t}
-          </div>
-        ))}
+          {material && <li>Material: {material}</li>}
+        </ul>
       </div>
-
-      <div className="text-3xl font-bold">฿{price.toLocaleString()}</div>
-
-      <hr className="my-3 border-[#B29675]" />
-
-      <div className="space-y-3 text-sm">
-        {Array.isArray(Description) ? (
-          Description.map((text, index) => <p key={index}>{text}</p>)
-        ) : (
-          <p>{Description}</p>
-        )}
-      </div>
-
-      <hr className="my-3 border-[#B29675]" />
-
       <div>
         <div className="pb-1 text-sm font-medium">Color</div>
         <div className="flex gap-2">
@@ -93,9 +80,7 @@ const ProductContent = ({ product }) => {
         </div>
       </div>
 
-      <hr className="my-3 border-[#B29675]" />
-
-      <div className="flex flex-col gap-4 w-full">
+      <div className="flex flex-col gap-4 w-full mt-2">
         <div className="flex flex-col sm:flex-row gap-2 w-full">
           {trial && (
             <button
@@ -130,7 +115,7 @@ const ProductContent = ({ product }) => {
         </div>
       </div>
 
-      <hr className="my-3 border-[#B29675]" />
+
 
       <div className="flex flex-col sm:flex-row gap-2 w-full">
         <div
@@ -166,7 +151,7 @@ const ProductContent = ({ product }) => {
         </div>
 
         <button
-          onClick={() => addToCart(id, Name, selectedColor, quantity, price, `../images/${image}`, altText, selected, variants)}
+          onClick={() => addToCart(productID, Name, selectedColor, quantity, price, `../images/${image}`, altText, selected, variants)}
           disabled={quantityInStock === 0}
           className={`h-12 px-4 py-2 rounded text-sm w-full lg:w-1/2 transition ${
             quantityInStock === 0
@@ -177,26 +162,8 @@ const ProductContent = ({ product }) => {
           Add to Cart
         </button>
       </div>
-
-      <div className="pt-4">
-        <div className="pb-2 font-semibold">Product Information</div>
-        <ul className="list-disc list-inside text-sm text-[#A8A8A8]">
-          {currentVariant.dimensions &&
-            Object.entries(currentVariant.dimensions)
-              .filter(([k]) => k !== "unit")
-              .map(([key, value]) => {
-                const unit = currentVariant.dimensions.unit?.[key] || "";
-                return (
-                  <li key={key}>
-                    {key.charAt(0).toUpperCase() + key.slice(1)}: {value} {unit}
-                  </li>
-                );
-              })}
-          {material && <li>Material: {material}</li>}
-        </ul>
-      </div>
     </div>
   );
 };
 
-export default ProductContent;
+export default AddToCartModal;

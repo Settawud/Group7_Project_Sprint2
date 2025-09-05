@@ -26,6 +26,8 @@ const App = () => {
 
   const productData = {
     id: product.productID,
+    altText: product.altText,
+    image: product.image,
     Name: product.Name,
     tag: product.tag,
     Description: product.Description,
