@@ -1,9 +1,9 @@
-import React, { useContext, useState } from 'react';
-import { ValueContext } from '../../context/valueContext,jsx';
+import React, { useState, useContext } from 'react';
+import { ValueContext } from "../../context/ValueContext";
 
-const QuantityButton2 = ({ min = 1, max = 99, onChange, className = "", item = "", cart ,setCart}) => {
+const QuantityButton2 = ({ min = 1, max = 99, onChange, className="" ,item = ""}) => {
   const [quantity, setQuantity] = useState(min);
-  //const {handleQuantityChange} = useContext(ValueContext)
+  const {setCart} = useContext(ValueContext)
 
         const handleDecrease = () => {
     if (quantity > min) {
@@ -35,15 +35,13 @@ const QuantityButton2 = ({ min = 1, max = 99, onChange, className = "", item = "
       
     }
   };
-  
-
 
   return (
-    <div className={"flex items-center justify-center text-off-white font-medium p-1 bg-sandy-beige rounded-md " + `${className}`}>
-      <button onClick={handleDecrease} className="px-3 hover:cursor-pointer">−</button>
+    <div className={"flex items-center justify-around text-off-white p-1 bg-sandy-beige rounded-md " + `${className}`}>
+      <button onClick={handleDecrease} className="px-2">−</button>
       <span>{item ? item.quantity : quantity}</span>
-      <button onClick={handleIncrease} className="px- hover:cursor-pointer">+</button>
-    </div> 
+      <button onClick={handleIncrease} className="px-2">+</button>
+    </div>
   );
 };
 

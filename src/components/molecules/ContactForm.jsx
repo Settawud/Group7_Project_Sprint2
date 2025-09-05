@@ -7,17 +7,15 @@ export default function ContactForm() {
       <div className="flex flex-col gap-2">
       <input
         type="text"
-        placeholder="ชื่อผู้รับ"
+        placeholder="Name"
         className="w-full px-4 py-2 rounded-xl border border-gray-300 
-                   focus:border-amber-500 focus:ring focus:ring-amber-100 
-                   transition bg-white"
+                   focus:outline-none focus:ring-1 focus:ring-[#B29674] bg-white"
       />
       <input
         type="text"
-        placeholder="เบอร์โทรศัพท์"
+        placeholder="Phone"
         className="w-full px-4 py-2 rounded-xl border border-gray-300 
-                   focus:border-amber-500 focus:ring focus:ring-amber-100 
-                   transition bg-white"
+                   focus:outline-none focus:ring-1 focus:ring-[#B29674] bg-white"
       />
       </div>
     </div>

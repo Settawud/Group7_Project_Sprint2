@@ -1,8 +1,12 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import CartItem from '../molecules/CartItem'
+import { ValueContext } from "../../context/ValueContext";
 
 
-const CartTable = ({cart,setCart, className}) => {
+const CartTable = ({ className }) => {
+  
+  const {cart} = useContext(ValueContext)
+  
   return (
       <div className={` border rounded-2xl border-sandy-beige overflow-hidden shadow-[0_2px_4px_rgba(178,_150,_116,_1)] ${className}`}>
           <table className="w-full sm:table-fixed mx-auto bg-white">
@@ -15,7 +19,7 @@ const CartTable = ({cart,setCart, className}) => {
               </thead>
               <tbody className="divide-y divide-gray-300">
                   {cart.map((item, index) => (
-                      <CartItem key={item.skuId} item={item} cart={cart} setCart={setCart}/>
+                      <CartItem key={item.skuId} item={item}/>
                   ))}
               </tbody>
           </table>

@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
+import { User, MapPin, ShoppingBag, CreditCard, LogOut, Wallet } from "lucide-react";
 
 function Icon({ children }) {
   return <span className="inline-flex h-5 w-5 items-center justify-center">{children}</span>;
@@ -44,10 +46,12 @@ export default function NavUserMenu({
         onClick={() => setOpen((v) => !v)}
         aria-haspopup="menu"
         aria-expanded={open}
-        className="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-white/70 px-3 py-1.5 text-sm shadow-sm hover:bg-amber-50"
+        className="inline-flex items-center gap-2 rounded-full border border-stone-200 bg-white/70 px-3 py-1.5 text-sm shadow-sm hover:bg-stone-50"
       >
-        <span className="h-6 w-6 rounded-full bg-stone-300/80 grid place-items-center">👤</span>
-        <span className="hidden sm:block max-w-[8rem] truncate">{user?.name}</span>
+        <span className="h-6 w-6 rounded-full bg-stone-300/80 grid place-items-center">
+          <User className="h-4 w-4 text-stone-700" />
+        </span>
+        <span className="hidden sm:block max-w-[8rem] truncate text-stone-800">{user?.name}</span>
         <svg width="16" height="16" viewBox="0 0 20 20" className={`transition ${open ? "rotate-180" : ""}`}>
           <path d="M5.5 7.5l4.5 4 4.5-4" stroke="currentColor" strokeWidth="1.6" fill="none" strokeLinecap="round"/>
         </svg>
@@ -57,34 +61,32 @@ export default function NavUserMenu({
       <div
         ref={menuRef}
         role="menu"
-        className={`
-          absolute right-0 mt-2 w-64 rounded-2xl border border-amber-200 bg-white shadow-xl
-          ring-1 ring-black/5 p-2
-          origin-top-right transition
+        className={`absolute right-0 mt-2 w-64 rounded-2xl border border-stone-200 bg-white/95 backdrop-blur shadow-xl
+          ring-1 ring-black/5 p-2 origin-top-right transition
           ${open ? "scale-100 opacity-100 translate-y-0" : "pointer-events-none scale-95 opacity-0 -translate-y-1"}
         `}
       >
         <ul className="space-y-1 text-slate-700">
           <li>
-            <a href="/userprofile" className="flex items-center gap-3 rounded-xl px-3 py-2 hover:bg-stone-100" role="menuitem">
-              <Icon>🧑</Icon> <span>Profile</span>
-            </a>
+            <Link to="/userprofile" onClick={() => setOpen(false)} className="flex items-center gap-3 rounded-xl px-3 py-2 hover:bg-stone-100" role="menuitem">
+              <Icon><User className="w-4 h-4" /></Icon> <span>Profile</span>
+            </Link>
           </li>
           <li>
-            <a href="/account/address" className="flex items-center gap-3 rounded-xl px-3 py-2 hover:bg-stone-100" role="menuitem">
-              <Icon>🏠</Icon> <span>Address</span>
-            </a>
+            <Link to="/checkoutpage" onClick={() => setOpen(false)} className="flex items-center gap-3 rounded-xl px-3 py-2 hover:bg-stone-100" role="menuitem">
+              <Icon><Wallet className="w-4 h-4" /></Icon> <span>Purchase</span>
+            </Link>
+          </li>
+          {/* <li>
+            <Link to="/cart" onClick={() => setOpen(false)} className="flex items-center gap-3 rounded-xl px-3 py-2 hover:bg-stone-100" role="menuitem">
+              <Icon><ShoppingBag className="w-4 h-4" /></Icon> <span>Cart</span>
+            </Link>
           </li>
           <li>
-            <a href="/account/purchase" className="flex items-center gap-3 rounded-xl px-3 py-2 hover:bg-stone-100" role="menuitem">
-              <Icon>🧾</Icon> <span>Purchase</span>
-            </a>
-          </li>
-          <li>
-            <a href="/account/payment" className="flex items-center gap-3 rounded-xl px-3 py-2 hover:bg-stone-100" role="menuitem">
-              <Icon>💳</Icon> <span>Payment</span>
-            </a>
-          </li>
+            <Link to="/checkout" onClick={() => setOpen(false)} className="flex items-center gap-3 rounded-xl px-3 py-2 hover:bg-stone-100" role="menuitem">
+              <Icon><CreditCard className="w-4 h-4" /></Icon> <span>Checkout</span>
+            </Link>
+          </li> */}
 
           <li className="my-1 border-t border-stone-200" />
           <li>
@@ -93,7 +95,7 @@ export default function NavUserMenu({
               className="w-full text-left flex items-center gap-3 rounded-xl px-3 py-2 hover:bg-stone-100"
               role="menuitem"
             >
-              <Icon>↩️</Icon> <span>Log out</span>
+              <Icon><LogOut className="w-4 h-4" /></Icon> <span>Log out</span>
             </button>
           </li>
         </ul>
