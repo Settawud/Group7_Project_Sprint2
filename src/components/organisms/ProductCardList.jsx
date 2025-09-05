@@ -5,6 +5,13 @@ import { ValueContext } from "../../context/ValueContext";
 const ProductCardList = ({ id, imageSrc, title, tag, size, price }) => {
   const [quantity, setQuantity] = useState(1);
   const { addToCart } = useContext(ValueContext) || {};
+  const { isModalOpen, setIsModalOpen, setProduct } = useContext(ValueContext)
+  
+  const clickAddToCart = (id) => {
+    setIsModalOpen(true)
+    console.log(id)
+    setProduct(id)
+  }
 
   const resolvedSrc = useMemo(() => {
     if (!imageSrc) return "";
@@ -73,15 +80,7 @@ const ProductCardList = ({ id, imageSrc, title, tag, size, price }) => {
           <div className="flex items-center justify-center sm:w-2/3 h-12 bg-[#B29675] rounded-lg hover:bg-[#B2967590] transition">
             <button
               className="text-lg"
-              onClick={() =>
-                addToCart?.({
-                  skuId: `${title}`,
-                  image: resolvedSrc,
-                  name: title,
-                  altText: title,
-                  price: typeof price === "number" ? price : Number(String(price).replace(/[^0-9]/g, "")),
-                }, quantity)
-              }
+              onClick={() => clickAddToCart(id)}
             >
               Add to Cart
             </button>
@@ -89,6 +88,8 @@ const ProductCardList = ({ id, imageSrc, title, tag, size, price }) => {
         </div>
       </div>
     </div>
+
+    
   );
 };
 

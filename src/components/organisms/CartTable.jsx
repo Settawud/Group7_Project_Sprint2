@@ -8,8 +8,9 @@ const CartTable = ({ className }) => {
   const {cart} = useContext(ValueContext)
   
   return (
-      <div className={` border rounded-2xl border-sandy-beige overflow-hidden shadow-[0_2px_4px_rgba(178,_150,_116,_1)] ${className}`}>
-          <table className="w-full sm:table-fixed mx-auto bg-white">
+      <div className={`mb-4 border rounded-2xl overflow-hidden border-sandy-beige shadow-[0_2px_4px_rgba(178,_150,_116,_1)] ${className}`}>
+      <div className='overflow-y-auto'>   
+      <table className="w-full sm:table-fixed mx-auto bg-white">
               <thead className="hidden sm:contents w-full">
                 <th className="p-4 sm:w-1/10 sm:border-b sm:border-charcoal">เลือก</th>
                 <th className="py-4 px-2 sm:w-15/100 sm:border-b sm:border-charcoal">รูปสินค้า</th>
@@ -22,7 +23,8 @@ const CartTable = ({ className }) => {
                       <CartItem key={item.skuId} item={item}/>
                   ))}
               </tbody>
-          </table>
+        </table>
+        </div> 
     </div>
   )
 }

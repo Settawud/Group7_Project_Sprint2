@@ -18,10 +18,12 @@ const CartAction = ({ className = "" }) => {
       sum += 200;
     }
     setTotal(sum);
+    console.log(cart)
   }, [cart, installChecked]);
   //console.log(total)
 
   const handleDeleteCartItem = () => {
+    //setCart([])
     removeChecked();
   };
 
@@ -43,7 +45,6 @@ const CartAction = ({ className = "" }) => {
 
   return (
     <div className={`border rounded-2xl border-sandy-beige overflow-hidden shadow-[0_2px_4px_rgba(178,_150,_116,_1)] p-2 sm:px-4 bg-white ${className}`}>
-      <div>{checkoutItem.map((item) => (<div>{item.name}</div>))}</div>
       <div className="flex sm:justify-end px-2 sm:px-4 pt-4 pb-2 border-b border-gray-400">
         <CheckboxWithText
           name="install"
@@ -64,14 +65,14 @@ const CartAction = ({ className = "" }) => {
             checked={selectAllChecked}
             onChange={handleSelectAll}
           />
-{/*           <Button
+          <Button
             variant="secondary"
             className="p-2 mx-4 inline-flex"
             onClick={handleDeleteCartItem}
             //disabled={!cart.some((i) => i.checked)}
           >
             ลบที่เลือก
-          </Button> */}
+          </Button>
         </div>
 
         <div className="flex">

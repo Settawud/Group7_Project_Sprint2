@@ -2,7 +2,7 @@ import Container from "../layout/Container";
 import { Facebook, Instagram, MessageSquare } from "lucide-react";
 
 
-export default function Footer() {
+export default function Footer({ className = "" }) {
   return (
     // <footer className="mt-16 border-t border-stone-200 bg-stone-800 text-stone-100">
     //   <Container className="grid gap-8 py-10 md:grid-cols-4">
@@ -14,7 +14,7 @@ export default function Footer() {
     //   <div className="py-4 text-center text-sm text-stone-400">© 2025 Livin’ Lab. All rights reserved.</div>
     // </footer>
     
-    <footer className="bg-[#9f8668] text-[--color-footer-link] ring-1 ring-white/20" >
+    <footer className={`bg-[#9f8668] text-[--color-footer-link] ring-1 ring-white/20 ${className}`} >
       {/* ชั้นบน: เนื้อหาหลัก */ }
       <div className="mx-auto max-w-6xl px-6 py-12 grid gap-10 md:grid-cols-4">
         {/* คอลัมน์ที่ 1: Brand */ }

@@ -1,7 +1,10 @@
 import { ValueContext } from './ValueContext';
 import { useMemo, useState, useEffect } from "react";
+import { products } from '../data/products';
 
 export const ValueProvider = ({ children }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [product, setProduct] = useState(null);
   // Auth state (very lightweight demo auth)
   const [user, setUser] = useState(() => {
     try {
@@ -49,35 +52,72 @@ export const ValueProvider = ({ children }) => {
   const [checkoutItem, setCheckoutItem] = useState([]);
   const [installChecked, setInstallChecked] = useState(false);
 
-  const addToCart = (item, qty = 1) => {
+  // const addToCart = (item, qty = 1) => {
+  //   setCart((prev) => {
+  //     const idx = prev.findIndex((cartItem) => cartItem.skuId === item.skuId);
+  //     console.log(idx)
+  //     if (idx >= 0) {
+  //       const next = [...prev];
+  //       next[idx] = { ...next[idx], quantity: (next[idx].quantity || 0) + qty };
+  //       return next;
+  //     }
+  //     return [
+  //       ...prev,
+  //       {
+  //         skuId: item.skuId,
+  //         image: item.image,
+  //         name: item.name,
+  //         altText: item.altText || item.name,
+  //         price: item.price,
+  //         quantity: qty,
+  //         checked: false,
+  //       },
+  //     ];
+  //   });
+  // };
+
+  function addToCart(productId, name, color, quantity, price, image, altText, sample, variants) {
+    if (!color || !productId) {
+      return alert("Please select a color")
+    }
+
+    const variantName = sample === "trial" ? "สินค้าทดลอง" : "สี"
+    const sku = variants.find(item => item.variantName === variantName && item.variantOption[0] === color[0]);
+    //console.log(sku)
+    const skuId = sku.skuID
+
+
     setCart((prev) => {
-      const idx = prev.findIndex((x) => x.skuId === item.skuId);
-      if (idx >= 0) {
+      const index = prev.findIndex((cartItem) => cartItem.skuId === skuId);
+      if (index >= 0) {
         const next = [...prev];
-        next[idx] = { ...next[idx], quantity: (next[idx].quantity || 0) + qty };
+        next[index] = { ...next[index], quantity: (next[index].quantity || 0) + quantity };
         return next;
       }
       return [
         ...prev,
         {
-          skuId: item.skuId,
-          image: item.image,
-          name: item.name,
-          altText: item.altText || item.name,
-          price: item.price,
-          quantity: qty,
+          productId: productId,
+          skuId: skuId,
+          image: image,
+          name: name,
+          variantName: variantName,
+          color: color,
+          altText: altText,
+          price: price,
+          quantity: quantity,
           checked: false,
         },
       ];
     });
-  };
+  }
 
   const removeFromCart = (skuId) => {
     setCart((prev) => prev.filter((x) => x.skuId !== skuId));
   };
 
   const removeChecked = () => {
-    setCart((prev) => prev.filter((x) => !x.checked));
+    setCart((prev) => prev.filter((item) => !item.checked));
   };
 
   const cartCount = useMemo(
@@ -94,7 +134,6 @@ export const ValueProvider = ({ children }) => {
         login,
         logout,
         setUser,
-        // cart
         cart,
         setCart,
         checkoutItem,
@@ -105,6 +144,9 @@ export const ValueProvider = ({ children }) => {
         removeFromCart,
         removeChecked,
         cartCount,
+        isModalOpen,
+        setIsModalOpen,
+        product, setProduct
       }}
     >
       {children}

@@ -2,9 +2,9 @@ import { useContext, useState } from "react";
 import { ValueContext } from "../../context/ValueContext";
 import { ClipboardType } from "lucide-react";
 
-const ProductContent = ({ product }) => {
+const AddToCartModal = ({ product }) => {
   const {
-    id,
+    //productID,
     image,
     altText,
     Name,
@@ -166,7 +166,7 @@ const ProductContent = ({ product }) => {
         </div>
 
         <button
-          onClick={() => addToCart(id, Name, selectedColor, quantity, price, `../images/${image}`, altText, selected, variants)}
+          //onClick={() => addToCart(productID, Name, selectedColor, quantity, price, `../images/${image}`, altText, selected, variants)}
           disabled={quantityInStock === 0}
           className={`h-12 px-4 py-2 rounded text-sm w-full lg:w-1/2 transition ${
             quantityInStock === 0
@@ -199,4 +199,4 @@ const ProductContent = ({ product }) => {
   );
 };
 
-export default ProductContent;
+export default AddToCartModal;

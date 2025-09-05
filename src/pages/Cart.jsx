@@ -18,11 +18,11 @@ const Cart = () => {
           <h3>รายการสินค้าในตะกร้า</h3>
         </div>
         <CartTable cart={cart} setCart={setCart} className="sm:max-w-[80%] lg:max-w-[60%] mx-auto"/>
-        <div className='sm:max-w-[80%] lg:max-w-[60%] mx-auto bottom-0 fixed left-0 right-0 px-4 sm:px-0'>
+        <div className='sm:max-w-[80%] lg:max-w-[60%] mx-auto bottom-0 sticky left-0 right-0 px-4 sm:px-0'>
           <CartAction cart={cart} setCart={setCart}/>
         </div>
       </main>
-      <Footer />
+      <Footer className="hidden sm:block" />
     </div>
   )
 }
