@@ -43,13 +43,20 @@ export default function HomePage() {
   const [fbMsg, setFbMsg] = useState("");
   const [fbSent, setFbSent] = useState(false);
   useEffect(() => {
-    const obs = new IntersectionObserver(([entry]) => setVpVisible(entry.isIntersecting), { threshold: 0.2 });
-    if (vpRef.current) obs.observe(vpRef.current);
+    const obs = new IntersectionObserver(
+      ([entry]) => setVpVisible(entry.isIntersecting),
+      { threshold: 0.2 }
+    );
+
+    const target = vpRef.current; // snapshot อ้างอิงเดียว
+    if (target) obs.observe(target);
+
     return () => {
-      try { if (vpRef.current) obs.unobserve(vpRef.current); } catch {}
-      obs.disconnect?.();
+      if (target) obs.unobserve(target);
+      obs.disconnect();
     };
   }, []);
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -58,11 +65,13 @@ export default function HomePage() {
 <Container className="relative py-8 md:py-12">
           {/* hero (edge-to-edge blur) */}
           <div className="relative w-screen left-1/2 -translate-x-1/2 overflow-hidden min-h-[420px] md:min-h-[520px]">
-            <img
+           <img
               src="/images/EGT-AP-01-W-150.png"
               alt="Ergonomic workspace desk"
               className="absolute inset-0 h-full w-full object-cover"
               loading="eager"
+              decoding="async"
+              fetchpriority="high"
             />
             {/* full overlay + side vignettes */}
             <div className="absolute inset-0 z-10 bg-black/30 backdrop-blur-sm" />
@@ -125,19 +134,19 @@ export default function HomePage() {
               title="Ergonomic Chairs"
               href="/pageproductlist?category=chairs"
               subtitle={`${chairs.length} items`}
-              imageSrc="EGC-EF-01-B.png"
+              imageSrc="/images/EGC-EF-01-B.png"
             />
             <CategoryCard
               title="Standing Tables"
               href="/pageproductlist?category=tables"
               subtitle={`${tables.length} items`}
-              imageSrc="EGT-AP-01-W-120.png"
+              imageSrc="/images/EGT-AP-01-W-120.png"
             />
             <CategoryCard
               title="Accessories"
               href="/pageproductlist?category=อุปกรณ์เสริม"
               subtitle={`${accessories.length} items`}
-              imageSrc="EGA-FR-01.png"
+              imageSrc="/images/EGA-FR-01.png"
             />
           </div>
         </Section>
@@ -151,7 +160,7 @@ export default function HomePage() {
             {popular.map((p) => (
               <ProductCard
                 key={p.id}
-                img={p.img}
+                img={`/images/${p.img}`}
                 name={p.name}
                 price={p.price}
                 rating={p.rating}
