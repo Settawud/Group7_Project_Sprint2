@@ -2,6 +2,7 @@ import React, { useState, useEffect,useContext } from "react";
 import CheckboxWithText from "../atoms/CheckboxWithText";
 import Button from "../atoms/Button";
 import { ValueContext } from "../../context/ValueContext";
+import { Link } from "react-router-dom";
 
 
 const CartAction = ({ className = "" }) => {
@@ -78,9 +79,11 @@ const CartAction = ({ className = "" }) => {
         <div className="flex">
           <p className="mr-4 my-5 hidden sm:block">ยอดรวม ฿{total}</p>
           <p className="mr-2 my-5 sm:hidden">฿{total}</p>
+          <Link to ="/checkout">
           <Button variant="primary" className="py-2 px-3 my-2">
             เริ่มการสั่งซื้อ
-          </Button>
+            </Button>
+            </Link>
         </div>
       </div>
     </div>
