@@ -20,12 +20,14 @@ export default function ForgotPasswordPage() {
     return /.+@.+\..+/.test(email) ? "" : "Invalid email";
   }, [email, attempted]);
 
-  const disabled = submitting || !email || !!emailError;
+  // Allow submit to trigger validation feedback on first click
+  const disabled = submitting;
 
   const onSubmit = async (e) => {
     e.preventDefault();
     setAttempted(true);
-    if (emailError || !email) return;
+    const validEmail = /.+@.+\..+/.test(email);
+    if (!validEmail) return;
     setMessage("");
     try {
       setSubmitting(true);
