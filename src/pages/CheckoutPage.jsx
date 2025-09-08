@@ -24,9 +24,9 @@ export default function CheckoutPage() {
     <div className="min-h-screen flex flex-col bg-[#faf6f1]">
         <Navbar/>
     <main className="flex-1">
-        <h1 className="p-4 text-center">รายละเอียดการจัดส่งสินค้าและสรุปคำสั่งซื้อ</h1>
+        <h1 className="p-4 text-center">Shipping details and order summary</h1>
 
-      <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 pb-6 ">
         
         {/* Left side */}
         <div className="space-y-4">

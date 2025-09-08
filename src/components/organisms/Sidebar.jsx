@@ -15,7 +15,7 @@ const Sidebar = () => {
   }, []);
 
   const sidebarClass = `
-    top-16 left-0 z-50 h-[calc(100vh-64px)] p-6 bg-[#B29675] transition-all duration-300 fixed
+    top-16 left-0 z-40 h-[calc(100vh-64px)] p-6 bg-[#B29675] transition-all duration-300 fixed
     ${isMobileOpen ? "translate-x-0" : "translate-x-[-100%]"}
     ${isCollapsed ? "w-20" : "w-64"}
     lg:translate-x-0 lg:sticky lg:top-16
@@ -27,7 +27,7 @@ const Sidebar = () => {
     <>
       {isMobileOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/30 lg:hidden"
+          className="fixed inset-0 z-30 bg-black/30 lg:hidden"
           onClick={() => setIsMobileOpen(false)}
         />
       )}
