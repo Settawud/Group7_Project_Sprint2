@@ -32,7 +32,7 @@ export default function App() {
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/forgot" element={<ForgotPasswordPage />} />
         <Route path="/userprofile" element={<UserProfile />} />
-                <Route
+        <Route
           path="/OrderConfirmationMessage"
           element={<OrderConfirmationMessage />}
         />
@@ -45,7 +45,7 @@ export default function App() {
         <Route path="/pageproductlist" element={<Page_Product_List />} />
         <Route path="/orderhistorylist" element={<Order_History_List />} />
         <Route path="/orderhistorydetail" element={<Order_History_Detail />} />
-        
+
         {/* TODO: category pages, product detail, cart, etc. */}
       </Routes>
       <Toaster position="top-center" expand={true} toastOptions={{
