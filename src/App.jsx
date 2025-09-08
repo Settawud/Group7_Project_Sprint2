@@ -48,13 +48,13 @@ export default function App() {
 
         {/* TODO: category pages, product detail, cart, etc. */}
       </Routes>
-      <Toaster position="top-center" expand={true} toastOptions={{
+      <Toaster richColors position="top-center" expand={true} toastOptions={{
           style: {
             fontSize: '16px', 
           padding: '16px',
           fontFamily: 'Poppins',
           backgroundColor: 'var(--color-off-white)',
-            color: 'var(--color-charcoal)'
+            //color: 'var(--color-charcoal)'
           },
         }}/>
     </BrowserRouter>
