@@ -9,6 +9,7 @@ import { useContext, useMemo, useState } from "react";
 import { ValueContext } from "../../context/ValueContext";
 import { toast } from "sonner";
 
+
 export default function LoginPage() {
   const navigate = useNavigate();
   const { login } = useContext(ValueContext) || {};
@@ -18,7 +19,7 @@ export default function LoginPage() {
   const [attempted, setAttempted] = useState(false);
   const [generalError, setGeneralError] = useState("");
 
-  const API_BASE = import.meta.env.VITE_API_BASE || ""; // e.g., http://localhost:4000/api/v1
+  const API_BASE = import.meta.env.VITE_API_BASE || ""; // e.g., http://localhost:4000/api/v1/mongo
 
   const emailError = useMemo(() => {
     if (!attempted) return "";
@@ -53,6 +54,8 @@ export default function LoginPage() {
         const res = await fetch(`${API_BASE}/auth/login`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
+          // Send/receive httpOnly cookies (CORS credentials must be allowed on server)
+          credentials: "include",
           body: JSON.stringify({ email, password }),
         }).catch(() => null);
 
