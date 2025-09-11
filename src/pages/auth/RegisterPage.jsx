@@ -8,6 +8,7 @@ import { useContext, useMemo, useState } from "react";
 import { ValueContext } from "../../context/ValueContext";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { post } from "../../lib/api";
 
 export default function RegisterPage() {
   const { login } = useContext(ValueContext) || {};
@@ -50,40 +51,21 @@ export default function RegisterPage() {
     try {
       setSubmitting(true);
       if (API_BASE) {
-        // 1) Register on backend
-        const res = await fetch(`${API_BASE}/auth/register`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({ firstName, lastName, email, password })
-        }).catch(() => null);
+        try {
+          // 1) Register on backend
+          await post("/auth/register", { firstName, lastName, email, password });
 
-        if (!res) throw new Error("Network error");
-        const data = await res.json().catch(() => ({}));
-        if (!res.ok || data?.error) {
-          const msg = data?.message || (res.status === 409 ? "Email already used" : "Register failed");
+          // 2) Auto login to obtain token/session
+          const dataLogin = await post("/auth/login", { email, password });
+          const name = dataLogin?.user?.name || fullName;
+          login?.({ name, email, token: dataLogin?.token });
+          toast.success("Registered successfully");
+          navigate("/");
+        } catch (err) {
+          const msg = err?.response?.data?.message || "Register failed";
           setGeneralError(msg);
           return;
         }
-
-        // 2) Auto login to obtain token/session
-        const resLogin = await fetch(`${API_BASE}/auth/login`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({ email, password })
-        }).catch(() => null);
-        const dataLogin = resLogin ? await resLogin.json().catch(() => ({})) : {};
-        if (!resLogin || !resLogin.ok) {
-          // Fallback: still navigate, but ask user to sign in
-          toast.success("Registered. Please sign in.");
-          navigate("/login");
-          return;
-        }
-        const name = dataLogin?.user?.name || fullName;
-        login?.({ name, email, token: dataLogin?.token });
-        toast.success("Registered successfully");
-        navigate("/");
       } else {
         // Frontend-only fallback
         login?.({ name: fullName, email });
