@@ -266,13 +266,14 @@ export default function HomePage() {
                 onChange={(e) => setFbMsg(e.target.value)}
                 required
               />
-              <button
+              
+            </div>
+            <button
                 type="submit"
-                className="h-12 md:h-auto md:self-stretch rounded-xl bg-[#B29675] px-6 text-white font-semibold hover:bg-[#a68968] transition"
+                className="h-12 md:h-15 md:self-center rounded-xl bg-[#B29675] px-6 text-white font-semibold hover:bg-[#a68968] transition"
               >
                 Send Message
               </button>
-            </div>
             {fbSent && (
               <p className="md:col-span-3 text-sm text-green-700">Thanks! Your message has been received.</p>
             )}
