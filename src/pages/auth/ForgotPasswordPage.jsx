@@ -13,7 +13,7 @@ export default function ForgotPasswordPage() {
   const [message, setMessage] = useState("");
   const [attempted, setAttempted] = useState(false);
 
-  const API_BASE = import.meta.env.VITE_API_BASE || ""; // e.g., http://localhost:4000/api/v1
+  const API_BASE = import.meta.env.VITE_API_BASE || ""; // e.g., http://localhost:4000/api/v1/mongo
 
   const emailError = useMemo(() => {
     if (!attempted) return "";
@@ -32,9 +32,10 @@ export default function ForgotPasswordPage() {
     try {
       setSubmitting(true);
       // Try to call backend if available
-      const res = await fetch(`${API_BASE}/auth/forgot-password`, {
+      const res = await fetch(`${API_BASE}/auth/password/forgot`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ email }),
       }).catch(() => null);
 

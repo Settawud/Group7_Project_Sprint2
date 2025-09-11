@@ -11,8 +11,10 @@ import { toast } from "sonner";
 export default function ResetPassword() {
   const [params] = useSearchParams();
   const token = params.get("token") || "";
+  const emailParam = params.get("email") || "";
   const navigate = useNavigate();
 
+  const [email, setEmail] = useState(emailParam);
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -45,6 +47,10 @@ export default function ResetPassword() {
       setError("Invalid or expired link (missing token)");
       return;
     }
+    if (!email) {
+      setError("Please enter your email");
+      return;
+    }
     if (passwordError || confirmError) {
       setError("Please fix the errors above");
       return;
@@ -52,10 +58,11 @@ export default function ResetPassword() {
     try {
       setSubmitting(true);
       const API_BASE = import.meta.env.VITE_API_BASE || "";
-      const res = await fetch(`${API_BASE}/auth/reset-password`, {
+      const res = await fetch(`${API_BASE}/auth/password/reset`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token, newPassword: password })
+        credentials: "include",
+        body: JSON.stringify({ email, token, newPassword: password })
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data?.message || "Reset password failed");
@@ -82,6 +89,11 @@ export default function ResetPassword() {
               <p className="text-sm text-red-600">Reset token not found. Please request a new email from the forgot password page.</p>
             )}
             <form onSubmit={onSubmit} className="space-y-3">
+              {!emailParam && (
+                <FormField label="Email" hint="Enter the email you used to request reset">
+                  <Input type="email" value={email} onChange={(e)=>setEmail(e.target.value)} placeholder="you@email.com" />
+                </FormField>
+              )}
               <FormField label="New password" hint="At least 6 characters" error={passwordError}>
                 <Input type="password" value={password} onChange={(e)=>setPassword(e.target.value)} placeholder="••••••••" minLength={6} />
               </FormField>

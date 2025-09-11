@@ -19,6 +19,9 @@ export default function RegisterPage() {
   const [confirm, setConfirm] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [attempted, setAttempted] = useState(false);
+  const [generalError, setGeneralError] = useState("");
+
+  const API_BASE = import.meta.env.VITE_API_BASE || ""; // e.g., http://localhost:4000/api/v1/mongo
 
   const emailError = useMemo(() => {
     if (!attempted) return "";
@@ -37,18 +40,58 @@ export default function RegisterPage() {
 
   const disabled = submitting; // allow attempt to trigger field errors
 
-  const onSubmit = (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault();
     setAttempted(true);
+    setGeneralError("");
     if (!firstName || !lastName || !email || !password || !confirm) return;
     if (emailError || passwordError || confirmError) return;
     const fullName = `${firstName} ${lastName}`.trim() || (email?.split("@")[0] ?? "User");
     try {
       setSubmitting(true);
-      // Mock register success (no backend call here)
-      login?.({ name: fullName, email });
-      toast.success("Registered successfully");
-      navigate("/");
+      if (API_BASE) {
+        // 1) Register on backend
+        const res = await fetch(`${API_BASE}/auth/register`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ firstName, lastName, email, password })
+        }).catch(() => null);
+
+        if (!res) throw new Error("Network error");
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || data?.error) {
+          const msg = data?.message || (res.status === 409 ? "Email already used" : "Register failed");
+          setGeneralError(msg);
+          return;
+        }
+
+        // 2) Auto login to obtain token/session
+        const resLogin = await fetch(`${API_BASE}/auth/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ email, password })
+        }).catch(() => null);
+        const dataLogin = resLogin ? await resLogin.json().catch(() => ({})) : {};
+        if (!resLogin || !resLogin.ok) {
+          // Fallback: still navigate, but ask user to sign in
+          toast.success("Registered. Please sign in.");
+          navigate("/login");
+          return;
+        }
+        const name = dataLogin?.user?.name || fullName;
+        login?.({ name, email, token: dataLogin?.token });
+        toast.success("Registered successfully");
+        navigate("/");
+      } else {
+        // Frontend-only fallback
+        login?.({ name: fullName, email });
+        toast.success("Registered successfully (mock)");
+        navigate("/");
+      }
+    } catch (err) {
+      setGeneralError(err.message || "Register failed");
     } finally {
       setSubmitting(false);
     }
@@ -78,6 +121,7 @@ export default function RegisterPage() {
             <FormField label="Confirm Password" error={confirmError}>
               <Input type="password" value={confirm} onChange={(e)=>setConfirm(e.target.value)} minLength={6} />
             </FormField>
+            {generalError && <div className="text-sm text-red-600">{generalError}</div>}
             <Button className="w-full mt-2" type="submit" disabled={disabled}>{submitting ? "Registering..." : "Register"}</Button>
           </form>
         </AuthCard>
