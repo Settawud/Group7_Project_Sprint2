@@ -32,7 +32,7 @@ export const AddProductPage = () => {
       [name]: type === 'checkbox' ? checked : value,
     });
   };
-  
+
   // Handle changes for main image file input
   const handleMainImageChange = (e) => {
     const files = Array.from(e.target.files);
@@ -61,7 +61,7 @@ export const AddProductPage = () => {
   const handleVariantChange = (e, variantIndex) => {
     const { name, value, type, checked } = e.target;
     const newVariants = [...formData.variants];
-    
+
     // Handle nested dimensions object
     if (name in newVariants[variantIndex].dimensions) {
       newVariants[variantIndex].dimensions[name] = value;
@@ -139,15 +139,15 @@ export const AddProductPage = () => {
       tag: formData.tag.split(',').map(item => item.trim()).filter(item => item),
       space: formData.space.split(',').map(item => item.trim()).filter(item => item),
     };
-    
+
     console.log('Form Data:', submissionData);
     // You would typically send this data to an API
     console.log('Product form submitted! Check the console for data.');
-    
+
     // Clear the form after submission
     handleCancel();
   };
-  
+
   // Handle form cancellation and reset
   const handleCancel = () => {
     setFormData({
@@ -279,7 +279,7 @@ export const AddProductPage = () => {
           {formData.variants.map((variant, variantIndex) => (
             <div key={variantIndex} className="space-y-4 border border-gray-200 p-6 rounded-2xl bg-gray-50 relative">
               <h4 className="text-lg font-bold text-gray-700">Variant #{variantIndex + 1}</h4>
-              
+
               {formData.variants.length > 1 && (
                 <button
                   type="button"
@@ -368,7 +368,7 @@ export const AddProductPage = () => {
                     ))}
                   </div>
                 )}
-                
+
                 {/* Checkbox for Trial Product */}
                 <div className="col-span-full flex items-center space-x-2 mt-4">
                   <input type="checkbox" id={`isTrial-${variantIndex}`} name="isTrial" checked={variant.isTrial} onChange={(e) => handleVariantChange(e, variantIndex)} className="h-4 w-4 text-[#B29674] border-gray-300 rounded" />
