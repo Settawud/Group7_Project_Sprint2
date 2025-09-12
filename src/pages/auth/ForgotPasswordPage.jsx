@@ -6,6 +6,7 @@ import Input from "../../components/atoms/Input";
 import Button from "../../components/atoms/Button";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import { post } from "../../lib/api";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -32,17 +33,14 @@ export default function ForgotPasswordPage() {
     try {
       setSubmitting(true);
       // Try to call backend if available
-      const res = await fetch(`${API_BASE}/auth/password/forgot`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ email }),
-      }).catch(() => null);
-
-      if (res && res.ok) {
-        const data = await res.json();
-        toast.success("Reset link sent. Please check your email.");
-        setMessage("We have sent a reset link to your email address.");
+      if (API_BASE) {
+        try {
+          await post("/auth/password/forgot", { email });
+          toast.success("Reset link sent. Please check your email.");
+          setMessage("We have sent a reset link to your email address.");
+        } catch (err) {
+          toast.error("Failed to submit request");
+        }
       } else {
         // Graceful fallback if backend not available
         toast.success("Request submitted (mock).");
