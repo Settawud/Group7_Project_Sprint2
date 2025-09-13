@@ -134,19 +134,19 @@ export default function HomePage() {
               title="Ergonomic Chairs"
               href="/pageproductlist?category=chairs"
               subtitle={`${chairs.length} items`}
-              imageSrc="/images/EGC-EF-01-B.png"
+              imageSrc="/images/EGC-MA-03-O (2).png"
             />
             <CategoryCard
               title="Standing Tables"
               href="/pageproductlist?category=tables"
               subtitle={`${tables.length} items`}
-              imageSrc="/images/EGT-AP-01-W-120.png"
+              imageSrc="/images/EGT-AP-01-W-150.png"
             />
             <CategoryCard
               title="Accessories"
               href="/pageproductlist?category=อุปกรณ์เสริม"
               subtitle={`${accessories.length} items`}
-              imageSrc="/images/EGA-FR-01.png"
+              imageSrc="/images/20250820_0943_Minimalist Desk Design_remix_01k32nnxkpfeq9dxnzysqr0v0x.png"
             />
           </div>
         </Section>
@@ -160,7 +160,7 @@ export default function HomePage() {
             {popular.map((p) => (
               <ProductCard
                 key={p.id}
-                img={`/images/${p.img}`}
+                img={p.img}
                 name={p.name}
                 price={p.price}
                 rating={p.rating}
@@ -168,7 +168,7 @@ export default function HomePage() {
                 onAdd={() =>
                   addToCart?.({
                     skuId: p.id,
-                    image: `/images/${p.img}`,
+                    image: p.img,
                     name: p.name,
                     altText: p.name,
                     price: p.price,

@@ -73,14 +73,35 @@ const Page_Product_List = () => {
     fetchProducts();
   }, [filters, sort, page, search]);
 
-  const mappedProducts = products.map(product => ({
-    _id: product._id,
-    imageSrc: product.thumbnails[0],
-    title: product.name,
-    tag: product.tags,
-    size: `${product.dimension.width}x${product.dimension.height}x${product.dimension.depth} cm`,
-    price: product.variants[0].price.toLocaleString(),
-  }));
+  const mappedProducts = products.map((product) => {
+    // Normalize image: prefer product thumbnail url, otherwise a variant image, otherwise fallback
+    const thumb = Array.isArray(product?.thumbnails) ? product.thumbnails[0] : null;
+    const thumbUrl = typeof thumb === "string" ? thumb : thumb?.url;
+    const variantWithImage = Array.isArray(product?.variants)
+      ? product.variants.find((v) => v?.image && (typeof v.image === "string" ? v.image : v.image.url))
+      : null;
+    const variantUrl = variantWithImage
+      ? (typeof variantWithImage.image === "string" ? variantWithImage.image : variantWithImage.image?.url)
+      : null;
+    const imageSrc = thumbUrl || variantUrl || "/images/logoCutBackground2.png";
+
+    const d = product?.dimension || {};
+    const safeSize = [d.width, d.height, d.depth].every((n) => Number.isFinite(n))
+      ? `${d.width}x${d.height}x${d.depth} cm`
+      : "";
+    const priceNum = Array.isArray(product?.variants) && product.variants[0]?.price
+      ? Number(product.variants[0].price)
+      : 0;
+
+    return {
+      _id: product._id,
+      imageSrc,
+      title: product.name,
+      tag: Array.isArray(product.tags) ? product.tags : [],
+      size: safeSize,
+      price: priceNum ? priceNum.toLocaleString() : "-",
+    };
+  });
 
   return (
     <div className="bg-[#fefdf9]">

@@ -1,11 +1,15 @@
 import React, { useEffect, useState } from "react";
 import Navbar from "../components/organisms/Navbar";
-import { api } from "../lib/api";
+import Footer from "../components/organisms/Footer";
+import { api, postForm } from "../lib/api";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 export const AddProductPage = () => {
   const [colors, setColors] = useState([]);
   const [addColorOpen, setAddColorOpen] = useState(null); // variant index or null
   const [newColor, setNewColor] = useState({ name_th: "", name_en: "", hex: "#000000" });
   const [savingColor, setSavingColor] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -164,6 +168,7 @@ export const AddProductPage = () => {
     e.preventDefault();
 
     try {
+      setSubmitting(true);
       // 1) เตรียม payload JSON ให้ตรงกับ backend
       const tags = String(formData.tags || "")
         .split(",")
@@ -211,29 +216,59 @@ export const AddProductPage = () => {
       const createdVariants = createRes?.data?.item?.variants || [];
       if (!productId) throw new Error("Missing productId in response");
 
-      // 3) อัปโหลดรูปหลัก (thumbnails) ทีละไฟล์
-      for (const file of formData.thumbnails) {
-        const fd = new FormData();
-        fd.append("image", file);
-        await api.post(`/products/${productId}/images`, fd);
-      }
-
-      // 4) อัปโหลดรูปของแต่ละ variant หากมี (แม็พตาม index)
-      for (let i = 0; i < formData.variants.length; i++) {
-        const file = formData.variants[i]?.image;
-        const variantId = createdVariants[i]?._id;
-        if (file && variantId) {
-          const fd = new FormData();
-          fd.append("image", file);
-          await api.post(`/products/${productId}/variants/${variantId}/images`, fd);
+      // 3) อัปโหลดรูปหลัก (thumbnails) ทีละไฟล์ (ไม่ให้ล้มเหลวทั้งงาน)
+      if (formData.thumbnails.length > 0) {
+        for (const file of formData.thumbnails) {
+          try {
+            const fd = new FormData();
+            fd.append("image", file);
+            await postForm(`/products/${productId}/images`, fd);
+          } catch (err) {
+            const status = err?.response?.status;
+            const msg = err?.response?.data?.message || err?.message || "Upload failed";
+            console.warn("Thumbnail upload failed:", status, msg);
+            // แจ้งเตือนแบบไม่หยุดการทำงาน
+            try { toast.warning(`Some images failed: ${msg}`); } catch {}
+          }
         }
       }
 
+      // 4) อัปโหลดรูปของแต่ละ variant หากมี (แม็พตาม index) — ไม่ให้ล้มทั้งงาน
+      for (let i = 0; i < formData.variants.length; i++) {
+        try {
+          const file = formData.variants[i]?.image;
+          const variantId = createdVariants[i]?._id;
+          if (file && variantId) {
+            const fd = new FormData();
+            fd.append("image", file);
+            await postForm(`/products/${productId}/variants/${variantId}/images`, fd);
+          }
+        } catch (err) {
+          const status = err?.response?.status;
+          const msg = err?.response?.data?.message || err?.message || "Upload failed";
+          console.warn("Variant image upload failed:", status, msg);
+          try { toast.warning(`Variant image failed: ${msg}`); } catch {}
+        }
+      }
+
+      try { toast.success("Product created successfully"); } catch {}
+      // ปิดสถานะกำลังบันทึกก่อนแจ้งเตือน blocking
+      setSubmitting(false);
       alert(`Product created! ID: ${productId}`);
       handleCancel();
     } catch (err) {
-      console.error("Error creating product:", err);
-      alert("Failed to create product");
+      const status = err?.response?.status;
+      const msg = err?.response?.data?.message || err?.message || "Failed to create product";
+      console.error("Error creating product:", status, msg, err?.response?.data);
+      if (status === 401) {
+        alert("Unauthorized. Please sign in.");
+      } else if (status === 403) {
+        alert("Forbidden. Admin role required to create products.");
+      } else {
+        alert(`Failed to create product: ${msg}`);
+      }
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -260,13 +295,15 @@ export const AddProductPage = () => {
   };
 
   return (
-    <div>
+    <div className="min-h-screen flex flex-col overflow-x-hidden">
       <Navbar />
-      <h2 className="text-4xl font-light text-gray-800 mb-8 text-center tracking-wide">
-        Add New Product
-      </h2>
-      <div className="flex justify-center">
-        <form onSubmit={handleSubmit} className="space-y-8">
+      <main className="flex-1">
+        <div className="py-10 px-4">
+          <div className="max-w-4xl mx-auto w-full">
+            <h2 className="text-3xl md:text-4xl font-light text-gray-800 mb-8 text-center tracking-wide">
+              Add New Product
+            </h2>
+            <form onSubmit={handleSubmit} className="space-y-8 w-full">
           {/* Product Info */}
           <div className="space-y-6">
             {/* Product Name */}
@@ -353,7 +390,7 @@ export const AddProductPage = () => {
             {/* Dimensions (dimension) */}
             <div>
               <label className="block text-gray-700 font-medium mb-2">Dimensions</label>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
                 {["width", "height", "depth", "weight"].map((key) => (
                   <div key={key}>
                     <label className="block text-gray-700 text-sm mb-1">
@@ -426,187 +463,240 @@ export const AddProductPage = () => {
             )}
           </div>
 
-          {/* Variants Section */}
-          <div className="space-y-6">
-            <h3 className="text-2xl font-light text-gray-800 border-b pb-2">Variants</h3>
-            {formData.variants.map((variant, variantIndex) => (
-              <div
-                key={variantIndex}
-                className="space-y-4 border p-6 rounded-2xl bg-gray-50 relative"
-              >
-                <h4 className="text-lg font-bold">
-                  Variant #{variantIndex + 1}
-                </h4>
+     {/* Variants Section */}
+<div className="space-y-6">
+  <h3 className="text-2xl font-light text-gray-800 border-b pb-2">Variants</h3>
 
-                {formData.variants.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveVariant(variantIndex)}
-                    className="absolute top-4 right-4 text-red-500"
-                  >
-                    ✕
-                  </button>
-                )}
+  {formData.variants.map((variant, variantIndex) => (
+    <div
+      key={variantIndex}
+      className="space-y-4 border p-6 rounded-2xl bg-gray-50 relative"
+    >
+      <h4 className="text-lg font-bold">Variant #{variantIndex + 1}</h4>
 
-                {/* Variant Inputs */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  <div className="flex gap-3 items-center relative">
-                    <select
-                      name="colorId"
-                      value={variant.colorId}
-                      onChange={(e) => handleVariantChange(e, variantIndex)}
-                      className="w-full px-4 py-3 border rounded-xl"
-                    >
-                      <option value="" disabled>Select color (colorId)</option>
-                      {colors.map((c) => (
-                        <option key={c._id} value={c._id}>
-                          {c.name_th || c.name_en || c.hex || c._id}
-                        </option>
-                      ))}
-                    </select>
-                    <button
-                      type="button"
-                      onClick={() => openAddColor(variantIndex)}
-                      className="px-3 py-2 bg-[#E7E2D8] rounded-lg border hover:bg-[#ddd7cb]"
-                      title="Add new color"
-                    >
-                      + New Color
-                    </button>
-                  </div>
+      {formData.variants.length > 1 && (
+        <button
+          type="button"
+          onClick={() => handleRemoveVariant(variantIndex)}
+          className="absolute top-4 right-4 text-red-500"
+        >
+          ✕
+        </button>
+      )}
 
-                  {addColorOpen === variantIndex && (
-                    <div className="absolute z-20 right-0 top-full mt-2 w-[28rem] max-w-[90vw] border rounded-xl p-4 bg-white space-y-3 shadow-lg">
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                        <div>
-                          <label className="block text-sm text-gray-700 mb-1">Color name (TH)</label>
-                          <input
-                            type="text"
-                            value={newColor.name_th}
-                            onChange={(e) => setNewColor({ ...newColor, name_th: e.target.value })}
-                            className="w-full px-3 py-2 border rounded-md"
-                            placeholder="e.g., Dark gray (TH)"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm text-gray-700 mb-1">Color name (EN)</label>
-                          <input
-                            type="text"
-                            value={newColor.name_en}
-                            onChange={(e) => setNewColor({ ...newColor, name_en: e.target.value })}
-                            className="w-full px-3 py-2 border rounded-md"
-                            placeholder="e.g., Dark Gray"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm text-gray-700 mb-1">Hex</label>
-                          <input
-                            type="text"
-                            value={newColor.hex}
-                            onChange={(e) => setNewColor({ ...newColor, hex: e.target.value })}
-                            className="w-full px-3 py-2 border rounded-md"
-                            placeholder="#000000"
-                          />
-                        </div>
-                      </div>
-                      <div className="flex gap-2 justify-end">
-                        <button
-                          type="button"
-                          onClick={cancelAddColor}
-                          className="px-4 py-2 rounded-lg border"
-                        >
-                          Cancel
-                        </button>
-                        <button
-                          type="button"
-                          disabled={savingColor}
-                          onClick={() => saveNewColor(variantIndex)}
-                          className="px-4 py-2 rounded-lg bg-[#B29674] text-white disabled:opacity-50"
-                        >
-                          {savingColor ? "Saving..." : "Save color"}
-                        </button>
-                      </div>
-                    </div>
-                  )}
+      {/* Variant Inputs */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-x-8 gap-y-6">
+        {/* Color */}
+        <div className="relative lg:col-span-2">
+          <label htmlFor={`color-${variantIndex}`} className="block text-gray-700 font-medium mb-2">
+            Color
+          </label>
+
+          {/* ใช้ flex กันซ้อน + ให้ select ยืด และปุ่มไม่บีบ */}
+          <div className="flex items-center gap-4 min-w-0">
+            <select
+              id={`color-${variantIndex}`}
+              name="colorId"
+              value={variant.colorId}
+              onChange={(e) => handleVariantChange(e, variantIndex)}
+              required
+              className="flex-1 min-w-0 h-12 px-4 text-base border-2 border-[#B29674]/50 rounded-2xl focus:ring-2 focus:ring-[#B29674]/40"
+            >
+              <option value="" disabled>Select color (colorId)</option>
+              {colors.map((c) => (
+                <option key={c._id} value={c._id}>
+                  {c.name_th || c.name_en || c.hex || c._id}
+                </option>
+              ))}
+            </select>
+
+            <button
+              type="button"
+              onClick={() => openAddColor(variantIndex)}
+              className="h-12 px-4 bg-[#E7E2D8] rounded-xl border hover:bg-[#ddd7cb] whitespace-nowrap shrink-0"
+              title="Add new color"
+            >
+              + New Color
+            </button>
+          </div>
+
+          {addColorOpen === variantIndex && (
+            <div className="absolute z-40 right-0 top-[calc(100%+0.5rem)] w-[30rem] max-w-[95vw] border rounded-xl p-4 bg-white space-y-3 shadow-lg">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-sm text-gray-700 mb-1">Color name (TH)</label>
                   <input
-                    type="number"
-                    name="price"
-                    value={variant.price}
-                    onChange={(e) => handleVariantChange(e, variantIndex)}
-                    placeholder="Price (price)"
-                    className="w-full px-4 py-3 border rounded-xl"
-                    min="0"
-                  />
-                  <input
-                    type="number"
-                    name="quantityInStock"
-                    value={variant.quantityInStock}
-                    onChange={(e) => handleVariantChange(e, variantIndex)}
-                    placeholder="In stock (quantityInStock)"
-                    className="w-full px-4 py-3 border rounded-xl"
-                    min="0"
+                    type="text"
+                    value={newColor.name_th}
+                    onChange={(e) => setNewColor({ ...newColor, name_th: e.target.value })}
+                    className="w-full px-3 py-2 border rounded-md"
+                    placeholder="e.g., Dark gray (TH)"
                   />
                 </div>
-
-                {/* Variant Image Upload */}
-                <div className="col-span-full">
+                <div>
+                  <label className="block text-sm text-gray-700 mb-1">Color name (EN)</label>
                   <input
-                    type="file"
-                    id={`variant-image-${variantIndex}`}
-                    accept="image/*"
-                    onChange={(e) => handleVariantImageChange(e, variantIndex)}
-                    className="hidden"
+                    type="text"
+                    value={newColor.name_en}
+                    onChange={(e) => setNewColor({ ...newColor, name_en: e.target.value })}
+                    className="w-full px-3 py-2 border rounded-md"
+                    placeholder="e.g., Dark Gray"
                   />
-                  <label
-                    htmlFor={`variant-image-${variantIndex}`}
-                    className="bg-[#E7E2D8] py-3 px-6 rounded-xl cursor-pointer"
-                  >
-                    Choose image
-                  </label>
-                  {variant.image && (
-                    <span className="text-sm text-gray-600 ml-4">
-                      {variant.image.name}
-                    </span>
-                  )}
-                  {variant.image && (
-                    <div className="mt-4 w-32 h-32 border rounded-lg">
-                      <img
-                        src={URL.createObjectURL(variant.image)}
-                        alt="Variant Preview"
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  )}
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-700 mb-1">Hex</label>
+                  <input
+                    type="text"
+                    value={newColor.hex}
+                    onChange={(e) => setNewColor({ ...newColor, hex: e.target.value })}
+                    className="w-full px-3 py-2 border rounded-md"
+                    placeholder="#000000"
+                  />
                 </div>
               </div>
-            ))}
+              <div className="flex gap-2 justify-end">
+                <button type="button" onClick={cancelAddColor} className="px-4 py-2 rounded-lg border">
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  disabled={savingColor}
+                  onClick={() => saveNewColor(variantIndex)}
+                  className="px-4 py-2 rounded-lg bg-[#B29674] text-white disabled:opacity-50"
+                >
+                  {savingColor ? "Saving..." : "Save color"}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
 
-            <button
-              type="button"
-              onClick={handleAddVariant}
-              className="w-full py-3 px-8 border border-dashed rounded-3xl text-[#B29674] hover:bg-[#E7E2D8]"
+        {/* Price */}
+        <div>
+          <label htmlFor={`price-${variantIndex}`} className="block text-gray-700 font-medium mb-2">
+            Price
+          </label>
+          <input
+            id={`price-${variantIndex}`}
+            type="number"
+            name="price"
+            value={variant.price}
+            onChange={(e) => handleVariantChange(e, variantIndex)}
+            onWheel={(e) => e.currentTarget.blur()}
+            inputMode="decimal"
+            step="1"
+            min="0"
+            required
+            placeholder="Price (price)"
+            className="w-full h-12 px-4 text-base border-2 border-[#B29674]/50 rounded-2xl focus:ring-2 focus:ring-[#B29674]/40"
+          />
+        </div>
+
+        {/* Stock */}
+        <div>
+          <label htmlFor={`stock-${variantIndex}`} className="block text-gray-700 font-medium mb-2">
+            In stock
+          </label>
+          <input
+            id={`stock-${variantIndex}`}
+            type="number"
+            name="quantityInStock"
+            value={variant.quantityInStock}
+            onChange={(e) => handleVariantChange(e, variantIndex)}
+            onWheel={(e) => e.currentTarget.blur()}
+            inputMode="numeric"
+            step="1"
+            min="0"
+            required
+            placeholder="In stock (quantityInStock)"
+            className="w-full h-12 px-4 text-base border-2 border-[#B29674]/50 rounded-2xl focus:ring-2 focus:ring-[#B29674]/40"
+          />
+        </div>
+
+        {/* Variant Image Upload — วางใน grid แถวของตัวเอง */}
+        <div className="col-span-1 md:col-span-2 lg:col-span-5">
+          <label className="block text-gray-700 font-medium mb-2">Variant image</label>
+          <div className="flex items-center gap-4">
+            <input
+              type="file"
+              id={`variant-image-${variantIndex}`}
+              accept="image/*"
+              onChange={(e) => handleVariantImageChange(e, variantIndex)}
+              className="hidden"
+            />
+            <label
+              htmlFor={`variant-image-${variantIndex}`}
+              className="bg-[#E7E2D8] py-3 px-6 rounded-xl cursor-pointer border hover:bg-[#ddd7cb]"
             >
-              + Add variant
-            </button>
+              Choose image
+            </label>
+
+            {variant.image && (
+              <span
+                className="text-sm text-gray-600 inline-block max-w-[60vw] md:max-w-xs truncate align-middle"
+                title={variant.image.name}
+              >
+                {variant.image.name}
+              </span>
+            )}
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex justify-center space-x-4 pt-4">
-            <button
-              type="submit"
-              className="bg-[#B29674] text-white py-3 px-8 rounded-3xl shadow-lg"
-            >
-              Save product
-            </button>
-            <button
-              type="button"
-              onClick={handleCancel}
-              className="bg-gray-300 text-gray-800 py-3 px-8 rounded-3xl shadow-lg"
-            >
-              Cancel
-            </button>
-          </div>
-        </form>
+          {variant.image && (
+            <div className="mt-4 w-32 h-32 border rounded-lg">
+              <img
+                src={URL.createObjectURL(variant.image)}
+                onLoad={(e) => URL.revokeObjectURL(e.currentTarget.src)}
+                alt="Variant Preview"
+                className="w-full h-full object-cover"
+              />
+            </div>
+          )}
+        </div>
       </div>
+    </div>
+  ))}
+
+  <button
+    type="button"
+    onClick={handleAddVariant}
+    className="w-full py-3 px-8 border border-dashed rounded-3xl text-[#B29674] hover:bg-[#E7E2D8]"
+  >
+    + Add variant
+  </button>
+</div>
+
+{/* Action Buttons */}
+<div className="flex justify-center space-x-4 pt-4">
+  <button
+    type="submit"
+    className="bg-[#B29674] text-white py-3 px-8 rounded-3xl shadow-lg disabled:opacity-60 disabled:cursor-not-allowed"
+    disabled={submitting}
+  >
+    {submitting ? "Saving..." : "Save product"}
+  </button>
+  <button
+    type="button"
+    onClick={handleCancel}
+    className="bg-gray-300 text-gray-800 py-3 px-8 rounded-3xl shadow-lg disabled:opacity-60 disabled:cursor-not-allowed"
+    disabled={submitting}
+  >
+    Cancel
+  </button>
+</div>
+
+          </form>
+        </div>
+        </div>
+      </main>
+      {submitting && (
+        <div className="fixed inset-0 z-[60] bg-white/70 backdrop-blur-sm flex items-center justify-center">
+          <div className="flex items-center gap-3 text-[#49453A]">
+            <Loader2 className="w-6 h-6 animate-spin" />
+            <span className="text-base font-medium">กำลังสร้างสินค้า...</span>
+          </div>
+        </div>
+      )}
+      <Footer />
     </div>
   );
 };

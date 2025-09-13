@@ -3,8 +3,23 @@ import Button from "../atoms/Button";
 import Stars from "../atoms/Stars";
 import { Link } from "react-router-dom";
 
+function normalizePublicImage(img) {
+  if (!img) return null;
+  const s = String(img);
+  if (/^https?:\/\//i.test(s)) return s;
+  let cleaned = s.replace(/^\.\/+/, ""); // drop leading ./
+  if (cleaned.startsWith("/images/")) return cleaned;
+  if (cleaned.startsWith("images/")) return "/" + cleaned;
+  // if path includes images/ somewhere, take from images/ onward
+  const idx = cleaned.indexOf("images/");
+  if (idx >= 0) return "/" + cleaned.slice(idx);
+  // otherwise assume it's a filename
+  const base = cleaned.split("/").pop();
+  return `/images/${base}`;
+}
+
 export default function ProductCard({ img, name, price, rating = 0, onAdd, href }) {
-  const imgSrc = img?.startsWith("/") ? img : img ? `/images/${img}` : null;
+  const imgSrc = normalizePublicImage(img);
   return (
     <Card className="p-0 ring-1 ring-black/5 hover:shadow-md transition">
       {href ? (

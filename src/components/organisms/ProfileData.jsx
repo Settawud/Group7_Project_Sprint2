@@ -1,12 +1,15 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Button from "../atoms/Button";
-import { Edit, Camera } from "lucide-react";
+import { Edit, Camera, ImageUp } from "lucide-react";
 import { api } from "../../lib/api";
+import { toast } from "sonner";
 
 export default function ProfileData() {
   const [profileImage, setProfileImage] = useState(null); // รูปที่แสดงจริง
   const [previewImage, setPreviewImage] = useState(null); // รูป preview ยังไม่ save
   const [selectedImageFile, setSelectedImageFile] = useState(null);
+  const quickInputRef = useRef(null);
+  const [showDelete, setShowDelete] = useState(false);
 
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -58,11 +61,18 @@ export default function ProfileData() {
     e.target.value = ""; // reset → เลือกรูปเดิมซ้ำได้
   };
 
-  // 📌 ลบรูป (mark ว่าจะลบ)
-  const handleRemoveImage = () => {
-    setSelectedImageFile(null);
-    setPreviewImage(null);
-    setProfileImage(null); // frontend โชว์ว่าไม่มีรูปแล้ว
+  // 📌 ลบรูป (ลบทันทีที่ backend และอัปเดต UI)
+  const handleDeleteImage = async () => {
+    try {
+      const res = await api.patch("/users/me/image");
+      setSelectedImageFile(null);
+      setPreviewImage(null);
+      setProfileImage(res.data.user?.image || null);
+      try { toast.success("Profile image removed"); } catch {}
+    } catch (err) {
+      const msg = err?.response?.data?.message || err?.message || "Delete failed";
+      try { toast.error(msg); } catch {}
+    }
   };
 
   // 📌 เปลี่ยนข้อมูล text
@@ -122,7 +132,30 @@ export default function ProfileData() {
     setIsEditing(false);
   };
 
-  const displayImage = previewImage || profileImage;
+  const displayImage = previewImage || (typeof profileImage === "string" ? profileImage : profileImage?.url || null);
+
+  // Quick upload outside edit
+  const handleQuickPick = () => {
+    setShowDelete(true);
+    quickInputRef.current?.click();
+  };
+  const handleQuickChange = async (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    try {
+      const form = new FormData();
+      form.append("image", file);
+      const res = await api.patch("/users/me/image", form, { headers: { "Content-Type": "multipart/form-data" } });
+      setProfileImage(res.data.user?.image || null);
+      setPreviewImage(null);
+      setSelectedImageFile(null);
+      toast.success("Profile image updated");
+    } catch (err) {
+      const msg = err?.response?.data?.message || err?.message || "Upload failed";
+      toast.error(msg);
+    }
+  };
 
   return (
     <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
@@ -139,7 +172,13 @@ export default function ProfileData() {
       <div className="flex flex-col md:flex-row gap-8 items-start">
         {/* Profile Image */}
         <div className="flex flex-col items-center">
-          <div className="w-32 h-32 rounded-full border-4 border-gray-100 shadow-sm flex items-center justify-center bg-gray-200 overflow-hidden">
+          <div
+            className={`w-32 h-32 rounded-full border-4 border-gray-100 shadow-sm flex items-center justify-center bg-gray-200 overflow-hidden ${isEditing ? "cursor-default" : "cursor-pointer"}`}
+            onClick={isEditing ? undefined : handleQuickPick}
+            title="Change picture"
+            role="button"
+            aria-label="Change profile picture"
+          >
             {displayImage ? (
               <img
                 src={displayImage}
@@ -153,26 +192,28 @@ export default function ProfileData() {
               </div>
             )}
           </div>
-
-          {isEditing && (
-            <div className="flex flex-col items-center mt-3 text-sm">
-              <label className="text-amber-600 font-medium cursor-pointer hover:underline mt-1">
-                Upload Picture
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleImageChange}
-                />
-              </label>
-              {displayImage && (
+          {!isEditing && (
+            <div className="flex items-center gap-4 mt-3 text-sm">
+              <button
+                type="button"
+                onClick={handleQuickPick}
+                className="inline-flex items-center gap-1 text-amber-700 hover:underline"
+                title="Change picture"
+              >
+                <ImageUp className="w-4 h-4" /> Change picture
+              </button>
+              {showDelete && (
                 <button
-                  onClick={handleRemoveImage}
-                  className="text-red-500 mt-1 hover:underline"
+                  type="button"
+                  onClick={handleDeleteImage}
+                  className="inline-flex items-center gap-1 text-red-600 hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Delete picture"
+                  disabled={!displayImage}
                 >
-                  Delete Picture
+                  Delete picture
                 </button>
               )}
+              <input ref={quickInputRef} type="file" accept="image/*" className="hidden" onChange={handleQuickChange} />
             </div>
           )}
         </div>
@@ -257,6 +298,3 @@ export default function ProfileData() {
     </div>
   );
 }
-
-
-
