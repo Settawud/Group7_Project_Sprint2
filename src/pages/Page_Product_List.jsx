@@ -79,7 +79,7 @@ const Page_Product_List = () => {
     title: product.name,
     tag: product.tags,
     size: `${product.dimension.width}x${product.dimension.height}x${product.dimension.depth} cm`,
-    price: product.variants[0].price.toLocaleString(),
+    price: product.variants[0].price || 0
   }));
 
   return (

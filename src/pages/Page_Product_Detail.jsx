@@ -75,7 +75,6 @@ const Page_Product_Detail = () => {
           Description: data.description,
           tag: data.tags,
           material: data.material,
-          trial: data.trial || false,
           variants: data.variants.map((v) => ({
             _id: v._id,
             trial: v.trial,

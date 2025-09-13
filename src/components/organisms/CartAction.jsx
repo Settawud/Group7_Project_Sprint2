@@ -23,9 +23,9 @@ const CartAction = ({ className = "" }) => {
   }, [cart, installChecked]);
   //console.log(total)
 
-  const handleDeleteCartItem = () => {
+  const handleDeleteCartItem = async (cart) => {
     //setCart([])
-    removeChecked();
+    await removeChecked(cart);
   };
 
   const handleInstallationChecked = () => {
@@ -69,7 +69,7 @@ const CartAction = ({ className = "" }) => {
           <Button
             variant="secondary"
             className="p-2 mx-4 inline-flex"
-            onClick={handleDeleteCartItem}
+            onClick={() => handleDeleteCartItem(cart)}
             //disabled={!cart.some((i) => i.checked)}
           >
             ลบที่เลือก

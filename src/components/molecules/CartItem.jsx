@@ -5,7 +5,8 @@ import CheckboxWithText from '../atoms/CheckboxWithText';
 import { ValueContext } from '../../context/ValueContext';
 
 
-const CartItem = ({ item}) => {
+const CartItem = ({ item }) => {
+
     
     const {cart,setCart,setCheckoutItem} = useContext(ValueContext)
     
@@ -16,7 +17,7 @@ const CartItem = ({ item}) => {
 
     const handleSelect = (skuId) => {
         setIsChecked(!isChecked)
-        const updatedCart = cart.map((item) => (item.skuId === skuId ? { ...item, checked: !item.checked } : item));
+        const updatedCart = cart.map((item) => (item.variantId === skuId ? { ...item, checked: !item.checked } : item));
     setCart(updatedCart)
     setCheckoutItem(updatedCart.filter(item => item.checked));
     }
@@ -25,14 +26,14 @@ const CartItem = ({ item}) => {
   return (
     <tr key={item.skuId}>
                       <td className="p-4 text-center">
-              <CheckboxWithText name="select" skuId={item.skuId} checked={item.checked} onChange={() => handleSelect(item.skuId)} />
+              <CheckboxWithText name="select" skuId={item.variantId} checked={item.checked} onChange={() => handleSelect(item.variantId)} />
                       </td>
                       <td><img src={item.image}
                           className="sm:mx-auto max-w-14 max-h-14 p-1 border-1 rounded-sm border-gray-300 shadow-[0_2px_4px_1px_rgba(209,213,219,0.2)]"
-                          alt={item.altText} /></td>
+                          alt={item.name} /></td>
                       <td className="p-4 text-sm break-words">
                           <div className="grid grid-cols-2 grid-rows-[1fr_auto] sm:block">
-                              <div className="col-span-2 mx-2">{item.name} <br /> <span className='font-semibold'>{item.variantName === "สินค้าทดลอง" ? "สินค้าทดลอง" : ""}</span> สี: {item.color && item.color[0] ? item.color[0] : ''} </div>
+                              <div className="col-span-2 mx-2">{item.name} <br /> <span className='font-semibold'>{item.trial ? "สินค้าทดลอง" : ""}</span> สี: {item.color} </div>
                               <div
                                   className="mt-2 mx-2 font-semibold row-start-2 sm:text-center sm:hidden self-end">
                       ฿{subtotal}</div>
