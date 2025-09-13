@@ -34,7 +34,6 @@ const ProductContent = ({ product }) => {
 
   const handleAddToCart = async () => {
     try {
-      const token = localStorage.getItem("token");
 
       const res = await axios.post(
         "http://localhost:4000/api/v1/mongo/cart/items",
@@ -44,10 +43,7 @@ const ProductContent = ({ product }) => {
           quantity: quantity,
         },
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
+          withCredentials: true,
         }
       );
 

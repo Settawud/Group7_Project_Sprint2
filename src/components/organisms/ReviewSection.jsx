@@ -20,12 +20,9 @@ const ReviewSection = ({ productId }) => {
   useEffect(() => {
     const fetchMyReviews = async () => {
       try {
-        const token = localStorage.getItem("token");
 
         const res = await axios.get("http://localhost:4000/api/v1/mongo/reviews/me", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          withCredentials: true,
         });
 
         const myReviews = res.data.items || [];
@@ -53,22 +50,19 @@ const ReviewSection = ({ productId }) => {
     setIsSubmitting(true);
     setErrorMessage("");
     setSuccessMessage("");
-
+    const name = "name";
     try {
-      const token = localStorage.getItem("token");
 
       await axios.post(
         "http://localhost:4000/api/v1/mongo/reviews",
         {
           productId,
+          name,
           rating,
           comment,
         },
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
+          withCredentials: true,
         }
       );
 
