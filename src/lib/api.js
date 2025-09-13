@@ -13,4 +13,3 @@ export async function post(path, body) {
   const { data } = await api.post(path, body);
   return data;
 }
-
