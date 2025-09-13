@@ -4,7 +4,30 @@ import table from "../assets/table.jpg";
 import Navbar from "../components/organisms/Navbar";
 import Container from "../components/layout/Container";
 import Footer from "../components/organisms/Footer";
+import axios from "axios";
+import { useEffect, useState } from "react";
+import { api } from "../lib/api";
+
+const API = "http://localhost:4000/api/v1/mongo";
+
 const Orderconfirm = () => {
+  const [users, setUsers] = useState([]);
+  const fetchUsers = async () => {
+    try {
+      const res = await api.get("/users/me"); // ✅ เหมือน ProfileData
+      setUsers(
+        Array.isArray(res.data) ? res.data : [res.data.user || res.data]
+      );
+      console.log("Fetched user:", res.data);
+    } catch (err) {
+      console.error("Failed to fetch users:", err);
+      alert("กรุณาเข้าสู่ระบบก่อนเข้าหน้านี้");
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
   return (
     <div>
       <Navbar />
@@ -136,6 +159,26 @@ const Orderconfirm = () => {
         </main>
       </div>
       <Footer />
+      <div>
+        <table className="w-full border-separate">
+          <thead>
+            <tr className="bg-gray-200">
+              <th className="border rounded-tl-lg p-2">Name</th>
+              <th className="border p-2">Last name</th>
+              <th className="border p-2 rounded-tr-lg">Position</th>
+            </tr>
+          </thead>
+          <tbody>
+            {users.map((user) => (
+              <tr key={user._id} className="bg-white">
+                <td className="border p-2">{user.firstname}</td>
+                <td className="border p-2">{user.lastname}</td>
+                <td className="border p-2">{user.role}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };
