@@ -94,48 +94,72 @@ export const AddProductPage = () => {
     e.preventDefault();
 
     try {
-      const fd = new FormData();
-      fd.append("name", formData.name);
-      fd.append("description", formData.description);
-      fd.append("category", formData.category);
-      fd.append("trial", formData.trial);
-      fd.append(
-        "tags",
-        JSON.stringify(
-          formData.tags
-            .split(",")
-            .map((t) => t.trim())
-            .filter((t) => t)
-        )
-      );
-      fd.append("material", formData.material);
+      // 1) เตรียม payload JSON ให้ตรงกับ backend
+      const tags = String(formData.tags || "")
+        .split(",")
+        .map((t) => t.trim())
+        .filter(Boolean);
 
-      fd.append("dimension", JSON.stringify(formData.dimension));
+      const dimension = {
+        width: Number(formData.dimension.width || 0),
+        height: Number(formData.dimension.height || 0),
+        depth: Number(formData.dimension.depth || 0),
+        weight: Number(formData.dimension.weight || 0),
+      };
 
-      formData.thumbnails.forEach((file, idx) => fd.append(`thumbnails`, file));
-
-      // variants (ส่งเป็น JSON ยกเว้น image)
-      const variantsWithoutImages = formData.variants.map((v) => ({
-        trial: v.trial,
+      const variants = formData.variants.map((v) => ({
         colorId: v.colorId,
-        price: v.price,
-        quantityInStock: v.quantityInStock,
+        price: Number(v.price || 0),
+        quantityInStock: Number(v.quantityInStock || 0),
+        trial: !!v.trial,
       }));
-      fd.append("variants", JSON.stringify(variantsWithoutImages));
 
-      formData.variants.forEach((variant, i) => {
-        if (variant.image) fd.append(`variantImages`, variant.image);
-      });
+      if (!variants.length) {
+        alert("ต้องมีอย่างน้อย 1 variant");
+        return;
+      }
+      if (variants.some((v) => !v.colorId)) {
+        alert("กรุณาเลือก Color ID ให้ครบทุก variant");
+        return;
+      }
 
-      // ✅ ส่งไป API
-      const res = await api.post("/products", fd, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      const payload = {
+        name: formData.name,
+        description: formData.description,
+        category: formData.category,
+        trial: !!formData.trial,
+        tags,
+        material: formData.material,
+        thumbnails: [], // อัปโหลดทีหลัง
+        dimension,
+        variants,
+      };
 
-      console.log("Product created:", res.data);
-      alert("เพิ่มสินค้าเรียบร้อย!");
+      // 2) สร้างสินค้า (JSON)
+      const createRes = await api.post("/products", payload);
+      const productId = createRes?.data?.item?._id;
+      const createdVariants = createRes?.data?.item?.variants || [];
+      if (!productId) throw new Error("Missing productId in response");
+
+      // 3) อัปโหลดรูปหลัก (thumbnails) ทีละไฟล์
+      for (const file of formData.thumbnails) {
+        const fd = new FormData();
+        fd.append("image", file);
+        await api.post(`/products/${productId}/images`, fd);
+      }
+
+      // 4) อัปโหลดรูปของแต่ละ variant หากมี (แม็พตาม index)
+      for (let i = 0; i < formData.variants.length; i++) {
+        const file = formData.variants[i]?.image;
+        const variantId = createdVariants[i]?._id;
+        if (file && variantId) {
+          const fd = new FormData();
+          fd.append("image", file);
+          await api.post(`/products/${productId}/variants/${variantId}/images`, fd);
+        }
+      }
+
+      alert(`เพิ่มสินค้าเรียบร้อย! ID: ${productId}`);
       handleCancel();
     } catch (err) {
       console.error("Error creating product:", err);
