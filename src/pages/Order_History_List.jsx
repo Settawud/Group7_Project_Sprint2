@@ -21,7 +21,6 @@ const Order_History_List = () => {
   });
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
 
     const fetchOrdersAndProducts = async () => {
       try {

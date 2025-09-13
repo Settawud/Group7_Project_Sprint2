@@ -63,7 +63,7 @@ const Page_Product_List = () => {
         });
 
         setProducts(response.data.items || []);
-        setTotalPages(Math.ceil((response.data.total || 0) / 12));
+        setTotalPages(Math.ceil((response.data.total || 0) / 20));
       } catch (err) {
         console.error("Error fetching products:", err);
         setProducts([]);
