@@ -31,6 +31,7 @@ export default function ProductCard({ img, name, price, rating = 0, onAdd, href 
                 alt={name}
                 className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
                 loading="lazy"
+                onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = "/images/logoCutBackground2.png"; }}
               />
             )}
           </div>
@@ -43,6 +44,7 @@ export default function ProductCard({ img, name, price, rating = 0, onAdd, href 
               alt={name}
               className="h-full w-full object-cover"
               loading="lazy"
+              onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = "/images/logoCutBackground2.png"; }}
             />
           )}
         </div>

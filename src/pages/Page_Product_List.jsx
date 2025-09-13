@@ -21,6 +21,15 @@ const Page_Product_List = () => {
 
   const [sort, setSort] = useState("Price High to Low");
   const search = searchParams.get("search") || "";
+  // Sync category from URL to filters (normalize lowercase to proper case for backend)
+  useEffect(() => {
+    const cat = searchParams.get("category");
+    if (cat && cat !== filters.category) {
+      const m = { chairs: "Chairs", tables: "Tables", accessories: "Accessories" };
+      const norm = m[cat?.toLowerCase?.()] || cat;
+      setFilters((prev) => ({ ...prev, category: norm }));
+    }
+  }, [searchParams]);
 
   const getSortQuery = (sortValue) => {
     if (sortValue === "Price High to Low") return "";
@@ -34,7 +43,8 @@ const Page_Product_List = () => {
       const query = { page };
 
       if (filters.category) {
-        query.category = filters.category;
+        const m = { chairs: "Chairs", tables: "Tables", accessories: "Accessories" };
+        query.category = m[filters.category?.toLowerCase?.()] || filters.category;
       }
 
       if (filters.availability === "In Stock") {

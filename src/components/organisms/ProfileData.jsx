@@ -142,7 +142,7 @@ export default function ProfileData() {
   const handleQuickChange = async (e) => {
     const file = e.target.files?.[0];
     e.target.value = "";
-    if (!file) return;
+    if (!file) { setShowDelete(false); return; }
     try {
       const form = new FormData();
       form.append("image", file);
@@ -154,7 +154,7 @@ export default function ProfileData() {
     } catch (err) {
       const msg = err?.response?.data?.message || err?.message || "Upload failed";
       toast.error(msg);
-    }
+    } finally { setShowDelete(false); }
   };
 
   return (

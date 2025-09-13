@@ -3,7 +3,7 @@ import { Copy, TicketPercent, ShieldCheck, AlertTriangle } from "lucide-react";
 import Button from "../atoms/Button";
 import { api } from "../../lib/api";
 
-export default function UserCoupon() {
+export default function UserCoupon({ refreshKey }) {
   const [coupons, setCoupons] = useState([]);
   const [copiedCode, setCopiedCode] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -24,7 +24,7 @@ export default function UserCoupon() {
       }
     };
     loadCoupons();
-  }, []);
+  }, [refreshKey]);
 
   const handleCopy = (code) => {
     navigator.clipboard.writeText(code);
