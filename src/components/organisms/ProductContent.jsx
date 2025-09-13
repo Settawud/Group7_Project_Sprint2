@@ -1,12 +1,9 @@
-import { useContext, useState } from "react";
-import { ValueContext } from "../../context/ValueContext";
-import { ClipboardType } from "lucide-react";
+import axios from "axios";
+import { useState } from "react";
 
 const ProductContent = ({ product }) => {
   const {
-    id,
-    image,
-    altText,
+    _id,
     Name,
     Description = [],
     tag,
@@ -15,21 +12,18 @@ const ProductContent = ({ product }) => {
     variants = [],
   } = product;
 
-  const {cart,setCart, addToCart} = useContext(ValueContext)
-
   const [selected, setSelected] = useState("buy");
   const [quantity, setQuantity] = useState(1);
   const [selectedColor, setSelectedColor] = useState(null);
-  const [selectedSkuId, setSelectedSkuId] = useState(null);
 
   const filteredVariants = variants.filter((v) =>
     selected === "trial"
-      ? v.variantName === "สินค้าทดลอง"
-      : v.variantName !== "สินค้าทดลอง"
+      ? v.trial === true
+      : v.trial !== true
   );
 
   const currentVariant = selectedColor
-    ? filteredVariants.find((v) => v.variantOption === selectedColor)
+    ? filteredVariants.find((v) => v._id === selectedColor)
     : filteredVariants[0] || {};
 
   const increment = () => setQuantity((prev) => prev + 1);
@@ -38,12 +32,32 @@ const ProductContent = ({ product }) => {
   const quantityInStock = currentVariant.quantityInStock || 0;
   const price = currentVariant.price || 0;
 
-  function handleSelectColor(skuId, color) {
-    setSelectedColor(color)
-    setSelectedSkuId(skuId)
-  }
+  const handleAddToCart = async () => {
+    try {
+      const token = localStorage.getItem("token");
 
+      const res = await axios.post(
+        "http://localhost:4000/api/v1/mongo/cart/items",
+        {
+          productId: _id,
+          variantId: currentVariant._id,
+          quantity: quantity,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
+      console.log("Added to cart success:", res.data);
+      alert("Success!");
+    } catch (error) {
+      console.error("Add to cart error:", error);
+      alert("Error!");
+    }
+  };
 
   return (
     <div className="flex flex-col gap-3 text-black">
@@ -79,15 +93,15 @@ const ProductContent = ({ product }) => {
         <div className="flex gap-2">
           {filteredVariants.map((v) => (
             <div
-              key={v.skuID}
-              onClick={() => handleSelectColor(v.skuID, v.variantOption)}
-              className={`w-6 h-6 border rounded-full cursor-pointer hover:border-black ${
-                selectedColor === v.variantOption ||
+              key={v._id}
+              onClick={() => setSelectedColor(v._id)}
+              className={`w-6 h-6 border rounded-full cursor-pointer hover:border-black hover:border-2 ${
+                selectedColor === v._id ||
                 (!selectedColor && v === filteredVariants[0])
-                  ? "border-black"
+                  ? "border-black border-2"
                   : ""
               }`}
-              style={{ backgroundColor: v.variantOption[1] }}
+              style={{ backgroundColor: v.color }}
             />
           ))}
         </div>
@@ -110,7 +124,7 @@ const ProductContent = ({ product }) => {
               }`}
             >
               ทดลองใช้ ฿
-              {variants.find((v) => v.variantName === "สินค้าทดลอง")?.price}
+              {variants.find((v) => v.trial === true)?.price}
             </button>
           )}
           <button
@@ -125,7 +139,7 @@ const ProductContent = ({ product }) => {
             }`}
           >
             ซื้อเดี๋ยวนี้ ฿
-            {variants.find((v) => v.variantName !== "สินค้าทดลอง")?.price}
+            {variants.find((v) => v.trial !== true)?.price}
           </button>
         </div>
       </div>
@@ -166,7 +180,7 @@ const ProductContent = ({ product }) => {
         </div>
 
         <button
-          onClick={() => addToCart(id, Name, selectedColor, quantity, price, `../images/${image}`, altText, selected, variants)}
+          onClick={handleAddToCart}
           disabled={quantityInStock === 0}
           className={`h-12 px-4 py-2 rounded text-sm w-full lg:w-1/2 transition ${
             quantityInStock === 0
@@ -174,7 +188,7 @@ const ProductContent = ({ product }) => {
               : "bg-[#B29675] text-white hover:bg-[#B2967590]"
           }`}
         >
-          Add to Cart
+          {quantityInStock === 0 ? "Sold Out" : "Add to Cart"}
         </button>
       </div>
 

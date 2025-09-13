@@ -1,10 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
 
-const ReviewSection = () => {
+const ReviewSection = ({ productId }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [rating, setRating] = useState(0);
   const [hovered, setHovered] = useState(0);
   const [comment, setComment] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [hasReviewed, setHasReviewed] = useState(false);
 
   const toggleReview = () => setIsOpen((prev) => !prev);
 
@@ -12,22 +17,93 @@ const ReviewSection = () => {
   const handleMouseLeave = () => setHovered(0);
   const handleRatingClick = (index) => setRating(index);
 
-  const submitReview = () => {
-    console.log("Review submitted:", { rating, comment });
+  useEffect(() => {
+    const fetchMyReviews = async () => {
+      try {
+        const token = localStorage.getItem("token");
+
+        const res = await axios.get("http://localhost:4000/api/v1/mongo/reviews/me", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const myReviews = res.data.items || [];
+        const alreadyReviewed = myReviews.some(
+          (review) => review.productId === productId
+        );
+
+        setHasReviewed(alreadyReviewed);
+      } catch (err) {
+        console.error("Error fetching user reviews:", err);
+      }
+    };
+
+    if (productId) {
+      fetchMyReviews();
+    }
+  }, [productId]);
+
+  const submitReview = async () => {
+    if (!rating || !comment) {
+      setErrorMessage("Please write comment...");
+      return;
+    }
+
+    setIsSubmitting(true);
+    setErrorMessage("");
+    setSuccessMessage("");
+
+    try {
+      const token = localStorage.getItem("token");
+
+      await axios.post(
+        "http://localhost:4000/api/v1/mongo/reviews",
+        {
+          productId,
+          rating,
+          comment,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      setSuccessMessage("Success!");
+      setHasReviewed(true);
+      setRating(0);
+      setComment("");
+    } catch (err) {
+      console.error("Error submitting review:", err);
+      setErrorMessage("Error!");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <div className="review-container">
       <div className="text-end">
-        <button
-          className="mt-2 text-sm border border-[#B29675] text-[#B29675] px-4 py-1 rounded hover:bg-[#B2967510] transition"
-          onClick={toggleReview}
-        >
-          Review
-        </button>
+        {!hasReviewed && (
+          <button
+            className="mt-2 text-sm border border-[#B29675] text-[#B29675] px-4 py-1 rounded hover:bg-[#B2967510] transition"
+            onClick={toggleReview}
+          >
+            Review
+          </button>
+        )}
       </div>
 
-      {isOpen && (
+      {hasReviewed && (
+        <p className="text-green-600 text-sm mt-2 text-right">
+          You have already reviewed this product
+        </p>
+      )}
+
+      {isOpen && !hasReviewed && (
         <div className="review-section pt-4">
           <div className="flex items-center gap-1">
             <span className="text-sm">Rating:</span>
@@ -56,18 +132,26 @@ const ReviewSection = () => {
             <textarea
               rows="3"
               className="w-full rounded border border-[#B29675] p-2 text-sm focus:outline-none focus:ring-1 focus:ring-[#B29675]"
-              placeholder="Write your review..."
+              placeholder="Please write comment..."
               value={comment}
               onChange={(e) => setComment(e.target.value)}
             />
           </div>
 
+          {errorMessage && (
+            <p className="text-red-500 text-sm mt-2">{errorMessage}</p>
+          )}
+          {successMessage && (
+            <p className="text-green-600 text-sm mt-2">{successMessage}</p>
+          )}
+
           <div className="text-right pt-2">
             <button
               onClick={submitReview}
-              className="bg-[#B29675] text-white px-4 py-2 rounded hover:bg-[#9e8460] transition"
+              disabled={isSubmitting}
+              className="bg-[#B29675] text-white px-4 py-2 rounded hover:bg-[#9e8460] transition disabled:opacity-50"
             >
-              Submit Review
+              {isSubmitting ? "กำลังส่ง..." : "ส่งรีวิว"}
             </button>
           </div>
         </div>

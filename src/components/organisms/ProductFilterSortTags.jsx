@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from "react";
 import PriceRangeSlider from "./PriceRangeSlider";
-import { ChevronDown, X as XIcon } from "lucide-react";
 
 const Dropdown = ({
   label,
@@ -55,11 +54,12 @@ const Dropdown = ({
         >
           {renderLabel()}
         </span>
-        <ChevronDown
-          className={`w-4 h-4 text-stone-500 transition-transform duration-300 ${
+        <img
+          src="./icon/chevron_down.svg"
+          alt="chevron down"
+          className={`w-4 h-3 transition-transform duration-300 ${
             open ? "rotate-180" : ""
           }`}
-          aria-hidden
         />
       </button>
 
@@ -106,16 +106,9 @@ export const FilterProduct = ({ filters, setFilters }) => {
     <div className="grid grid-cols-1 sm:grid-cols-4 w-full sm:w-fit gap-2">
       <Dropdown
         label="Category"
-        options={["โต๊ะ", "เก้าอี้", "อุปกรณ์เสริม"]}
+        options={["Ergonomic Chairs", "Standing Desks", "Accessories"]}
         selected={filters.category}
         setSelected={(value) => setFilters((f) => ({ ...f, category: value }))}
-        useFixedLabel={true}
-      />
-      <Dropdown
-        label="Space"
-        options={["Workspace", "Bedroom", "Outdoor", "Living room"]}
-        selected={filters.space}
-        setSelected={(value) => setFilters((f) => ({ ...f, space: value }))}
         useFixedLabel={true}
       />
       <Dropdown
@@ -181,7 +174,7 @@ export const Tags = ({ filters, removeFilter, clearAll }) => {
                   ? `฿${label[0].toLocaleString()} - ฿${label[1].toLocaleString()}`
                   : label}
               </span>
-              <XIcon className="w-4 h-4" aria-hidden />
+              <img src="./icon/X.svg" alt="remove" className="w-4 h-4" />
             </div>
           ))
         ) : (
@@ -213,7 +206,6 @@ const ProductFilterSortTags = ({ filters, setFilters, sort, setSort }) => {
   const clearAll = () => {
     setFilters({
       category: null,
-      space: null,
       availability: null,
       price: null,
     });
