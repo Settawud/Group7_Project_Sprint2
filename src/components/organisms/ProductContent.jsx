@@ -40,13 +40,6 @@ const ProductContent = ({ product }) => {
 
   const handleAddToCart = async () => {
     try {
-      const token = localStorage.getItem("token");
-
-      if (!token) {
-        console.log("token not found")
-      }
-
-      
 
       const res = await axios.post(
         "http://localhost:4000/api/v1/mongo/cart/items",
@@ -56,7 +49,7 @@ const ProductContent = ({ product }) => {
           quantity: quantity,
         },
         {
-          withCredentials: true
+          withCredentials: true,
         }
       );
 

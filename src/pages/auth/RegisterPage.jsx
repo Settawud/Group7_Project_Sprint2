@@ -9,6 +9,7 @@ import { ValueContext } from "../../context/ValueContext";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { post } from "../../lib/api";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function RegisterPage() {
   const { login } = useContext(ValueContext) || {};
@@ -18,6 +19,8 @@ export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [attempted, setAttempted] = useState(false);
   const [generalError, setGeneralError] = useState("");
@@ -98,10 +101,42 @@ export default function RegisterPage() {
               <Input type="email" placeholder="you@email.com" value={email} onChange={(e)=>setEmail(e.target.value)} />
             </FormField>
             <FormField label="Password" error={passwordError}>
-              <Input type="password" value={password} onChange={(e)=>setPassword(e.target.value)} minLength={6} />
+              <Input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e)=>setPassword(e.target.value)}
+                minLength={6}
+                right={
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((v) => !v)}
+                    className="text-stone-500 hover:text-stone-700"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    title={showPassword ? "Hide password" : "Show password"}
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                }
+              />
             </FormField>
             <FormField label="Confirm Password" error={confirmError}>
-              <Input type="password" value={confirm} onChange={(e)=>setConfirm(e.target.value)} minLength={6} />
+              <Input
+                type={showConfirm ? "text" : "password"}
+                value={confirm}
+                onChange={(e)=>setConfirm(e.target.value)}
+                minLength={6}
+                right={
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirm((v) => !v)}
+                    className="text-stone-500 hover:text-stone-700"
+                    aria-label={showConfirm ? "Hide password" : "Show password"}
+                    title={showConfirm ? "Hide password" : "Show password"}
+                  >
+                    {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                }
+              />
             </FormField>
             {generalError && <div className="text-sm text-red-600">{generalError}</div>}
             <Button className="w-full mt-2" type="submit" disabled={disabled}>{submitting ? "Registering..." : "Register"}</Button>

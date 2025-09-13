@@ -9,12 +9,14 @@ import { useContext, useMemo, useState } from "react";
 import { ValueContext } from "../../context/ValueContext";
 import { toast } from "sonner";
 import { post } from "../../lib/api";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function LoginPage() {
   const navigate = useNavigate();
   const { login } = useContext(ValueContext) || {};
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [attempted, setAttempted] = useState(false);
   const [generalError, setGeneralError] = useState("");
@@ -84,7 +86,23 @@ export default function LoginPage() {
               <Input type="email" value={email} onChange={(e)=>setEmail(e.target.value)} placeholder="you@email.com" />
             </FormField>
             <FormField label="Password" error={passwordError}>
-              <Input type="password" value={password} onChange={(e)=>setPassword(e.target.value)} placeholder="••••••••" />
+              <Input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e)=>setPassword(e.target.value)}
+                placeholder="••••••••"
+                right={
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((v) => !v)}
+                    className="text-stone-500 hover:text-stone-700"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    title={showPassword ? "Hide password" : "Show password"}
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                }
+              />
             </FormField>
             <div className="flex items-center justify-between text-sm">
               <label className="inline-flex items-center gap-2"><input type="checkbox" /> Remember me</label>

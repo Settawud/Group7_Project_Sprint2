@@ -5,11 +5,12 @@ import Footer from "../components/organisms/Footer";
 import CategoryCard from "../components/organisms/CategoryCard";
 import ProductCard from "../components/organisms/ProductCard";
 import ProductGrid from "../components/molecules/ProductGrid";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Truck, ShieldCheck, Headphones, Wrench, ArrowRight, Heart, Gem, Award, Quote } from "lucide-react";
 import { useContext, useEffect, useRef, useState } from "react";
 import { ValueContext } from "../context/ValueContext";
-// import products data
+import { api } from "../lib/api";
+// import products data (legacy fallback counts)
 import { products, chairs, tables, accessories } from "../data/products";
 
 // pick top 4 and compute display fields
@@ -29,12 +30,13 @@ const popular = products.slice(0, 4).map((p) => {
     img: p.image,
     price,
     rating: p.rating ?? 4,
-    href: `/pageproductdetail?id=${encodeURIComponent(p.productID)}`,
+    href: `/products/${encodeURIComponent(p.productID)}`,
   };
 });
 
 
 export default function HomePage() {
+  const navigate = useNavigate();
   const { addToCart } = useContext(ValueContext) || {};
   const vpRef = useRef(null);
   const [vpVisible, setVpVisible] = useState(false);
@@ -42,6 +44,7 @@ export default function HomePage() {
   const [fbEmail, setFbEmail] = useState("");
   const [fbMsg, setFbMsg] = useState("");
   const [fbSent, setFbSent] = useState(false);
+  const [popularApi, setPopularApi] = useState([]);
   useEffect(() => {
     const obs = new IntersectionObserver(
       ([entry]) => setVpVisible(entry.isIntersecting),
@@ -55,6 +58,36 @@ export default function HomePage() {
       if (target) obs.unobserve(target);
       obs.disconnect();
     };
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await api.get("/products", { params: { page: 1 } });
+        const items = Array.isArray(res?.data?.items) ? res.data.items : [];
+        const head = items.slice(0, 8);
+        const enriched = await Promise.all(head.map(async (p) => {
+          try {
+            const rv = await api.get(`/reviews/product/${p._id}`);
+            const arr = Array.isArray(rv?.data?.items) ? rv.data.items : [];
+            const avg = arr.length ? arr.reduce((s, r) => s + (r.rating || 0), 0) / arr.length : 0;
+            return { p, avg };
+          } catch { return { p, avg: 0 }; }
+        }));
+        enriched.sort((a, b) => (b.avg || 0) - (a.avg || 0));
+        const mapped = enriched.slice(0, 4).map(({ p, avg }) => ({
+          id: p._id,
+          name: p.name,
+          img: (Array.isArray(p.thumbnails) && (typeof p.thumbnails[0] === 'string' ? p.thumbnails[0] : p.thumbnails[0]?.url))
+               || (p.variants?.find(v => v?.image && (typeof v.image === 'string' ? v.image : v.image?.url)) ? (typeof p.variants.find(v => v.image).image === 'string' ? p.variants.find(v => v.image).image : p.variants.find(v => v.image).image?.url) : null)
+               || "/images/logoCutBackground2.png",
+          price: Array.isArray(p.variants) && p.variants.length ? Math.min(...p.variants.map(v => Number(v.price || 0))) : "",
+          rating: Math.round((avg || 0) * 10) / 10,
+          href: `/products/${p._id}`,
+        }));
+        setPopularApi(mapped);
+      } catch {}
+    })();
   }, []);
 
   return (
@@ -84,7 +117,7 @@ export default function HomePage() {
               <p className="text-base md:text-lg text-white/90 max-w-2xl mx-auto">Discover ergonomic furniture crafted for focus and comfort.</p>
               <div className="mt-8 md:mt-10 flex items-center justify-center gap-3">
                 <Link
-                  to="/pageproductlist"
+                  to="/products"
                   aria-label="Shop now"
                   className="relative inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-[#B29674] to-[#c8a883] px-10 py-3.5 text-base md:text-lg font-semibold text-white shadow-[0_10px_20px_rgba(178,150,116,0.45)] ring-1 ring-black/10 transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_28px_rgba(178,150,116,0.55)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
                 >
@@ -132,21 +165,21 @@ export default function HomePage() {
           <div className="grid gap-6 sm:grid-cols-3">
             <CategoryCard
               title="Ergonomic Chairs"
-              href="/pageproductlist?category=chairs"
+              href="/products?category=Chairs"
               subtitle={`${chairs.length} items`}
-              imageSrc="/images/EGC-EF-01-B.png"
+              imageSrc="/images/EGC-MA-03-O (2).png"
             />
             <CategoryCard
               title="Standing Tables"
-              href="/pageproductlist?category=tables"
+              href="/products?category=Tables"
               subtitle={`${tables.length} items`}
-              imageSrc="/images/EGT-AP-01-W-120.png"
+              imageSrc="/images/EGT-AP-01-W-150.png"
             />
             <CategoryCard
               title="Accessories"
-              href="/pageproductlist?category=อุปกรณ์เสริม"
+              href="/products?category=Accessories"
               subtitle={`${accessories.length} items`}
-              imageSrc="/images/EGA-FR-01.png"
+              imageSrc="/images/20250820_0943_Minimalist Desk Design_remix_01k32nnxkpfeq9dxnzysqr0v0x.png"
             />
           </div>
         </Section>
@@ -154,26 +187,18 @@ export default function HomePage() {
         <Section
           title="Popular Picks"
           subtitle="Hand-picked for you"
-          actions={<Link to="/pageproductlist" className="text-sm text-stone-600 hover:underline">View all</Link>}
+          actions={<Link to="/products" className="text-sm text-stone-600 hover:underline">View all</Link>}
         >
           <ProductGrid>
-            {popular.map((p) => (
+            {(popularApi.length ? popularApi : popular).map((p) => (
               <ProductCard
                 key={p.id}
-                img={`/images/${p.img}`}
+                img={p.img}
                 name={p.name}
                 price={p.price}
                 rating={p.rating}
                 href={p.href}
-                onAdd={() =>
-                  addToCart?.({
-                    skuId: p.id,
-                    image: `/images/${p.img}`,
-                    name: p.name,
-                    altText: p.name,
-                    price: p.price,
-                  }, 1)
-                }
+                onAdd={() => navigate(p.href)}
               />
             ))}
           </ProductGrid>
@@ -229,56 +254,64 @@ export default function HomePage() {
           </div>
         </Section>
 
-        {/* FAQ / Feedback form */}
-        <Section title="Questions or Feedback?" subtitle="Send us a message — our team will get back quickly.">
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (!fbName || !fbEmail || !fbMsg) return;
-              setFbSent(true);
-              setFbName("");
-              setFbEmail("");
-              setFbMsg("");
-            }}
-            className="grid grid-cols-1 md:grid-cols-3 gap-4"
-          >
-            <input
-              className="rounded-xl border border-stone-300 bg-white/80 px-4 py-3 outline-none focus:ring-2 focus:ring-amber-300"
-              placeholder="Your name"
-              value={fbName}
-              onChange={(e) => setFbName(e.target.value)}
-              required
-            />
-            <input
-              type="email"
-              className="rounded-xl border border-stone-300 bg-white/80 px-4 py-3 outline-none focus:ring-2 focus:ring-amber-300"
-              placeholder="Email"
-              value={fbEmail}
-              onChange={(e) => setFbEmail(e.target.value)}
-              required
-            />
-            <div className="md:col-span-3 grid grid-cols-1 md:grid-cols-[1fr_auto] gap-4">
-              <textarea
-                rows={3}
-                className="rounded-xl border border-stone-300 bg-white/80 px-4 py-3 outline-none focus:ring-2 focus:ring-amber-300"
-                placeholder="Type your question or message"
-                value={fbMsg}
-                onChange={(e) => setFbMsg(e.target.value)}
-                required
-              />
-              
-            </div>
-            <button
-                type="submit"
-                className="h-12 md:h-15 md:self-center rounded-xl bg-[#B29675] px-6 text-white font-semibold hover:bg-[#a68968] transition"
-              >
-                Send Message
-              </button>
-            {fbSent && (
-              <p className="md:col-span-3 text-sm text-green-700">Thanks! Your message has been received.</p>
-            )}
-          </form>
-        </Section>
+      {/* FAQ / Feedback form */}
+<Section title="Questions or Feedback?" subtitle="Send us a message — our team will get back quickly.">
+  <form
+    onSubmit={(e) => {
+      e.preventDefault();
+      if (!fbName || !fbEmail || !fbMsg) return;
+      setFbSent(true);
+      setFbName(""); setFbEmail(""); setFbMsg("");
+    }}
+    className="max-w-2xl mx-auto space-y-4"  // << อยู่กลาง + ความกว้างพอดีตา
+  >
+    {/* แถว: ชื่อ + อีเมล */}
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <input
+        className="rounded-xl border border-stone-300 bg-white/80 px-4 py-3 outline-none focus:ring-2 focus:ring-amber-300"
+        placeholder="Your name"
+        value={fbName}
+        onChange={(e) => setFbName(e.target.value)}
+        required
+      />
+      <input
+        type="email"
+        className="rounded-xl border border-stone-300 bg-white/80 px-4 py-3 outline-none focus:ring-2 focus:ring-amber-300"
+        placeholder="Email"
+        value={fbEmail}
+        onChange={(e) => setFbEmail(e.target.value)}
+        required
+      />
+    </div>
+
+    {/* แถว: ข้อความ */}
+    <textarea
+      rows={4}
+      className="w-full rounded-xl border border-stone-300 bg-white/80 px-4 py-3 outline-none focus:ring-2 focus:ring-amber-300"
+      placeholder="Type your question or message"
+      value={fbMsg}
+      onChange={(e) => setFbMsg(e.target.value)}
+      required
+    />
+
+    {/* แถว: ปุ่ม ส่ง (กลางหน้า) */}
+    <div className="flex justify-center">
+      <button
+        type="submit"
+        className="h-12 rounded-xl bg-[#B29675] px-8 text-white font-semibold hover:bg-[#a68968] transition"
+      >
+        Send Message
+      </button>
+    </div>
+
+    {fbSent && (
+      <p className="text-center text-sm text-green-700">
+        Thanks! Your message has been received.
+      </p>
+    )}
+  </form>
+</Section>
+
       </Container>
       </div>
       </main>

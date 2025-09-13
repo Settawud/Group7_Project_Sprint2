@@ -1,5 +1,17 @@
 import { Link } from "react-router-dom";
 
+function normalizePublicImage(p) {
+  if (!p) return null;
+  const s = String(p);
+  if (/^https?:\/\//i.test(s)) return s;
+  let cleaned = s.replace(/^\.\/+/, "");
+  if (cleaned.startsWith("/images/")) return cleaned;
+  if (cleaned.startsWith("images/")) return "/" + cleaned;
+  const idx = cleaned.indexOf("images/");
+  if (idx >= 0) return "/" + cleaned.slice(idx);
+  return `/images/${cleaned}`;
+}
+
 export default function CategoryCard({ title, subtitle, href = "#", imageSrc }) {
   return (
     <Link
@@ -9,7 +21,7 @@ export default function CategoryCard({ title, subtitle, href = "#", imageSrc }) 
       {imageSrc ? (
         <div className="relative h-64">
           <img
-            src={imageSrc.startsWith("/") ? imageSrc : `/images/${imageSrc}`}
+            src={normalizePublicImage(imageSrc)}
             alt={title}
             className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
             loading="lazy"

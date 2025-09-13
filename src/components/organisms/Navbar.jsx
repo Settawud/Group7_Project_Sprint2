@@ -30,7 +30,7 @@ export default function Navbar() {
   const isActive = useMemo(() => {
     const params = new URLSearchParams(location.search);
     const cat = params.get("category");
-    return (key) => location.pathname === "/pageproductlist" && cat === key;
+    return (key) => location.pathname === "/products" && cat === key;
   }, [location.pathname, location.search]);
 
   return (
@@ -44,9 +44,9 @@ export default function Navbar() {
           <Link to="/" className="font-semibold"><img src="/images/logoCutBackground.webp" alt="logo image" width="56" height="56"/></Link>
           <Link to="/" className="font-semibold text-[#49453A]">Livin’ Lab</Link>
           <nav className="hidden md:flex gap-1 text-stone-700">
-            <Link to="/pageproductlist?category=chairs" className={`px-3 py-2 rounded-xl hover:bg-stone-900/5 ${isActive("chairs") ? "text-stone-900 bg-stone-900/5" : ""}`}>Ergonomic Chairs</Link>
-            <Link to="/pageproductlist?category=tables" className={`px-3 py-2 rounded-xl hover:bg-stone-900/5 ${isActive("tables") ? "text-stone-900 bg-stone-900/5" : ""}`}>Standing Desks</Link>
-            <Link to="/pageproductlist?category=accessories" className={`px-3 py-2 rounded-xl hover:bg-stone-900/5 ${isActive("accessories") ? "text-stone-900 bg-stone-900/5" : ""}`}>Accessories</Link>
+            <Link to="/products?category=Chairs" className={`px-3 py-2 rounded-xl hover:bg-stone-900/5 ${isActive("Chairs") ? "text-stone-900 bg-stone-900/5" : ""}`}>Ergonomic Chairs</Link>
+            <Link to="/products?category=Tables" className={`px-3 py-2 rounded-xl hover:bg-stone-900/5 ${isActive("Tables") ? "text-stone-900 bg-stone-900/5" : ""}`}>Standing Desks</Link>
+            <Link to="/products?category=Accessories" className={`px-3 py-2 rounded-xl hover:bg-stone-900/5 ${isActive("Accessories") ? "text-stone-900 bg-stone-900/5" : ""}`}>Accessories</Link>
           </nav>
         </div>
 
@@ -56,7 +56,7 @@ export default function Navbar() {
             onSubmit={(e) => {
               e.preventDefault();
               const q = query.trim();
-              navigate(`/pageproductlist${q ? `?q=${encodeURIComponent(q)}` : ""}`);
+              navigate(`/products${q ? `?search=${encodeURIComponent(q)}` : ""}`);
             }}
           >
             <Input
@@ -122,15 +122,15 @@ export default function Navbar() {
         <div className="md:hidden border-t border-stone-200 bg-white/90 backdrop-blur">
           <Container className="py-2">
             <nav className="grid gap-1 text-stone-700">
-              <Link to="/pageproductlist?category=chairs" className={`px-3 py-2 rounded-lg hover:bg-stone-900/5 ${isActive("chairs") ? "text-stone-900 bg-stone-900/5" : ""}`}>Ergonomic Chairs</Link>
-              <Link to="/pageproductlist?category=tables" className={`px-3 py-2 rounded-lg hover:bg-stone-900/5 ${isActive("tables") ? "text-stone-900 bg-stone-900/5" : ""}`}>Standing Desks</Link>
-              <Link to="/pageproductlist?category=accessories" className={`px-3 py-2 rounded-lg hover:bg-stone-900/5 ${isActive("accessories") ? "text-stone-900 bg-stone-900/5" : ""}`}>Accessories</Link>
+              <Link to="/products?category=Chairs" className={`px-3 py-2 rounded-lg hover:bg-stone-900/5 ${isActive("Chairs") ? "text-stone-900 bg-stone-900/5" : ""}`}>Ergonomic Chairs</Link>
+              <Link to="/products?category=Tables" className={`px-3 py-2 rounded-lg hover:bg-stone-900/5 ${isActive("Tables") ? "text-stone-900 bg-stone-900/5" : ""}`}>Standing Desks</Link>
+              <Link to="/products?category=Accessories" className={`px-3 py-2 rounded-lg hover:bg-stone-900/5 ${isActive("Accessories") ? "text-stone-900 bg-stone-900/5" : ""}`}>Accessories</Link>
               <form
                 className="mt-2"
                 onSubmit={(e) => {
                   e.preventDefault();
                   const q = query.trim();
-                  navigate(`/pageproductlist${q ? `?q=${encodeURIComponent(q)}` : ""}`);
+                  navigate(`/products${q ? `?search=${encodeURIComponent(q)}` : ""}`);
                 }}
               >
                 <Input
