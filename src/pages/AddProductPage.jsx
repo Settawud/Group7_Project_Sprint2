@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import Navbar from "../components/organisms/Navbar";
-
+import { api } from "../lib/api";
 export const AddProductPage = () => {
   const [formData, setFormData] = useState({
     productID: "",
@@ -23,12 +23,13 @@ export const AddProductPage = () => {
         colorId: "",
         price: "",
         quantityInStock: "",
+        trial: false,
         image: null,
       },
     ],
   });
 
-  // Handle top-level field changes
+  // === Field Handlers ===
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData({
@@ -37,104 +38,109 @@ export const AddProductPage = () => {
     });
   };
 
-  // Handle dimension fields
   const handleDimensionChange = (e) => {
     const { name, value } = e.target;
     setFormData({
       ...formData,
-      dimension: {
-        ...formData.dimension,
-        [name]: value,
-      },
+      dimension: { ...formData.dimension, [name]: value },
     });
   };
 
-  // Handle thumbnails
   const handleThumbnailChange = (e) => {
-    const files = Array.from(e.target.files);
-    setFormData({
-      ...formData,
-      thumbnails: files,
-    });
+    setFormData({ ...formData, thumbnails: Array.from(e.target.files) });
   };
 
-  // Handle variant field changes
-  const handleVariantChange = (e, variantIndex) => {
+  const handleVariantChange = (e, index) => {
     const { name, value, type, checked } = e.target;
     const newVariants = [...formData.variants];
-    newVariants[variantIndex][name] =
+    newVariants[index][name] =
       type === "checkbox" ? checked : type === "number" ? Number(value) : value;
-
-    setFormData({
-      ...formData,
-      variants: newVariants,
-    });
+    setFormData({ ...formData, variants: newVariants });
   };
 
-  // Handle variant image change
-  const handleVariantImageChange = (e, variantIndex) => {
+  const handleVariantImageChange = (e, index) => {
     const file = e.target.files[0] || null;
     const newVariants = [...formData.variants];
-    newVariants[variantIndex].image = file;
-    setFormData({
-      ...formData,
-      variants: newVariants,
-    });
+    newVariants[index].image = file;
+    setFormData({ ...formData, variants: newVariants });
   };
 
-  // Add/remove variants
   const handleAddVariant = () => {
     setFormData({
       ...formData,
       variants: [
         ...formData.variants,
-        { skuID: "", colorId: "", price: "", quantityInStock: "", image: null },
+        {
+          skuID: "",
+          colorId: "",
+          price: "",
+          quantityInStock: "",
+          trial: false,
+          image: null,
+        },
       ],
     });
   };
 
   const handleRemoveVariant = (index) => {
-    const newVariants = formData.variants.filter((_, i) => i !== index);
     setFormData({
       ...formData,
-      variants: newVariants,
+      variants: formData.variants.filter((_, i) => i !== index),
     });
   };
 
-  // Submit
-  const handleSubmit = (e) => {
+  // === Submit Handler ===
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const submissionData = {
-      name: formData.name,
-      description: formData.description,
-      category: formData.category,
-      trial: formData.trial,
-      tags: formData.tags
-        .split(",")
-        .map((item) => item.trim())
-        .filter((item) => item),
-      material: formData.material,
-      thumbnails: formData.thumbnails.map((file) => ({
-        url: URL.createObjectURL(file),
-        publicId: "mock-public-id-" + file.name,
-      })),
-      dimension: formData.dimension,
-      variants: formData.variants.map((variant) => ({
-        colorId: variant.colorId,
-        price: Number(variant.price),
-        quantityInStock: Number(variant.quantityInStock),
-        image: variant.image
-          ? {
-              url: URL.createObjectURL(variant.image),
-              publicId: "mock-public-id-" + variant.image.name,
-            }
-          : null,
-      })),
-    };
+    try {
+      const fd = new FormData();
+      fd.append("name", formData.name);
+      fd.append("description", formData.description);
+      fd.append("category", formData.category);
+      fd.append("trial", formData.trial);
+      fd.append(
+        "tags",
+        JSON.stringify(
+          formData.tags
+            .split(",")
+            .map((t) => t.trim())
+            .filter((t) => t)
+        )
+      );
+      fd.append("material", formData.material);
 
-    console.log("Form Data (matches Mongoose schema):", submissionData);
-    handleCancel(); // reset form
+      fd.append("dimension", JSON.stringify(formData.dimension));
+
+      formData.thumbnails.forEach((file, idx) => fd.append(`thumbnails`, file));
+
+      // variants (ส่งเป็น JSON ยกเว้น image)
+      const variantsWithoutImages = formData.variants.map((v) => ({
+        trial: v.trial,
+        colorId: v.colorId,
+        price: v.price,
+        quantityInStock: v.quantityInStock,
+      }));
+      fd.append("variants", JSON.stringify(variantsWithoutImages));
+
+      formData.variants.forEach((variant, i) => {
+        if (variant.image) fd.append(`variantImages`, variant.image);
+      });
+
+      // ✅ ส่งไป API
+      const res = await api.post("/products", fd, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      console.log("Product created:", res.data);
+      alert("เพิ่มสินค้าเรียบร้อย!");
+      handleCancel();
+    } catch (err) {
+      console.error("Error creating product:", err);
+      alert("ไม่สามารถเพิ่มสินค้าได้");
+    }
   };
 
   const handleCancel = () => {
@@ -147,18 +153,14 @@ export const AddProductPage = () => {
       material: "",
       trial: false,
       thumbnails: [],
-      dimension: {
-        width: "",
-        height: "",
-        depth: "",
-        weight: "",
-      },
+      dimension: { width: "", height: "", depth: "", weight: "" },
       variants: [
         {
           skuID: "",
           colorId: "",
           price: "",
           quantityInStock: "",
+          trial: false,
           image: null,
         },
       ],
@@ -387,8 +389,8 @@ export const AddProductPage = () => {
                     <option value="" disabled>
                       เลือก Color ID
                     </option>
-                    <option value="66141445b23d6a2f442c4b57">
-                      66141445b23d6a2f442c4b57
+                    <option value="68c3920d4670b96d19e824ff">
+                      68c3920d4670b96d19e824ff
                     </option>
                     <option value="66141445b23d6a2f442c4b58">
                       66141445b23d6a2f442c4b58
