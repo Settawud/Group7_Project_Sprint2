@@ -8,6 +8,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useContext, useMemo, useState } from "react";
 import { ValueContext } from "../../context/ValueContext";
 import { toast } from "sonner";
+import { post } from "../../lib/api";
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -18,7 +19,7 @@ export default function LoginPage() {
   const [attempted, setAttempted] = useState(false);
   const [generalError, setGeneralError] = useState("");
 
-  const API_BASE = import.meta.env.VITE_API_BASE || ""; // e.g., http://localhost:4000/api/v1
+  const API_BASE = import.meta.env.VITE_API_BASE || ""; // e.g., http://localhost:4000/api/v1/mongo
 
   const emailError = useMemo(() => {
     if (!attempted) return "";
@@ -50,20 +51,14 @@ export default function LoginPage() {
       setSubmitting(true);
       // If API base is configured, try real login
       if (API_BASE) {
-        const res = await fetch(`${API_BASE}/auth/login`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password }),
-        }).catch(() => null);
-
-        if (!res) throw new Error("Network error");
-        const data = await res.json().catch(() => ({}));
-        if (!res.ok) {
+        try {
+          const data = await post("/auth/login", { email, password });
+          const name = data?.user?.name || email?.split("@")[0] || "User";
+          login?.({ name, email, token: data?.token });
+        } catch (err) {
           setGeneralError("Invalid email or password");
           return;
         }
-        const name = data?.user?.name || email?.split("@")[0] || "User";
-        login?.({ name, email, token: data?.token });
       } else {
         // Mock success when no backend is configured
         const name = email?.split("@")[0] || "User";

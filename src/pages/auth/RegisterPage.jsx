@@ -8,6 +8,7 @@ import { useContext, useMemo, useState } from "react";
 import { ValueContext } from "../../context/ValueContext";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { post } from "../../lib/api";
 
 export default function RegisterPage() {
   const { login } = useContext(ValueContext) || {};
@@ -19,6 +20,9 @@ export default function RegisterPage() {
   const [confirm, setConfirm] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [attempted, setAttempted] = useState(false);
+  const [generalError, setGeneralError] = useState("");
+
+  const API_BASE = import.meta.env.VITE_API_BASE || ""; // e.g., http://localhost:4000/api/v1/mongo
 
   const emailError = useMemo(() => {
     if (!attempted) return "";
@@ -37,18 +41,39 @@ export default function RegisterPage() {
 
   const disabled = submitting; // allow attempt to trigger field errors
 
-  const onSubmit = (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault();
     setAttempted(true);
+    setGeneralError("");
     if (!firstName || !lastName || !email || !password || !confirm) return;
     if (emailError || passwordError || confirmError) return;
     const fullName = `${firstName} ${lastName}`.trim() || (email?.split("@")[0] ?? "User");
     try {
       setSubmitting(true);
-      // Mock register success (no backend call here)
-      login?.({ name: fullName, email });
-      toast.success("Registered successfully");
-      navigate("/");
+      if (API_BASE) {
+        try {
+          // 1) Register on backend
+          await post("/auth/register", { firstName, lastName, email, password });
+
+          // 2) Auto login to obtain token/session
+          const dataLogin = await post("/auth/login", { email, password });
+          const name = dataLogin?.user?.name || fullName;
+          login?.({ name, email, token: dataLogin?.token });
+          toast.success("Registered successfully");
+          navigate("/");
+        } catch (err) {
+          const msg = err?.response?.data?.message || "Register failed";
+          setGeneralError(msg);
+          return;
+        }
+      } else {
+        // Frontend-only fallback
+        login?.({ name: fullName, email });
+        toast.success("Registered successfully (mock)");
+        navigate("/");
+      }
+    } catch (err) {
+      setGeneralError(err.message || "Register failed");
     } finally {
       setSubmitting(false);
     }
@@ -78,6 +103,7 @@ export default function RegisterPage() {
             <FormField label="Confirm Password" error={confirmError}>
               <Input type="password" value={confirm} onChange={(e)=>setConfirm(e.target.value)} minLength={6} />
             </FormField>
+            {generalError && <div className="text-sm text-red-600">{generalError}</div>}
             <Button className="w-full mt-2" type="submit" disabled={disabled}>{submitting ? "Registering..." : "Register"}</Button>
           </form>
         </AuthCard>

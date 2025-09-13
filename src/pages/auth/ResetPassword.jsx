@@ -7,18 +7,26 @@ import FormField from "../../components/molecules/FormField";
 import Input from "../../components/atoms/Input";
 import Button from "../../components/atoms/Button";
 import { toast } from "sonner";
+import { post } from "../../lib/api";
 
 export default function ResetPassword() {
   const [params] = useSearchParams();
   const token = params.get("token") || "";
+  const emailParam = params.get("email") || "";
   const navigate = useNavigate();
 
+  const [email, setEmail] = useState(emailParam);
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [attempted, setAttempted] = useState(false);
+
+  const emailError = useMemo(() => {
+    if (!attempted) return "";
+    return /.+@.+\..+/.test(email) ? "" : "Invalid email";
+  }, [email, attempted]);
 
   const passwordError = useMemo(() => {
     if (!attempted) return "";
@@ -45,6 +53,16 @@ export default function ResetPassword() {
       setError("Invalid or expired link (missing token)");
       return;
     }
+    if (!email) {
+      setError("Please enter your email");
+      return;
+    }
+    const emailNorm = email.trim().toLowerCase();
+    const validEmail = /.+@.+\..+/.test(emailNorm);
+    if (!validEmail) {
+      setError("Invalid email");
+      return;
+    }
     if (passwordError || confirmError) {
       setError("Please fix the errors above");
       return;
@@ -52,18 +70,14 @@ export default function ResetPassword() {
     try {
       setSubmitting(true);
       const API_BASE = import.meta.env.VITE_API_BASE || "";
-      const res = await fetch(`${API_BASE}/auth/reset-password`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token, newPassword: password })
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data?.message || "Reset password failed");
+      if (!API_BASE) throw new Error("Backend not configured");
+      await post("/auth/password/reset", { email: emailNorm, token, newPassword: password });
       setSuccess("Password reset successful! Please sign in with your new password.");
       toast.success("Password reset successful");
       setTimeout(() => navigate("/login"), 1200);
     } catch (err) {
-      setError(err.message || "Something went wrong");
+      const msg = err?.response?.data?.message || err?.message || "Something went wrong";
+      setError(msg);
     } finally {
       setSubmitting(false);
     }
@@ -82,6 +96,11 @@ export default function ResetPassword() {
               <p className="text-sm text-red-600">Reset token not found. Please request a new email from the forgot password page.</p>
             )}
             <form onSubmit={onSubmit} className="space-y-3">
+              {!emailParam && (
+                <FormField label="Email" hint="Enter the email you used to request reset" error={emailError}>
+                  <Input type="email" value={email} onChange={(e)=>setEmail(e.target.value)} placeholder="you@email.com" />
+                </FormField>
+              )}
               <FormField label="New password" hint="At least 6 characters" error={passwordError}>
                 <Input type="password" value={password} onChange={(e)=>setPassword(e.target.value)} placeholder="••••••••" minLength={6} />
               </FormField>
