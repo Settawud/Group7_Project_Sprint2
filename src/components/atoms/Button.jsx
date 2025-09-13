@@ -13,7 +13,7 @@ export default function Button({
     "rounded-xl font-medium select-none",
     "transition-colors transition-transform duration-200",
     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-stone-900/20",
-    "cursor-pointer"
+    "cursor-pointer",
   ].join(" ");
 
   const sizes = {
@@ -23,18 +23,20 @@ export default function Button({
   };
 
   const variants = {
-    primary: "bg-sandy-beige text-white shadow-lg hover:opacity-90 hover:-translate-y-0.5 active:translate-y-0",
-    secondary: "bg-white text-sandy-beige border border-sandy-beige hover:bg-sandy-beige/10",
+    primary:
+      "bg-sandy-beige text-white shadow-lg hover:opacity-90 hover:-translate-y-0.5 active:translate-y-0",
+    secondary:
+      "bg-white text-sandy-beige border border-sandy-beige hover:bg-sandy-beige/10",
     ghost: "bg-transparent text-inherit hover:bg-stone-900/5",
     onDark: "bg-white/10 text-white border border-white/60 hover:bg-white/20",
   };
 
   return (
     <button
+      {...props}
       type={type}
       className={`${base} ${sizes[size]} ${variants[variant]} ${fullWidth ? "w-full" : ""} ${className}`}
       onClick={onClick}
-      {...props}
     >
       {children}
     </button>

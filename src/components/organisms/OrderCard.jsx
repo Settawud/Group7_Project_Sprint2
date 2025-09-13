@@ -21,8 +21,7 @@ const OrderCard = ({ order }) => {
             />
             <div className="flex-1 space-y-2">
               <p className="font-semibold">{item.name}</p>
-              <p className="text-sm text-[#A8A8A8]">{item.dimensions}</p>
-              <p className="text-sm text-[#A8A8A8]">สี: {item.color}</p>
+              <p className="text-sm text-[#A8A8A8]">Color: {item.color}</p>
               <p className="text-sm text-[#A8A8A8]">
                 Quantity: {item.quantity}
               </p>
@@ -30,7 +29,7 @@ const OrderCard = ({ order }) => {
             <p className="text-sm font-semibold">฿{item.price}</p>
           </div>
 
-          <ReviewSection />
+          <ReviewSection productId={item.productId} />
         </div>
       ))}
 
