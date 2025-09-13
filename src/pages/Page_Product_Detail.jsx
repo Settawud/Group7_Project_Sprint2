@@ -1,40 +1,26 @@
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import axios from "axios";
+
 import StickyImage from "../components/organisms/StickyImage";
 import ProductContent from "../components/organisms/ProductContent";
 import ScrollableThumbnails from "../components/organisms/ScrollableThumbnails";
 import UsersReviewSection from "../components/organisms/UsersReviewSection";
-import { products } from "../data/products";
 import Navbar from "../components/organisms/Navbar";
-import Footer from "../components/organisms/Footer";
-import { useSearchParams } from "react-router-dom";
 
-const App = () => {
-  const [searchParams] = useSearchParams();
-  const selectedProductID = searchParams.get("id") || products[0]?.productID;
-  const selectedProducts = products.filter((product) => product.productID === selectedProductID);
-  const product = selectedProducts[0] || products[0];
+const Page_Product_Detail = () => {
+  const { id } = useParams();
 
-  // Build images from product variants/images if available
-  const variantImages = Array.isArray(product?.variants)
-    ? product.variants
-        .map((v) => v.image)
-        .filter(Boolean)
-        .map((img) => (String(img).startsWith("/") ? img : `/images/${img}`))
-    : [];
-  const images = variantImages.length > 0
-    ? Array.from(new Set(variantImages))
-    : [product?.image ? `/images/${product.image}` : "/images/logo.png"];
+  const [productData, setProductData] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const productData = {
-    id: product.productID,
-    altText: product.altText,
-    image: product.image,
-    Name: product.Name,
-    tag: product.tag,
-    Description: product.Description,
-    material: product.material,
-    trial: product.trial,
-    variants: product.variants,
-  };
+  const images = [
+    "/images/product1.jpg",
+    "/images/product2.jpg",
+    "/images/product3.jpg",
+    "/images/product4.jpg",
+    "/images/product5.jpg",
+  ];
 
   const reviews = [
     {
@@ -63,20 +49,85 @@ const App = () => {
     },
   ];
 
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        const res = await axios.get(`http://localhost:4000/api/v1/mongo/products/${id}`);
+        const data = res.data.item;
+
+        const colorResponses = await Promise.all(
+          data.variants.map((v) =>
+            axios
+              .get(`http://localhost:4000/api/v1/mongo/colors/${v.colorId}`)
+              .then((res) => ({ id: v.colorId, hex: res.data.item.hex }))
+              .catch(() => ({ id: v.colorId, hex: "#D3D3D3" }))
+          )
+        );
+
+        const colorMap = colorResponses.reduce((acc, color) => {
+          acc[color.id] = color.hex;
+          return acc;
+        }, {});
+
+        const mappedProducts = {
+          _id: data._id,
+          Name: data.name,
+          Description: data.description,
+          tag: data.tags,
+          material: data.material,
+          trial: data.trial || false,
+          variants: data.variants.map((v) => ({
+            _id: v._id,
+            trial: v.trial,
+            color: colorMap[v.colorId],
+            price: v.price,
+            quantityInStock: v.quantityInStock,
+            dimensions: data.dimension,
+          })),
+        };
+
+        setProductData({
+          ...mappedProducts,
+          image: data.thumbnails?.[0],
+        });
+
+        setIsLoading(false);
+      } catch (err) {
+        console.error("Error fetching product:", err);
+        setIsLoading(false);
+      }
+    };
+
+    fetchProduct();
+  }, [id]);
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <span className="text-xl">Loading...</span>
+      </div>
+    );
+  }
+
+  if (!productData) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <span className="text-xl">ไม่พบข้อมูลสินค้า</span>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="bg-[#fefdf9]">
       <Navbar />
-      <main className="flex-1">
-        <div className="grid lg:grid-cols-[2fr_1fr] gap-10 mx-auto px-4 py-10 bg-[#fefdf9]">
-          <StickyImage src={product?.image ? `/images/${product.image}` : images[0]} />
-          <ProductContent product={productData} />
-        </div>
-        <ScrollableThumbnails images={images} />
-        <UsersReviewSection reviews={reviews} />
-      </main>
-      <Footer />
+      <div className="grid lg:grid-cols-[2fr_1fr] gap-10 mx-auto px-4 py-10">
+        <StickyImage src={productData.image} />
+        <ProductContent product={productData} />
+      </div>
+      <ScrollableThumbnails images={images} />
+      <UsersReviewSection reviews={reviews} />
     </div>
   );
 };
 
-export default App;
+export default Page_Product_Detail;

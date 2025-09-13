@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import axios from "axios";
+
 import StatusFilter from "../components/organisms/StatusFilter";
 import OrderCard from "../components/organisms/OrderCard";
 import FilterOrder from "../components/organisms/FilterOrder";
@@ -6,66 +8,8 @@ import Sidebar from "../components/organisms/Sidebar";
 import Navbar from "../components/organisms/Navbar";
 import Footer from "../components/organisms/Footer";
 
-const App = () => {
-  const orders = [
-    {
-      id: "ORD001",
-      date: "2025-08-01",
-      status: "Processing",
-      items: [
-        {
-          image: "./image/222.png",
-          name: 'โต๊ะทำงานไม้สไตล์มินิมอล "เรียบง่าย"',
-          dimensions: "120x60x75",
-          color: "น้ำตาล",
-          quantity: 1,
-          price: 3890,
-        },
-        {
-          image: "./image/222.png",
-          name: 'โต๊ะทำงานไม้สไตล์มินิมอล "เรียบง่าย"',
-          dimensions: "120x60x75",
-          color: "น้ำตาล",
-          quantity: 1,
-          price: 3890,
-        },
-      ],
-      total: 3890,
-    },
-    {
-      id: "ORD002",
-      date: "2025-08-05",
-      status: "Completed",
-      items: [
-        {
-          image: "./image/111.png",
-          name: 'เก้าอี้ไม้ "อเนกประสงค์"',
-          dimensions: "40x40x90",
-          color: "ขาว",
-          quantity: 2,
-          price: 2598,
-        },
-      ],
-      total: 2598,
-    },
-    {
-      id: "ORD003",
-      date: "2025-08-10",
-      status: "Pending",
-      items: [
-        {
-          image: "./image/333.png",
-          name: "ตู้เก็บของสไตล์โมเดิร์น",
-          dimensions: "80x40x180",
-          color: "ดำ",
-          quantity: 1,
-          price: 4990,
-        },
-      ],
-      total: 4990,
-    },
-  ];
-
+const Order_History_List = () => {
+  const [orders, setOrders] = useState([]);
   const [status, setStatus] = useState("All");
 
   const [filters, setFilters] = useState({
@@ -75,6 +19,46 @@ const App = () => {
     dateFrom: "",
     dateTo: "",
   });
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    const fetchOrdersAndProducts = async () => {
+      try {
+        const orderRes = await axios.get("http://localhost:4000/api/v1/mongo/orders", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const rawOrders = orderRes.data.items;
+        const mappedOrders = rawOrders.map((order) => ({
+          id: order.orderNumber,
+          date: new Date(order.createdAt).toISOString().split("T")[0],
+          status: order.orderStatus,
+          items: order.items.map((item) => {
+            const variant = item.variant;
+            return {
+              productId: item.productId,
+              image: variant.image,
+              name: item.productName,
+              color: variant.variantOption,
+              quantity: variant.quantity,
+              price: variant.price,
+            };
+          }),
+          total: order.subtotalAmount,
+        })).reverse();
+
+        setOrders(mappedOrders);
+      } catch (err) {
+        console.error("Error fetching orders or products:", err);
+        setOrders([]);
+      }
+    };
+
+    fetchOrdersAndProducts();
+  }, []);
 
   const filteredOrders = orders.filter((order) => {
     if (status !== "All" && order.status !== status) return false;
@@ -93,11 +77,7 @@ const App = () => {
       if (!matchItem) return false;
     }
 
-    if (
-      filters.status &&
-      filters.status !== "All" &&
-      order.status !== filters.status
-    ) {
+    if (filters.status && filters.status !== "All" && order.status !== filters.status) {
       return false;
     }
 
@@ -130,4 +110,4 @@ const App = () => {
   );
 };
 
-export default App;
+export default Order_History_List;

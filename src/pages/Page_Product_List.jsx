@@ -1,186 +1,107 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
+import axios from "axios";
+
+import Navbar from "../components/organisms/Navbar";
 import ProductFilterSortTags from "../components/organisms/ProductFilterSortTags";
 import ProductGridList from "../components/organisms/ProductGridList";
-import { products as rawProducts } from "../data/products";
-import Navbar from "../components/organisms/Navbar";
-import Footer from "../components/organisms/Footer";
-import { useSearchParams } from "react-router-dom";
-import { ValueContext } from "../context/ValueContext";
-import AddToCartModal from "../components/organisms/AddToCartModal";
 
-const App = () => {
-
-  // เพิ่ม searchParams ในการดึงค่าพารามิเตอร์จาก URL
-  const [searchParams] = useSearchParams();
-  const { isModalOpen, setIsModalOpen, product } = useContext(ValueContext)
-
-  // category and search params are handled below with mapping
-
+const Page_Product_List = () => {
   const [filters, setFilters] = useState({
     category: null,
-    space: null,
     price: null,
     availability: null,
-    search: null,
   });
 
-  const categoryMap = {
-    chair: "เก้าอี้",
-    chairs: "เก้าอี้",
-    table: "โต๊ะ",
-    tables: "โต๊ะ",
-    accessories: "อุปกรณ์เสริม",
-    // also accept Thai directly
-    "เก้าอี้": "เก้าอี้",
-    "โต๊ะ": "โต๊ะ",
-    "อุปกรณ์เสริม": "อุปกรณ์เสริม",
+  const [products, setProducts] = useState([]);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
+  const [sort, setSort] = useState("Price High to Low");
+  const search = searchParams.get("search") || "";
+
+  const getSortQuery = (sortValue) => {
+    if (sortValue === "Price High to Low") return "";
+    if (sortValue === "Price Low to High") return "";
+    if (sortValue === "New In") return "";
+    return null;
   };
 
   useEffect(() => {
-    const cat = searchParams.get("category");
-    if (cat) {
-      const key = String(cat).toLowerCase();
-      const mapped = categoryMap[key] ?? cat;
-      setFilters((f) => ({ ...f, category: mapped }));
-    } else {
-      setFilters((f) => ({ ...f, category: null }));
-    }
-  }, [searchParams]);
+    const fetchProducts = async () => {
+      const query = { page };
 
-  const [sort, setSort] = useState("Price High to Low");
-
-  const [products, setProducts] = useState([]);
-  const [filteredProducts, setFilteredProducts] = useState([]);
-  const [sortedProducts, setSortedProducts] = useState([]);
-  
-  useEffect(() => {
-    const transformed = rawProducts.map((p) => {
-      let selectedVariant;
-
-      const normalVariants = p.variants
-        .filter((v) => v.variantName !== "สินค้าทดลอง")
-        .sort((a, b) => a.price - b.price);
-
-      if (normalVariants.length > 0) {
-        selectedVariant = normalVariants[0];
-      } else {
-        const trialVariants = p.variants
-          .filter((v) => v.variantName === "สินค้าทดลอง")
-          .sort((a, b) => a.price - b.price);
-        selectedVariant = trialVariants[0] || null;
+      if (filters.category) {
+        query.category = filters.category;
       }
-
-      let sizeStr = "";
-      if (selectedVariant) {
-        const d = selectedVariant.dimensions;
-        const u = d.unit;
-        sizeStr = `${d.width} ${u.width} x ${d.depth} ${u.depth} x ${d.height} ${u.height}`;
-      }
-
-      return {
-        id: p.productID,
-        imageSrc: p.image,
-        title: p.Name,
-        tag: p.tag,
-        category: p.category,
-        space: p.space,
-        size: sizeStr,
-        price: selectedVariant ? selectedVariant.price : 999999999,
-        allStocks: p.variants.map((v) => v.quantityInStock),
-      };
-    });
-
-    setProducts(transformed);
-  }, []);
-
-  useEffect(() => {
-    const filtered = products.filter((p) => {
-      if (filters.category && p.category !== filters.category) return false;
-
-      if (filters.space && !p.space.includes(filters.space)) return false;
 
       if (filters.availability === "In Stock") {
-        const hasStock = p.allStocks.some((q) => q > 0);
-        if (!hasStock) return false;
+        query.availability = "instock";
       }
 
       if (filters.price) {
-        const [min, max] = filters.price;
-        if (p.price < min || p.price > max) return false;
+        query.minPrice = filters.price[0];
+        query.maxPrice = filters.price[1];
       }
 
-      if (filters.search) {
-        const q = String(filters.search).toLowerCase();
-        const inTitle = p.title?.toLowerCase().includes(q);
-        const inTags = Array.isArray(p.tag) && p.tag.some((t) => String(t).toLowerCase().includes(q));
-        const inSpace = Array.isArray(p.space) && p.space.some((s) => String(s).toLowerCase().includes(q));
-        if (!(inTitle || inTags || inSpace)) return false;
+      const sortQuery = getSortQuery(sort);
+      if (sortQuery) {
+        query.sort = sortQuery;
       }
 
-      return true;
-    });
+      if (search.trim()) {
+        query.search = search.trim();
+      }
 
-    setFilteredProducts(filtered);
-  }, [filters, products]);
+      setSearchParams(query);
 
-  useEffect(() => {
-    const sorted = [...filteredProducts];
-    if (sort === "Price High to Low") {
-      sorted.sort((a, b) => b.price - a.price);
-    } else if (sort === "Price Low to High") {
-      sorted.sort((a, b) => a.price - b.price);
-    } else if (sort === "New In") {
-      sorted.reverse();
-    }
-    setSortedProducts(sorted);
-  }, [filteredProducts, sort]);
+      try {
+        const response = await axios.get("http://localhost:4000/api/v1/mongo/products", {
+          params: query,
+        });
 
-  // Read search query from URL: ?q=...
-  useEffect(() => {
-    const q = searchParams.get("q");
-    setFilters((f) => ({ ...f, search: q || null }));
-  }, [searchParams]);
+        setProducts(response.data.items || []);
+        setTotalPages(Math.ceil((response.data.total || 0) / 12));
+      } catch (err) {
+        console.error("Error fetching products:", err);
+        setProducts([]);
+      }
+    };
+
+    fetchProducts();
+  }, [filters, sort, page, search]);
+
+  const mappedProducts = products.map(product => ({
+    _id: product._id,
+    imageSrc: product.thumbnails[0],
+    title: product.name,
+    tag: product.tags,
+    size: `${product.dimension.width}x${product.dimension.height}x${product.dimension.depth} cm`,
+    price: product.variants[0].price.toLocaleString(),
+  }));
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="bg-[#fefdf9]">
       <Navbar />
-      <main className="flex-1">
-        <div className="flex justify-center px-4 py-10 bg-[#fefdf9]">
-          <div className="w-full">
-            <ProductFilterSortTags
-              filters={filters}
-              setFilters={setFilters}
-              sort={sort}
-              setSort={setSort}
-            />
-            <ProductGridList products={sortedProducts} />
-          </div>
+      <div className="flex min-h-screen justify-center px-4 py-10">
+        <div className="w-full">
+          <ProductFilterSortTags
+            filters={filters}
+            setFilters={setFilters}
+            sort={sort}
+            setSort={setSort}
+          />
+          <ProductGridList
+            products={mappedProducts}
+            page={page}
+            setPage={setPage}
+            totalPages={totalPages} />
         </div>
-      </main>
-      <Footer />
-            <div>
-                            {isModalOpen && (
-          <div
-            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-            onClick={() => setIsModalOpen(false)}
-          >
-            <div
-              className="bg-off-white border-4 border-black rounded-2xl shadow-[8px_8px_0_0_#000] p-8 w-full max-w-lg relative"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="absolute top-4 right-4 text-black bg-white hover:border-2 border-black  rounded-full w-8 h-8 flex items-center justify-center "
-              >
-                ✖
-              </button>
-              <AddToCartModal product={rawProducts.find(item => item.productID === product)} />
-            </div>
-          </div>
-        )}
-</div>
+      </div>
     </div>
   );
 };
 
-export default App;
+export default Page_Product_List;

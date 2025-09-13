@@ -2,9 +2,8 @@ const StatusFilter = ({ currentStatus, onStatusChange }) => {
   const statuses = [
     "All",
     "Pending",
-    "Processing",
-    "Completed",
-    "Cancelled",
+    "Shipped",
+    "Delivered",
   ];
 
   return (

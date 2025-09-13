@@ -43,8 +43,8 @@ export default function App() {
         <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/orderconfirm" element={<Orderconfirm />} />
         <Route path="/AddProductPage" element={<AddProductPage />} />
-        <Route path="/pageproductdetail" element={<Page_Product_Detail />} />
-        <Route path="/pageproductlist" element={<Page_Product_List />} />
+        <Route path="/products/:id" element={<Page_Product_Detail />} />
+        <Route path="/products" element={<Page_Product_List />} />
         <Route path="/orderhistorylist" element={<Order_History_List />} />
         <Route path="/orderhistorydetail" element={<Order_History_Detail />} />
 
