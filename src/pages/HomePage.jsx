@@ -4,35 +4,17 @@ import Navbar from "../components/organisms/Navbar";
 import Footer from "../components/organisms/Footer";
 import CategoryCard from "../components/organisms/CategoryCard";
 import ProductCard from "../components/organisms/ProductCard";
-import ProductGrid from "../components/molecules/ProductGrid";
 import { Link, useNavigate } from "react-router-dom";
 import { Truck, ShieldCheck, Headphones, Wrench, ArrowRight, Heart, Gem, Award, Quote } from "lucide-react";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { ValueContext } from "../context/ValueContext";
 import { api } from "../lib/api";
+
+// Using backend aggregated popular endpoint instead of client-side aggregation
 // import products data (legacy fallback counts)
-import { products, chairs, tables, accessories } from "../data/products";
+// Remove all local mock product imports; rely on API only
 
-// pick top 4 and compute display fields
-const popular = products.slice(0, 4).map((p) => {
-  // prefer the lowest priced non-trial variant; fallback to trial
-  const normal = p.variants
-    ?.filter((v) => v.variantName !== "สินค้าทดลอง")
-    .sort((a, b) => a.price - b.price);
-  const price = normal?.[0]?.price ??
-    p.variants
-      ?.filter((v) => v.variantName === "สินค้าทดลอง")
-      .sort((a, b) => a.price - b.price)?.[0]?.price ?? "";
-
-  return {
-    id: p.productID,
-    name: p.Name,
-    img: p.image,
-    price,
-    rating: p.rating ?? 4,
-    href: `/products/${encodeURIComponent(p.productID)}`,
-  };
-});
+// No local mock "popular"; data comes from backend only
 
 
 export default function HomePage() {
@@ -40,11 +22,16 @@ export default function HomePage() {
   const { addToCart } = useContext(ValueContext) || {};
   const vpRef = useRef(null);
   const [vpVisible, setVpVisible] = useState(false);
+  const carouselRef = useRef(null);
   const [fbName, setFbName] = useState("");
   const [fbEmail, setFbEmail] = useState("");
   const [fbMsg, setFbMsg] = useState("");
   const [fbSent, setFbSent] = useState(false);
   const [popularApi, setPopularApi] = useState([]);
+  const [popTotal, setPopTotal] = useState(0);
+  const [popOffset, setPopOffset] = useState(0);
+  const popLimit = 4;
+  const [categoryCounts, setCategoryCounts] = useState({ Chairs: 0, Tables: 0, Accessories: 0 });
   useEffect(() => {
     const obs = new IntersectionObserver(
       ([entry]) => setVpVisible(entry.isIntersecting),
@@ -60,35 +47,92 @@ export default function HomePage() {
     };
   }, []);
 
+  async function loadPopular(nextOffset=0) {
+    try {
+      // 1) Try aggregated popular from reviews
+      const { data } = await api.get('/products/popular', { params: { limit: popLimit, offset: nextOffset, minAvg: 3 } });
+      const items = Array.isArray(data?.items) ? data.items : [];
+      const popularMapped = items.map((p) => ({
+        id: p._id,
+        name: p.name,
+        img: p.image || "/images/logoCutBackground2.png",
+        price: typeof p.minPrice === 'number' ? p.minPrice : '',
+        rating: typeof p.avgRating === 'number' ? Math.round(p.avgRating * 10) / 10 : 0,
+        href: `/products/${p._id}`,
+        trial: !!p.trial,
+      }));
+
+      // Only include products meeting avg >= 4 (as provided by API).
+      setPopularApi(popularMapped);
+      setPopTotal(Number(data?.total || popularMapped.length));
+      setPopOffset(nextOffset);
+    } catch {
+      setPopularApi([]);
+    }
+  }
+  useEffect(() => { loadPopular(0); }, []);
+
+  // Load category counts from API (no mock)
   useEffect(() => {
+    let alive = true;
     (async () => {
       try {
-        const res = await api.get("/products", { params: { page: 1 } });
-        const items = Array.isArray(res?.data?.items) ? res.data.items : [];
-        const head = items.slice(0, 8);
-        const enriched = await Promise.all(head.map(async (p) => {
-          try {
-            const rv = await api.get(`/reviews/product/${p._id}`);
-            const arr = Array.isArray(rv?.data?.items) ? rv.data.items : [];
-            const avg = arr.length ? arr.reduce((s, r) => s + (r.rating || 0), 0) / arr.length : 0;
-            return { p, avg };
-          } catch { return { p, avg: 0 }; }
-        }));
-        enriched.sort((a, b) => (b.avg || 0) - (a.avg || 0));
-        const mapped = enriched.slice(0, 4).map(({ p, avg }) => ({
-          id: p._id,
-          name: p.name,
-          img: (Array.isArray(p.thumbnails) && (typeof p.thumbnails[0] === 'string' ? p.thumbnails[0] : p.thumbnails[0]?.url))
-               || (p.variants?.find(v => v?.image && (typeof v.image === 'string' ? v.image : v.image?.url)) ? (typeof p.variants.find(v => v.image).image === 'string' ? p.variants.find(v => v.image).image : p.variants.find(v => v.image).image?.url) : null)
-               || "/images/logoCutBackground2.png",
-          price: Array.isArray(p.variants) && p.variants.length ? Math.min(...p.variants.map(v => Number(v.price || 0))) : "",
-          rating: Math.round((avg || 0) * 10) / 10,
-          href: `/products/${p._id}`,
-        }));
-        setPopularApi(mapped);
+        const cats = ["Chairs", "Tables", "Accessories"];
+        const res = await Promise.all(
+          cats.map((c) => api.get('/products', { params: { category: c, page: 1 } }).then(r => ({ c, total: Number(r?.data?.total || 0) })).catch(() => ({ c, total: 0 })))
+        );
+        if (!alive) return;
+        const obj = res.reduce((acc, it) => { acc[it.c] = it.total; return acc; }, { Chairs: 0, Tables: 0, Accessories: 0 });
+        setCategoryCounts(obj);
       } catch {}
     })();
+    return () => { alive = false; };
   }, []);
+
+  function scrollCarousel(direction = 1) {
+    const el = carouselRef.current;
+    if (!el) return;
+    const amount = Math.max(240, Math.floor(el.clientWidth * 0.9));
+    el.scrollBy({ left: amount * direction, behavior: 'smooth' });
+  }
+
+  // Use only API data; loadPopular already fills from backend general list if needed
+  const displayPopular = useMemo(() => (Array.isArray(popularApi) ? popularApi.slice(0, 4) : []), [popularApi]);
+
+  // drag-to-scroll support for carousel
+  const dragRef = useRef({ isDown: false, startX: 0, scrollLeft: 0 });
+  const onCarouselMouseDown = (e) => {
+    const el = carouselRef.current; if (!el) return;
+    dragRef.current.isDown = true;
+    dragRef.current.startX = e.pageX - el.getBoundingClientRect().left;
+    dragRef.current.scrollLeft = el.scrollLeft;
+    el.classList.add('cursor-grabbing');
+    e.preventDefault();
+  };
+  const onCarouselMouseLeave = () => {
+    const el = carouselRef.current; if (!el) return;
+    dragRef.current.isDown = false;
+    el.classList.remove('cursor-grabbing');
+  };
+  const onCarouselMouseUp = () => {
+    const el = carouselRef.current; if (!el) return;
+    dragRef.current.isDown = false;
+    el.classList.remove('cursor-grabbing');
+  };
+  const onCarouselMouseMove = (e) => {
+    const el = carouselRef.current; if (!el) return;
+    if (!dragRef.current.isDown) return;
+    const x = e.pageX - el.getBoundingClientRect().left;
+    const walk = x - dragRef.current.startX;
+    el.scrollLeft = dragRef.current.scrollLeft - walk;
+  };
+  const onCarouselWheel = (e) => {
+    const el = carouselRef.current; if (!el) return;
+    if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+      el.scrollBy({ left: e.deltaY, behavior: 'auto' });
+      e.preventDefault();
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -165,20 +209,20 @@ export default function HomePage() {
           <div className="grid gap-6 sm:grid-cols-3">
             <CategoryCard
               title="Ergonomic Chairs"
-              href="/products?category=Chairs"
-              subtitle={`${chairs.length} items`}
+              href="/products?category=เก้าอี้"
+              subtitle={`${categoryCounts.Chairs} items`}
               imageSrc="/images/EGC-MA-03-O (2).png"
             />
             <CategoryCard
               title="Standing Tables"
-              href="/products?category=Tables"
-              subtitle={`${tables.length} items`}
+              href="/products?category=โต๊ะ"
+              subtitle={`${categoryCounts.Tables} items`}
               imageSrc="/images/EGT-AP-01-W-150.png"
             />
             <CategoryCard
               title="Accessories"
-              href="/products?category=Accessories"
-              subtitle={`${accessories.length} items`}
+              href="/products?category=อุปกรณ์เสริม"
+              subtitle={`${categoryCounts.Accessories} items`}
               imageSrc="/images/20250820_0943_Minimalist Desk Design_remix_01k32nnxkpfeq9dxnzysqr0v0x.png"
             />
           </div>
@@ -189,19 +233,50 @@ export default function HomePage() {
           subtitle="Hand-picked for you"
           actions={<Link to="/products" className="text-sm text-stone-600 hover:underline">View all</Link>}
         >
-          <ProductGrid>
-            {(popularApi.length ? popularApi : popular).map((p) => (
-              <ProductCard
-                key={p.id}
-                img={p.img}
-                name={p.name}
-                price={p.price}
-                rating={p.rating}
-                href={p.href}
-                onAdd={() => navigate(p.href)}
-              />
-            ))}
-          </ProductGrid>
+          <div className="relative group">
+            <button
+              type="button"
+              aria-label="Previous"
+              className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white/80 backdrop-blur px-2 py-2 rounded-full shadow border opacity-0 group-hover:opacity-100 transition-opacity"
+              onClick={() => scrollCarousel(-1)}
+            >
+              ‹
+            </button>
+            <div
+              ref={carouselRef}
+              onWheel={onCarouselWheel}
+              onMouseDown={onCarouselMouseDown}
+              onMouseLeave={onCarouselMouseLeave}
+              onMouseUp={onCarouselMouseUp}
+              onMouseMove={onCarouselMouseMove}
+              className="flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-2 cursor-grab"
+            >
+              {displayPopular.map((p) => (
+                <div key={p.id} className="min-w-[260px] max-w-[280px] snap-start">
+                  <ProductCard
+                    img={p.img}
+                    name={p.name}
+                    price={p.price}
+                    rating={p.rating}
+                    href={p.href}
+                    onAdd={() => navigate(p.href)}
+                    trial={p.trial}
+                  />
+                </div>
+              ))}
+              {displayPopular.length === 0 && (
+                <div className="text-sm text-stone-500">No popular items yet.</div>
+              )}
+            </div>
+            <button
+              type="button"
+              aria-label="Next"
+              className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/80 backdrop-blur px-2 py-2 rounded-full shadow border opacity-0 group-hover:opacity-100 transition-opacity"
+              onClick={() => scrollCarousel(1)}
+            >
+              ›
+            </button>
+          </div>
         </Section>
         {/* About Us section */}
       <Section
