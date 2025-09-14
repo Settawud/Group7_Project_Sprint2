@@ -1,6 +1,8 @@
 import ReviewSection from "./ReviewSection";
 
 const OrderCard = ({ order }) => {
+  const reviewedProducts = new Set();
+
   return (
     <div className="mb-5 cursor-pointer rounded-lg border border-[#B29675] bg-white p-6 hover:bg-[#B2967510]">
       <div className="flex items-center justify-between pb-4 text-sm">
@@ -11,27 +13,34 @@ const OrderCard = ({ order }) => {
         <p className="font-medium text-[#849E91]">{order.status}</p>
       </div>
 
-      {order.items.map((item, idx) => (
-        <div key={idx}>
-          <div className="flex items-start gap-4 pt-4">
-            <img
-              src={item.image}
-              alt={item.name}
-              className="h-48 w-48 rounded-md border object-cover"
-            />
-            <div className="flex-1 space-y-2">
-              <p className="font-semibold">{item.name}</p>
-              <p className="text-sm text-[#A8A8A8]">Color: {item.color}</p>
-              <p className="text-sm text-[#A8A8A8]">
-                Quantity: {item.quantity}
-              </p>
-            </div>
-            <p className="text-sm font-semibold">฿{item.price}</p>
-          </div>
+      {order.items.map((item, idx) => {
+        const alreadyRendered = reviewedProducts.has(item.productId);
+        if (!alreadyRendered) reviewedProducts.add(item.productId);
 
-          <ReviewSection productId={item.productId} />
-        </div>
-      ))}
+        return (
+          <div key={idx}>
+            <div className="flex items-start gap-4 pt-4">
+              <img
+                src={item.image}
+                alt={item.name}
+                className="h-48 w-48 rounded-md border object-cover"
+              />
+              <div className="flex-1 space-y-2">
+                <p className="font-semibold">{item.name}</p>
+                <p className="text-sm text-[#A8A8A8]">Color: {item.color}</p>
+                <p className="text-sm text-[#A8A8A8]">
+                  Quantity: {item.quantity}
+                </p>
+              </div>
+              <p className="text-sm font-semibold">฿{item.price}</p>
+            </div>
+
+            {!alreadyRendered && (
+              <ReviewSection productId={item.productId} />
+            )}
+          </div>
+        );
+      })}
 
       <div className="pt-4 text-right">
         <p className="text-sm">

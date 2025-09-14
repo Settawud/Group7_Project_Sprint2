@@ -1,46 +1,40 @@
-import OrderHistory from "../components/organisms/OrderHistory";
+import { useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { api } from "../lib/api";
+
 import OrderSummarySection from "../components/organisms/OrderSummarySection";
 import ProductDetails from "../components/organisms/ProductDetails";
 import ShippingAddress from "../components/organisms/ShippingAddress";
+import OrderHistory from "../components/organisms/OrderHistory";
 import Sidebar from "../components/organisms/Sidebar";
 import Navbar from "../components/organisms/Navbar";
 import Footer from "../components/organisms/Footer";
 
-const products = [
-  {
-    id: 1,
-    name: 'โต๊ะทำงานไม้ดีไซน์มินิมอล "เรียบง่าย"',
-    quantity: 1,
-    unitPrice: 3890,
-  },
-  {
-    id: 2,
-    name: 'เก้าอี้สุดไม้ "อเนกประสงค์"',
-    quantity: 2,
-    unitPrice: 1299,
-  },
-];
+const Order_History_Detail = () => {
+  const { id } = useParams();
+  const [order, setOrder] = useState(null);
 
-const userAddress = {
-  name: "John Wick",
-  phone: "0812345678",
-  address: "239 Huay Kaew Road, Suthep, Muang, Chiang Mai 50200, Thailand",
-};
+  useEffect(() => {
+    const fetchOrder = async () => {
+      try {
+        const res = await api.get(`/orders/${id}`);
+        const mapped = mapOrderData(res.data.item);
+        setOrder(mapped);
+      } catch (err) {
+        console.error("Failed to fetch order detail", err);
+      }
+    };
 
-const orders = [
-  {
-    orderId: "XXXXXX",
-    orderDate: "01/01/25",
-    numberOfItems: 2,
-    shipping: {
-      carrierName: "Thunder",
-      shippingDate: "03/01/25",
-      shippingMethod: "Standard",
-    },
-  },
-];
+    fetchOrder();
+  }, [id]);
 
-const App = () => {
+
+
+  if (!order) return (
+    <div className="flex justify-center items-center h-screen">
+      <span className="text-xl">Loading order...</span>
+    </div>);
+
   return (
     <div>
       <Navbar />
@@ -48,17 +42,17 @@ const App = () => {
         <Sidebar />
         <main className="flex-1">
           <OrderSummarySection
-            orderNumber="12345678"
-            orderStatus="Shipped"
-            shippingStatus="In Transit"
+            orderNumber={order.orderNumber}
+            orderStatus={order.orderStatus}
+            shippingStatus={order.shippingStatus}
           />
           <ShippingAddress
-            name={userAddress.name}
-            phone={userAddress.phone}
-            address={userAddress.address}
+            name={order.shippingAddress.name}
+            phone={order.shippingAddress.phone}
+            address={order.shippingAddress.address}
           />
-          <ProductDetails products={products} />
-          <OrderHistory orders={orders} />
+          <ProductDetails products={order.products} />
+          <OrderHistory orders={order.orderHistory} />
         </main>
       </div>
       <Footer />
@@ -66,4 +60,49 @@ const App = () => {
   );
 };
 
-export default App;
+export default Order_History_Detail;
+
+function mapOrderData(data) {
+  const items = Array.isArray(data.items) ? data.items : [];
+
+  return {
+    orderNumber: data.orderNumber,
+    orderStatus: data.orderStatus,
+    shippingStatus: data.shipping?.deliveryStatus || "Unknown",
+
+    products: items.map((item) => ({
+      id: item.productId?.$oid || item.productId,
+      name: item.productName,
+      quantity: item.variant.quantity,
+      unitPrice: item.variant.price,
+    })),
+
+    shippingAddress: {
+      name: "Unknown",
+      phone: "Unknown",
+      address: data.shipping?.address || "No address provided",
+    },
+
+    orderHistory: [
+      {
+        orderDate: formatDate(data.createdAt?.$date || data.createdAt),
+        numberOfItems: items.length,
+        shipping: {
+          shippingDate: data.shipping?.shippedAt
+            ? formatDate(data.shipping.shippedAt)
+            : "",
+          shippingMethod: data.shipping.trackingNumber,
+        },
+      },
+    ],
+  };
+}
+
+function formatDate(dateString) {
+  const date = new Date(dateString);
+  return date.toLocaleDateString("th-TH", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+}
