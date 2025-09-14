@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import { api } from "../../lib/api";
 
 const ReviewSection = ({ productId }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -11,25 +11,35 @@ const ReviewSection = ({ productId }) => {
   const [errorMessage, setErrorMessage] = useState("");
   const [hasReviewed, setHasReviewed] = useState(false);
 
-  const toggleReview = () => setIsOpen((prev) => !prev);
+  const [userName, setUserName] = useState("");
 
+  const toggleReview = () => setIsOpen((prev) => !prev);
   const handleMouseEnter = (index) => setHovered(index);
   const handleMouseLeave = () => setHovered(0);
   const handleRatingClick = (index) => setRating(index);
 
   useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        const res = await api.get("/users/me");
+        const fullName = `${res.data.user.firstName} ${res.data.user.lastName}`.trim();
+        setUserName(fullName || "");
+      } catch (err) {
+        console.error("Error fetching user profile:", err);
+      }
+    };
+
+    fetchUserProfile();
+  }, []);
+
+  useEffect(() => {
     const fetchMyReviews = async () => {
       try {
-
-        const res = await axios.get("http://localhost:4000/api/v1/mongo/reviews/me", {
-          withCredentials: true,
-        });
-
+        const res = await api.get("/reviews/me");
         const myReviews = res.data.items || [];
         const alreadyReviewed = myReviews.some(
           (review) => review.productId === productId
         );
-
         setHasReviewed(alreadyReviewed);
       } catch (err) {
         console.error("Error fetching user reviews:", err);
@@ -50,21 +60,14 @@ const ReviewSection = ({ productId }) => {
     setIsSubmitting(true);
     setErrorMessage("");
     setSuccessMessage("");
-    const name = "name";
-    try {
 
-      await axios.post(
-        "http://localhost:4000/api/v1/mongo/reviews",
-        {
-          productId,
-          name,
-          rating,
-          comment,
-        },
-        {
-          withCredentials: true,
-        }
-      );
+    try {
+      await api.post("/reviews", {
+        productId,
+        name: userName,
+        rating,
+        comment,
+      });
 
       setSuccessMessage("Success!");
       setHasReviewed(true);
@@ -142,7 +145,7 @@ const ReviewSection = ({ productId }) => {
           <div className="text-right pt-2">
             <button
               onClick={submitReview}
-              disabled={isSubmitting}
+              disabled={isSubmitting || !userName}
               className="bg-[#B29675] text-white px-4 py-2 rounded hover:bg-[#9e8460] transition disabled:opacity-50"
             >
               {isSubmitting ? "กำลังส่ง..." : "ส่งรีวิว"}

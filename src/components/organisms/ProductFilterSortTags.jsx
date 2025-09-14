@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import PriceRangeSlider from "./PriceRangeSlider";
+import { ChevronDown, X as XIcon } from "lucide-react";
 
 const Dropdown = ({
   label,
@@ -54,12 +55,9 @@ const Dropdown = ({
         >
           {renderLabel()}
         </span>
-        <img
-          src="./icon/chevron_down.svg"
-          alt="chevron down"
-          className={`w-4 h-3 transition-transform duration-300 ${
-            open ? "rotate-180" : ""
-          }`}
+        <ChevronDown
+          aria-hidden="true"
+          className={`w-4 h-4 ml-2 transition-transform duration-300 ${open ? "rotate-180" : ""}`}
         />
       </button>
 
@@ -106,7 +104,7 @@ export const FilterProduct = ({ filters, setFilters }) => {
     <div className="grid grid-cols-1 sm:grid-cols-4 w-full sm:w-fit gap-2">
       <Dropdown
         label="Category"
-        options={["Ergonomic Chairs", "Standing Desks", "Accessories"]}
+        options={["Chairs(เก้าอี้)", "Tables(โต๊ะ)", "Accessories(อุปกรณ์เสริม)"]}
         selected={filters.category}
         setSelected={(value) => setFilters((f) => ({ ...f, category: value }))}
         useFixedLabel={true}
@@ -174,7 +172,7 @@ export const Tags = ({ filters, removeFilter, clearAll }) => {
                   ? `฿${label[0].toLocaleString()} - ฿${label[1].toLocaleString()}`
                   : label}
               </span>
-              <img src="./icon/X.svg" alt="remove" className="w-4 h-4" />
+              <XIcon aria-hidden="true" className="w-4 h-4" />
             </div>
           ))
         ) : (

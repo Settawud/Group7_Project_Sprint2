@@ -5,11 +5,10 @@ const API_BASE = import.meta.env.VITE_API_BASE || "";
 export const api = axios.create({
   baseURL: API_BASE,
   withCredentials: true,
-  // Do not set global Content-Type: let axios choose based on payload
- 
+  timeout: 15000,
 });
 
-// Attach Authorization from localStorage (if available)
+// Attach Authorization and content-type handling
 api.interceptors.request.use((config) => {
   try {
     const raw = localStorage.getItem("user");
@@ -21,10 +20,9 @@ api.interceptors.request.use((config) => {
       }
     }
   } catch {}
-  // Ensure correct content type for FormData
   if (config.data instanceof FormData) {
-    if (config.headers) delete config.headers["Content-Type"];
-  } else {
+    if (config.headers) delete config.headers["Content-Type"]; // let browser set boundary
+  } else if (config.data !== undefined) {
     config.headers = config.headers || {};
     config.headers["Content-Type"] = config.headers["Content-Type"] || "application/json";
   }

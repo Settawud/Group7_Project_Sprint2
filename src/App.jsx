@@ -22,12 +22,6 @@ import { ValueContext } from "./context/ValueContext";
 import { Toaster } from "sonner";
 import { AdminProductManagement } from "./pages/AdminProductManagement";
 
-
-
-
-
-
-
 export default function App() {
   return (
     <BrowserRouter>

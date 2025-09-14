@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import axios from "axios";
+import { api } from "../lib/api";
 
 import StickyImage from "../components/organisms/StickyImage";
 import ProductContent from "../components/organisms/ProductContent";
@@ -14,51 +14,22 @@ const Page_Product_Detail = () => {
   const [productData, setProductData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const images = [
-    "/images/product1.jpg",
-    "/images/product2.jpg",
-    "/images/product3.jpg",
-    "/images/product4.jpg",
-    "/images/product5.jpg",
-  ];
+  const [images, setImages] = useState([]);
 
-  const reviews = [
-    {
-      id: 1,
-      name: "คุณธีระ",
-      rating: 5.0,
-      comment: "โต๊ะสวยมาก วัสดุดี แข็งแรง แต่ประกอบเองยากนิดหน่อย",
-    },
-    {
-      id: 2,
-      name: "คุณธีระ",
-      rating: 5.0,
-      comment: "ส่งไว ประกอบง่าย ใช้งานดีมากครับ ประทับใจ",
-    },
-    {
-      id: 3,
-      name: "คุณธีระ",
-      rating: 5.0,
-      comment: "สินค้าคุณภาพดีแต่สีไม่ตรงกับภาพเล็กน้อย",
-    },
-    {
-      id: 4,
-      name: "คุณธีระ",
-      rating: 5.0,
-      comment: "เหมาะกับการใช้งานในออฟฟิศมาก",
-    },
-  ];
+  const [reviews, setReviews] = useState([]);
+  const [reviewsLoading, setReviewsLoading] = useState(true);
+  const [reviewsError, setReviewsError] = useState(null);
 
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const res = await axios.get(`http://localhost:4000/api/v1/mongo/products/${id}`);
+        const res = await api.get(`/products/${id}`);
         const data = res.data.item;
 
         const colorResponses = await Promise.all(
           data.variants.map((v) =>
-            axios
-              .get(`http://localhost:4000/api/v1/mongo/colors/${v.colorId}`)
+            api
+              .get(`/colors/${v.colorId}`)
               .then((res) => ({ id: v.colorId, hex: res.data.item.hex }))
               .catch(() => ({ id: v.colorId, hex: "#D3D3D3" }))
           )
@@ -85,25 +56,55 @@ const Page_Product_Detail = () => {
           })),
         };
 
+        const firstThumb = Array.isArray(data.thumbnails)
+          ? (typeof data.thumbnails[0] === 'string' ? data.thumbnails[0] : data.thumbnails[0]?.url)
+          : null;
+
+        const variantImages = (data.variants || [])
+          .map((v) => (typeof v.image === 'string' ? v.image : v.image?.url))
+          .filter(Boolean);
+
+        const allImages = [firstThumb, ...variantImages].filter(Boolean);
+
         setProductData({
           ...mappedProducts,
-          image: data.thumbnails?.[0],
+          image: firstThumb,
         });
-
-        setIsLoading(false);
+        setImages(allImages);
       } catch (err) {
         console.error("Error fetching product:", err);
+        setProductData(null);
+      } finally {
         setIsLoading(false);
       }
     };
 
+    const fetchReviews = async () => {
+      try {
+        setReviewsLoading(true);
+        setReviewsError(null);
+
+        const res = await api.get(`/reviews/product/${id}`);
+        const reviewItems = res.data.items || res.data || [];
+
+        setReviews(reviewItems);
+      } catch (err) {
+        console.error("Error fetching reviews:", err);
+        setReviewsError("ไม่สามารถโหลดรีวิวได้");
+        setReviews([]);
+      } finally {
+        setReviewsLoading(false);
+      }
+    };
+
     fetchProduct();
+    fetchReviews();
   }, [id]);
 
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-screen">
-        <span className="text-xl">Loading...</span>
+        <span className="text-xl">Loading product...</span>
       </div>
     );
   }
@@ -124,7 +125,17 @@ const Page_Product_Detail = () => {
         <ProductContent product={productData} />
       </div>
       <ScrollableThumbnails images={images} />
-      <UsersReviewSection reviews={reviews} />
+
+      {reviewsLoading && (
+        <p className="text-center py-4 text-gray-500">Loading reviews...</p>
+      )}
+      {reviewsError && (
+        <p className="text-center py-4 text-red-500">{reviewsError}</p>
+      )}
+
+      {!reviewsLoading && !reviewsError && (
+        <UsersReviewSection reviews={reviews} />
+      )}
     </div>
   );
 };
