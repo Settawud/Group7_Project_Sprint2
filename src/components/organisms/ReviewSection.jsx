@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import { api } from "../../lib/api";
 
 const ReviewSection = ({ productId }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -21,9 +21,7 @@ const ReviewSection = ({ productId }) => {
     const fetchMyReviews = async () => {
       try {
 
-        const res = await axios.get("http://localhost:4000/api/v1/mongo/reviews/me", {
-          withCredentials: true,
-        });
+        const res = await api.get("/reviews/me");
 
         const myReviews = res.data.items || [];
         const alreadyReviewed = myReviews.some(
@@ -53,16 +51,13 @@ const ReviewSection = ({ productId }) => {
     const name = "name";
     try {
 
-      await axios.post(
-        "http://localhost:4000/api/v1/mongo/reviews",
+      await api.post(
+        "/reviews",
         {
           productId,
           name,
           rating,
           comment,
-        },
-        {
-          withCredentials: true,
         }
       );
 

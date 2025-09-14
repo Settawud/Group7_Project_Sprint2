@@ -1,5 +1,5 @@
-import axios from "axios";
 import { useEffect } from "react";
+import { api } from "../../lib/api";
 import { useState } from "react";
 
 const ProductContent = ({ product }) => {
@@ -41,15 +41,12 @@ const ProductContent = ({ product }) => {
   const handleAddToCart = async () => {
     try {
 
-      const res = await axios.post(
-        "http://localhost:4000/api/v1/mongo/cart/items",
+      const res = await api.post(
+        "/cart/items",
         {
           productId: _id,
           variantId: currentVariant._id,
           quantity: quantity,
-        },
-        {
-          withCredentials: true,
         }
       );
 

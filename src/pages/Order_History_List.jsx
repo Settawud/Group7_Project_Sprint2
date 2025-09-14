@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import { api } from "../lib/api";
 
 import StatusFilter from "../components/organisms/StatusFilter";
 import OrderCard from "../components/organisms/OrderCard";
@@ -24,11 +24,7 @@ const Order_History_List = () => {
 
     const fetchOrdersAndProducts = async () => {
       try {
-        const orderRes = await axios.get("http://localhost:4000/api/v1/mongo/orders", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const orderRes = await api.get("/orders");
 
         const rawOrders = orderRes.data.items;
         const mappedOrders = rawOrders.map((order) => ({

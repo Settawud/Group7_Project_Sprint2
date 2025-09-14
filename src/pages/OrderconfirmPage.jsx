@@ -4,7 +4,6 @@ import table from "../assets/table.jpg";
 import Navbar from "../components/organisms/Navbar";
 import Container from "../components/layout/Container";
 import Footer from "../components/organisms/Footer";
-import axios from "axios";
 import { useEffect, useState } from "react";
 import { api } from "../lib/api";
 
