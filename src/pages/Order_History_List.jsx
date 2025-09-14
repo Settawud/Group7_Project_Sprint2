@@ -28,7 +28,8 @@ const Order_History_List = () => {
 
         const rawOrders = orderRes.data.items;
         const mappedOrders = rawOrders.map((order) => ({
-          id: order.orderNumber,
+          _id: order._id,
+          orderId: order.orderNumber,
           date: new Date(order.createdAt).toISOString().split("T")[0],
           status: order.orderStatus,
           items: order.items.map((item) => {
