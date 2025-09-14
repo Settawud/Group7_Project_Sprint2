@@ -4,44 +4,34 @@ import Navbar from "../components/organisms/Navbar";
 import Footer from "../components/organisms/Footer";
 import CategoryCard from "../components/organisms/CategoryCard";
 import ProductCard from "../components/organisms/ProductCard";
-import ProductGrid from "../components/molecules/ProductGrid";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Truck, ShieldCheck, Headphones, Wrench, ArrowRight, Heart, Gem, Award, Quote } from "lucide-react";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { ValueContext } from "../context/ValueContext";
-// import products data
-import { products, chairs, tables, accessories } from "../data/products";
+import { api } from "../lib/api";
 
-// pick top 4 and compute display fields
-const popular = products.slice(0, 4).map((p) => {
-  // prefer the lowest priced non-trial variant; fallback to trial
-  const normal = p.variants
-    ?.filter((v) => v.variantName !== "สินค้าทดลอง")
-    .sort((a, b) => a.price - b.price);
-  const price = normal?.[0]?.price ??
-    p.variants
-      ?.filter((v) => v.variantName === "สินค้าทดลอง")
-      .sort((a, b) => a.price - b.price)?.[0]?.price ?? "";
+// Using backend aggregated popular endpoint instead of client-side aggregation
+// import products data (legacy fallback counts)
+// Remove all local mock product imports; rely on API only
 
-  return {
-    id: p.productID,
-    name: p.Name,
-    img: p.image,
-    price,
-    rating: p.rating ?? 4,
-    href: `/pageproductdetail?id=${encodeURIComponent(p.productID)}`,
-  };
-});
+// No local mock "popular"; data comes from backend only
 
 
 export default function HomePage() {
+  const navigate = useNavigate();
   const { addToCart } = useContext(ValueContext) || {};
   const vpRef = useRef(null);
   const [vpVisible, setVpVisible] = useState(false);
+  const carouselRef = useRef(null);
   const [fbName, setFbName] = useState("");
   const [fbEmail, setFbEmail] = useState("");
   const [fbMsg, setFbMsg] = useState("");
   const [fbSent, setFbSent] = useState(false);
+  const [popularApi, setPopularApi] = useState([]);
+  const [popTotal, setPopTotal] = useState(0);
+  const [popOffset, setPopOffset] = useState(0);
+  const popLimit = 4;
+  const [categoryCounts, setCategoryCounts] = useState({ Chairs: 0, Tables: 0, Accessories: 0 });
   useEffect(() => {
     const obs = new IntersectionObserver(
       ([entry]) => setVpVisible(entry.isIntersecting),
@@ -56,6 +46,93 @@ export default function HomePage() {
       obs.disconnect();
     };
   }, []);
+
+  async function loadPopular(nextOffset=0) {
+    try {
+      // 1) Try aggregated popular from reviews
+      const { data } = await api.get('/products/popular', { params: { limit: popLimit, offset: nextOffset, minAvg: 3 } });
+      const items = Array.isArray(data?.items) ? data.items : [];
+      const popularMapped = items.map((p) => ({
+        id: p._id,
+        name: p.name,
+        img: p.image || "/images/logoCutBackground2.png",
+        price: typeof p.minPrice === 'number' ? p.minPrice : '',
+        rating: typeof p.avgRating === 'number' ? Math.round(p.avgRating * 10) / 10 : 0,
+        href: `/products/${p._id}`,
+        trial: !!p.trial,
+      }));
+
+      // Only include products meeting avg >= 4 (as provided by API).
+      setPopularApi(popularMapped);
+      setPopTotal(Number(data?.total || popularMapped.length));
+      setPopOffset(nextOffset);
+    } catch {
+      setPopularApi([]);
+    }
+  }
+  useEffect(() => { loadPopular(0); }, []);
+
+  // Load category counts from API (no mock)
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const cats = ["Chairs", "Tables", "Accessories"];
+        const res = await Promise.all(
+          cats.map((c) => api.get('/products', { params: { category: c, page: 1 } }).then(r => ({ c, total: Number(r?.data?.total || 0) })).catch(() => ({ c, total: 0 })))
+        );
+        if (!alive) return;
+        const obj = res.reduce((acc, it) => { acc[it.c] = it.total; return acc; }, { Chairs: 0, Tables: 0, Accessories: 0 });
+        setCategoryCounts(obj);
+      } catch {}
+    })();
+    return () => { alive = false; };
+  }, []);
+
+  function scrollCarousel(direction = 1) {
+    const el = carouselRef.current;
+    if (!el) return;
+    const amount = Math.max(240, Math.floor(el.clientWidth * 0.9));
+    el.scrollBy({ left: amount * direction, behavior: 'smooth' });
+  }
+
+  // Use only API data; loadPopular already fills from backend general list if needed
+  const displayPopular = useMemo(() => (Array.isArray(popularApi) ? popularApi.slice(0, 4) : []), [popularApi]);
+
+  // drag-to-scroll support for carousel
+  const dragRef = useRef({ isDown: false, startX: 0, scrollLeft: 0 });
+  const onCarouselMouseDown = (e) => {
+    const el = carouselRef.current; if (!el) return;
+    dragRef.current.isDown = true;
+    dragRef.current.startX = e.pageX - el.getBoundingClientRect().left;
+    dragRef.current.scrollLeft = el.scrollLeft;
+    el.classList.add('cursor-grabbing');
+    e.preventDefault();
+  };
+  const onCarouselMouseLeave = () => {
+    const el = carouselRef.current; if (!el) return;
+    dragRef.current.isDown = false;
+    el.classList.remove('cursor-grabbing');
+  };
+  const onCarouselMouseUp = () => {
+    const el = carouselRef.current; if (!el) return;
+    dragRef.current.isDown = false;
+    el.classList.remove('cursor-grabbing');
+  };
+  const onCarouselMouseMove = (e) => {
+    const el = carouselRef.current; if (!el) return;
+    if (!dragRef.current.isDown) return;
+    const x = e.pageX - el.getBoundingClientRect().left;
+    const walk = x - dragRef.current.startX;
+    el.scrollLeft = dragRef.current.scrollLeft - walk;
+  };
+  const onCarouselWheel = (e) => {
+    const el = carouselRef.current; if (!el) return;
+    if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+      el.scrollBy({ left: e.deltaY, behavior: 'auto' });
+      e.preventDefault();
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -84,7 +161,7 @@ export default function HomePage() {
               <p className="text-base md:text-lg text-white/90 max-w-2xl mx-auto">Discover ergonomic furniture crafted for focus and comfort.</p>
               <div className="mt-8 md:mt-10 flex items-center justify-center gap-3">
                 <Link
-                  to="/pageproductlist"
+                  to="/products"
                   aria-label="Shop now"
                   className="relative inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-[#B29674] to-[#c8a883] px-10 py-3.5 text-base md:text-lg font-semibold text-white shadow-[0_10px_20px_rgba(178,150,116,0.45)] ring-1 ring-black/10 transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_28px_rgba(178,150,116,0.55)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
                 >
@@ -132,21 +209,21 @@ export default function HomePage() {
           <div className="grid gap-6 sm:grid-cols-3">
             <CategoryCard
               title="Ergonomic Chairs"
-              href="/pageproductlist?category=chairs"
-              subtitle={`${chairs.length} items`}
-              imageSrc="/images/EGC-EF-01-B.png"
+              href="/products?category=เก้าอี้"
+              subtitle={`${categoryCounts.Chairs} items`}
+              imageSrc="/images/EGC-MA-03-O (2).png"
             />
             <CategoryCard
               title="Standing Tables"
-              href="/pageproductlist?category=tables"
-              subtitle={`${tables.length} items`}
-              imageSrc="/images/EGT-AP-01-W-120.png"
+              href="/products?category=โต๊ะ"
+              subtitle={`${categoryCounts.Tables} items`}
+              imageSrc="/images/EGT-AP-01-W-150.png"
             />
             <CategoryCard
               title="Accessories"
-              href="/pageproductlist?category=อุปกรณ์เสริม"
-              subtitle={`${accessories.length} items`}
-              imageSrc="/images/EGA-FR-01.png"
+              href="/products?category=อุปกรณ์เสริม"
+              subtitle={`${categoryCounts.Accessories} items`}
+              imageSrc="/images/20250820_0943_Minimalist Desk Design_remix_01k32nnxkpfeq9dxnzysqr0v0x.png"
             />
           </div>
         </Section>
@@ -154,29 +231,52 @@ export default function HomePage() {
         <Section
           title="Popular Picks"
           subtitle="Hand-picked for you"
-          actions={<Link to="/pageproductlist" className="text-sm text-stone-600 hover:underline">View all</Link>}
+          actions={<Link to="/products" className="text-sm text-stone-600 hover:underline">View all</Link>}
         >
-          <ProductGrid>
-            {popular.map((p) => (
-              <ProductCard
-                key={p.id}
-                img={`/images/${p.img}`}
-                name={p.name}
-                price={p.price}
-                rating={p.rating}
-                href={p.href}
-                onAdd={() =>
-                  addToCart?.({
-                    skuId: p.id,
-                    image: `/images/${p.img}`,
-                    name: p.name,
-                    altText: p.name,
-                    price: p.price,
-                  }, 1)
-                }
-              />
-            ))}
-          </ProductGrid>
+          <div className="relative group">
+            <button
+              type="button"
+              aria-label="Previous"
+              className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white/80 backdrop-blur px-2 py-2 rounded-full shadow border opacity-0 group-hover:opacity-100 transition-opacity"
+              onClick={() => scrollCarousel(-1)}
+            >
+              ‹
+            </button>
+            <div
+              ref={carouselRef}
+              onWheel={onCarouselWheel}
+              onMouseDown={onCarouselMouseDown}
+              onMouseLeave={onCarouselMouseLeave}
+              onMouseUp={onCarouselMouseUp}
+              onMouseMove={onCarouselMouseMove}
+              className="flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-2 cursor-grab"
+            >
+              {displayPopular.map((p) => (
+                <div key={p.id} className="min-w-[260px] max-w-[280px] snap-start">
+                  <ProductCard
+                    img={p.img}
+                    name={p.name}
+                    price={p.price}
+                    rating={p.rating}
+                    href={p.href}
+                    onAdd={() => navigate(p.href)}
+                    trial={p.trial}
+                  />
+                </div>
+              ))}
+              {displayPopular.length === 0 && (
+                <div className="text-sm text-stone-500">No popular items yet.</div>
+              )}
+            </div>
+            <button
+              type="button"
+              aria-label="Next"
+              className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/80 backdrop-blur px-2 py-2 rounded-full shadow border opacity-0 group-hover:opacity-100 transition-opacity"
+              onClick={() => scrollCarousel(1)}
+            >
+              ›
+            </button>
+          </div>
         </Section>
         {/* About Us section */}
       <Section
@@ -229,56 +329,64 @@ export default function HomePage() {
           </div>
         </Section>
 
-        {/* FAQ / Feedback form */}
-        <Section title="Questions or Feedback?" subtitle="Send us a message — our team will get back quickly.">
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (!fbName || !fbEmail || !fbMsg) return;
-              setFbSent(true);
-              setFbName("");
-              setFbEmail("");
-              setFbMsg("");
-            }}
-            className="grid grid-cols-1 md:grid-cols-3 gap-4"
-          >
-            <input
-              className="rounded-xl border border-stone-300 bg-white/80 px-4 py-3 outline-none focus:ring-2 focus:ring-amber-300"
-              placeholder="Your name"
-              value={fbName}
-              onChange={(e) => setFbName(e.target.value)}
-              required
-            />
-            <input
-              type="email"
-              className="rounded-xl border border-stone-300 bg-white/80 px-4 py-3 outline-none focus:ring-2 focus:ring-amber-300"
-              placeholder="Email"
-              value={fbEmail}
-              onChange={(e) => setFbEmail(e.target.value)}
-              required
-            />
-            <div className="md:col-span-3 grid grid-cols-1 md:grid-cols-[1fr_auto] gap-4">
-              <textarea
-                rows={3}
-                className="rounded-xl border border-stone-300 bg-white/80 px-4 py-3 outline-none focus:ring-2 focus:ring-amber-300"
-                placeholder="Type your question or message"
-                value={fbMsg}
-                onChange={(e) => setFbMsg(e.target.value)}
-                required
-              />
-              
-            </div>
-            <button
-                type="submit"
-                className="h-12 md:h-15 md:self-center rounded-xl bg-[#B29675] px-6 text-white font-semibold hover:bg-[#a68968] transition"
-              >
-                Send Message
-              </button>
-            {fbSent && (
-              <p className="md:col-span-3 text-sm text-green-700">Thanks! Your message has been received.</p>
-            )}
-          </form>
-        </Section>
+      {/* FAQ / Feedback form */}
+<Section title="Questions or Feedback?" subtitle="Send us a message — our team will get back quickly.">
+  <form
+    onSubmit={(e) => {
+      e.preventDefault();
+      if (!fbName || !fbEmail || !fbMsg) return;
+      setFbSent(true);
+      setFbName(""); setFbEmail(""); setFbMsg("");
+    }}
+    className="max-w-2xl mx-auto space-y-4"  // << อยู่กลาง + ความกว้างพอดีตา
+  >
+    {/* แถว: ชื่อ + อีเมล */}
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <input
+        className="rounded-xl border border-stone-300 bg-white/80 px-4 py-3 outline-none focus:ring-2 focus:ring-amber-300"
+        placeholder="Your name"
+        value={fbName}
+        onChange={(e) => setFbName(e.target.value)}
+        required
+      />
+      <input
+        type="email"
+        className="rounded-xl border border-stone-300 bg-white/80 px-4 py-3 outline-none focus:ring-2 focus:ring-amber-300"
+        placeholder="Email"
+        value={fbEmail}
+        onChange={(e) => setFbEmail(e.target.value)}
+        required
+      />
+    </div>
+
+    {/* แถว: ข้อความ */}
+    <textarea
+      rows={4}
+      className="w-full rounded-xl border border-stone-300 bg-white/80 px-4 py-3 outline-none focus:ring-2 focus:ring-amber-300"
+      placeholder="Type your question or message"
+      value={fbMsg}
+      onChange={(e) => setFbMsg(e.target.value)}
+      required
+    />
+
+    {/* แถว: ปุ่ม ส่ง (กลางหน้า) */}
+    <div className="flex justify-center">
+      <button
+        type="submit"
+        className="h-12 rounded-xl bg-[#B29675] px-8 text-white font-semibold hover:bg-[#a68968] transition"
+      >
+        Send Message
+      </button>
+    </div>
+
+    {fbSent && (
+      <p className="text-center text-sm text-green-700">
+        Thanks! Your message has been received.
+      </p>
+    )}
+  </form>
+</Section>
+
       </Container>
       </div>
       </main>

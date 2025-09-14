@@ -1,12 +1,25 @@
 import { Link } from "react-router-dom";
 
-const ProductCardList = ({ _id, imageSrc, title, tag, size, price }) => {
+const ProductCardList = ({ _id, imageSrc, title, tag, size, price, trial = false }) => {
 
   return (
-    <div className="w-full max-w-sm overflow-hidden bg-white border border-[#b29675] rounded-xl shadow transition-transform duration-300 ease-in-out hover:scale-105">
+    <div className="relative w-full max-w-sm overflow-hidden bg-white border border-[#b29675] rounded-xl shadow transition-transform duration-300 ease-in-out hover:scale-105">
+      {trial && (
+        <>
+          <div aria-hidden className="absolute left-0 top-0 h-full w-1.5 bg-amber-500" />
+          <span className="absolute top-2 left-2 z-10 rounded-full bg-amber-600/95 text-white text-[10px] font-semibold px-2 py-0.5">Trial</span>
+        </>
+      )}
       <Link to={`/products/${_id}`}>
-        <img src={imageSrc} alt={title} />
-      </Link >
+        <img
+          src={imageSrc}
+          alt={title}
+          onError={(e) => {
+            e.currentTarget.onerror = null;
+            e.currentTarget.src = "/images/logoCutBackground2.png";
+          }}
+        />
+      </Link>
       <div className="p-4 space-y-3">
         <div className="flex flex-wrap gap-2">
           {tag.map((t, index) => (

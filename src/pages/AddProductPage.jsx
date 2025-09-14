@@ -1,430 +1,702 @@
-import React, { useState } from 'react'
-import Navbar from '../components/organisms/Navbar';
-
+import React, { useEffect, useState } from "react";
+import Navbar from "../components/organisms/Navbar";
+import Footer from "../components/organisms/Footer";
+import { api, postForm } from "../lib/api";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 export const AddProductPage = () => {
-    const [formData, setFormData] = useState({
-    productID: '',
-    Name: '',
-    Description: '',
-    category: 'chairs',
-    tag: '',
-    material: '',
-    space: '',
-    mainImages: [], // Array of objects, each with { file: File, altText: string }
-    variants: [{
-      skuID: '',
-      variantName: '',
-      variantOption: '',
-      price: '',
-      quantityInStock: '',
-      availability: 'In Stock',
-      variantImages: [], // Now an array to hold multiple variant image objects
-      isTrial: false,
-      dimensions: { width: '', height: '', depth: '', weight: '', unit: { width: 'cm', height: 'cm', depth: 'cm', weight: 'kg' } },
-    }],
+  const [colors, setColors] = useState([]);
+  const [addColorOpen, setAddColorOpen] = useState(null); // variant index or null
+  const [newColor, setNewColor] = useState({ name_th: "", name_en: "", hex: "#000000" });
+  const [savingColor, setSavingColor] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    description: "",
+    category: "",
+    tags: "",
+    material: "",
+    trial: false,
+    thumbnails: [],
+    dimension: {
+      width: "",
+      height: "",
+      depth: "",
+      weight: "",
+    },
+    variants: [
+      {
+        colorId: "",
+        price: "",
+        quantityInStock: "",
+        trial: false,
+        image: null,
+      },
+    ],
   });
 
-  // Handle changes for top-level form fields
+  // === Field Handlers ===
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData({
       ...formData,
-      [name]: type === 'checkbox' ? checked : value,
+      [name]: type === "checkbox" ? checked : value,
     });
   };
 
-  // Handle changes for main image file input
-  const handleMainImageChange = (e) => {
-    const files = Array.from(e.target.files);
-    // Create an array of objects, with each object containing the file and an empty altText
-    const newMainImages = files.map(file => ({
-      file: file,
-      altText: '',
-    }));
+  // Load colors for dropdown
+  useEffect(() => {
+    (async () => {
+      try {
+        const { data } = await api.get("/colors");
+        // Accept { items: [...] } or direct array fallback
+        const items = Array.isArray(data) ? data : (data?.items || []);
+        setColors(items);
+      } catch (e) {
+        console.warn("Failed to load colors", e);
+      }
+    })();
+  }, []);
+
+  const openAddColor = (variantIndex) => {
+    setAddColorOpen(variantIndex);
+    setNewColor({ name_th: "", name_en: "", hex: "#000000" });
+  };
+
+  const cancelAddColor = () => {
+    setAddColorOpen(null);
+  };
+
+  const saveNewColor = async (variantIndex) => {
+    try {
+      const hexOk = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(String(newColor.hex || "").trim());
+      if (!newColor.name_th && !newColor.name_en) {
+        alert("Please enter at least one name (TH or EN)");
+        return;
+      }
+      if (!hexOk) {
+        alert("Invalid color hex (e.g., #FF0000)");
+        return;
+      }
+      setSavingColor(true);
+      const resp = await api.post("/colors", {
+        name_th: newColor.name_th,
+        name_en: newColor.name_en,
+        hex: String(newColor.hex || "").trim(),
+      });
+      const item = resp?.data?.item || resp?.data?.color || resp?.data;
+      if (!item?._id) {
+        alert("Failed to create color");
+        setSavingColor(false);
+        return;
+      }
+      setColors((prev) => [...prev, item]);
+      const newVariants = [...formData.variants];
+      newVariants[variantIndex].colorId = item._id;
+      setFormData({ ...formData, variants: newVariants });
+      setAddColorOpen(null);
+    } catch (e) {
+      console.error("Failed to add color", e);
+      alert("Failed to add color. You may need admin permissions.");
+    } finally {
+      setSavingColor(false);
+    }
+  };
+
+  const handleDimensionChange = (e) => {
+    const { name, value } = e.target;
     setFormData({
       ...formData,
-      mainImages: newMainImages,
+      dimension: { ...formData.dimension, [name]: value },
     });
   };
 
-  // Handle changes for individual main image alt text
-  const handleMainAltTextChange = (e, index) => {
-    const newMainImages = [...formData.mainImages];
-    newMainImages[index].altText = e.target.value;
-    setFormData({
-      ...formData,
-      mainImages: newMainImages,
-    });
+  const handleThumbnailChange = (e) => {
+    const picked = Array.from(e.target.files || []);
+    if (!picked.length) return;
+    // Append to existing selection (allow many files)
+    setFormData({ ...formData, thumbnails: [...formData.thumbnails, ...picked] });
+    // Reset input value to allow re-picking the same files
+    e.target.value = "";
   };
 
-  // Handle changes for variant fields (non-image)
-  const handleVariantChange = (e, variantIndex) => {
+  const removeThumbnail = (index) => {
+    const next = formData.thumbnails.filter((_, i) => i !== index);
+    setFormData({ ...formData, thumbnails: next });
+  };
+
+  const handleVariantChange = (e, index) => {
     const { name, value, type, checked } = e.target;
     const newVariants = [...formData.variants];
-
-    // Handle nested dimensions object
-    if (name in newVariants[variantIndex].dimensions) {
-      newVariants[variantIndex].dimensions[name] = value;
-    } else {
-      newVariants[variantIndex][name] = type === 'checkbox' ? checked : (type === 'number' ? Number(value) : value);
-    }
-
-    setFormData({
-      ...formData,
-      variants: newVariants,
-    });
+    newVariants[index][name] =
+      type === "checkbox" ? checked : type === "number" ? Number(value) : value;
+    setFormData({ ...formData, variants: newVariants });
   };
 
-  // Handle file change for variant images (now allows multiple)
-  const handleVariantImageChange = (e, variantIndex) => {
-    const files = Array.from(e.target.files);
-    const newVariantImages = files.map(file => ({
-      file: file,
-      altText: '',
-    }));
+  const handleVariantImageChange = (e, index) => {
+    const file = e.target.files[0] || null;
     const newVariants = [...formData.variants];
-    newVariants[variantIndex].variantImages = newVariantImages;
-    setFormData({
-      ...formData,
-      variants: newVariants,
-    });
+    newVariants[index].image = file;
+    setFormData({ ...formData, variants: newVariants });
   };
 
-  // Handle changes for variant image alt text
-  const handleVariantAltTextChange = (e, variantIndex, imageIndex) => {
-    const newVariants = [...formData.variants];
-    newVariants[variantIndex].variantImages[imageIndex].altText = e.target.value;
-    setFormData({
-      ...formData,
-      variants: newVariants,
-    });
-  };
-
-  // Add a new variant to the variants array
   const handleAddVariant = () => {
     setFormData({
       ...formData,
       variants: [
         ...formData.variants,
         {
-          skuID: '',
-          variantName: '',
-          variantOption: '',
-          price: '',
-          quantityInStock: '',
-          availability: 'In Stock',
-          variantImages: [],
-          isTrial: false,
-          dimensions: { width: '', height: '', depth: '', weight: '', unit: { width: 'cm', height: 'cm', depth: 'cm', weight: 'kg' } },
+          colorId: "",
+          price: "",
+          quantityInStock: "",
+          trial: false,
+          image: null,
         },
       ],
     });
   };
 
-  // Remove a variant from the variants array
   const handleRemoveVariant = (index) => {
-    const newVariants = formData.variants.filter((_, i) => i !== index);
     setFormData({
       ...formData,
-      variants: newVariants,
+      variants: formData.variants.filter((_, i) => i !== index),
     });
   };
 
-  // Handle form submission
-  const handleSubmit = (e) => {
+  // === Submit Handler ===
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Prepare data for submission, converting comma-separated strings to arrays
-    const submissionData = {
-      ...formData,
-      tag: formData.tag.split(',').map(item => item.trim()).filter(item => item),
-      space: formData.space.split(',').map(item => item.trim()).filter(item => item),
-    };
 
-    console.log('Form Data:', submissionData);
-    // You would typically send this data to an API
-    console.log('Product form submitted! Check the console for data.');
+    try {
+      setSubmitting(true);
+      // 1) เตรียม payload JSON ให้ตรงกับ backend
+      const tags = String(formData.tags || "")
+        .split(",")
+        .map((t) => t.trim())
+        .filter(Boolean);
 
-    // Clear the form after submission
-    handleCancel();
+      const dimension = {
+        width: Number(formData.dimension.width || 0),
+        height: Number(formData.dimension.height || 0),
+        depth: Number(formData.dimension.depth || 0),
+        weight: Number(formData.dimension.weight || 0),
+      };
+
+      const variants = formData.variants.map((v) => ({
+        colorId: v.colorId,
+        price: Number(v.price || 0),
+        quantityInStock: Number(v.quantityInStock || 0),
+        trial: !!v.trial,
+      }));
+
+      if (!variants.length) {
+        alert("At least one variant is required");
+        return;
+      }
+      if (variants.some((v) => !v.colorId)) {
+        alert("Please select colorId for every variant");
+        return;
+      }
+
+      const payload = {
+        name: formData.name,
+        description: formData.description,
+        category: formData.category,
+        trial: !!formData.trial,
+        tags,
+        material: formData.material,
+        thumbnails: [], // อัปโหลดทีหลัง
+        dimension,
+        variants,
+      };
+
+      // 2) สร้างสินค้า (JSON)
+      const createRes = await api.post("/products", payload);
+      const productId = createRes?.data?.item?._id;
+      const createdVariants = createRes?.data?.item?.variants || [];
+      if (!productId) throw new Error("Missing productId in response");
+
+      // 3) อัปโหลดรูปหลัก (thumbnails) ทีละไฟล์ (ไม่ให้ล้มเหลวทั้งงาน)
+      if (formData.thumbnails.length > 0) {
+        for (const file of formData.thumbnails) {
+          try {
+            const fd = new FormData();
+            fd.append("image", file);
+            await postForm(`/products/${productId}/images`, fd);
+          } catch (err) {
+            const status = err?.response?.status;
+            const msg = err?.response?.data?.message || err?.message || "Upload failed";
+            console.warn("Thumbnail upload failed:", status, msg);
+            // แจ้งเตือนแบบไม่หยุดการทำงาน
+            try { toast.warning(`Some images failed: ${msg}`); } catch {}
+          }
+        }
+      }
+
+      // 4) อัปโหลดรูปของแต่ละ variant หากมี (แม็พตาม index) — ไม่ให้ล้มทั้งงาน
+      for (let i = 0; i < formData.variants.length; i++) {
+        try {
+          const file = formData.variants[i]?.image;
+          const variantId = createdVariants[i]?._id;
+          if (file && variantId) {
+            const fd = new FormData();
+            fd.append("image", file);
+            await postForm(`/products/${productId}/variants/${variantId}/images`, fd);
+          }
+        } catch (err) {
+          const status = err?.response?.status;
+          const msg = err?.response?.data?.message || err?.message || "Upload failed";
+          console.warn("Variant image upload failed:", status, msg);
+          try { toast.warning(`Variant image failed: ${msg}`); } catch {}
+        }
+      }
+
+      try { toast.success("Product created successfully"); } catch {}
+      // ปิดสถานะกำลังบันทึกก่อนแจ้งเตือน blocking
+      setSubmitting(false);
+      alert(`Product created! ID: ${productId}`);
+      handleCancel();
+    } catch (err) {
+      const status = err?.response?.status;
+      const msg = err?.response?.data?.message || err?.message || "Failed to create product";
+      console.error("Error creating product:", status, msg, err?.response?.data);
+      if (status === 401) {
+        alert("Unauthorized. Please sign in.");
+      } else if (status === 403) {
+        alert("Forbidden. Admin role required to create products.");
+      } else {
+        alert(`Failed to create product: ${msg}`);
+      }
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  // Handle form cancellation and reset
   const handleCancel = () => {
     setFormData({
-      productID: '',
-      Name: '',
-      Description: '',
-      category: '',
-      tag: '',
-      material: '',
-      space: '',
-      mainImages: [],
-      variants: [{
-        skuID: '',
-        variantName: '',
-        variantOption: '',
-        price: '',
-        quantityInStock: '',
-        availability: 'In Stock',
-        variantImages: [],
-        isTrial: false,
-        dimensions: { width: '', height: '', depth: '', weight: '', unit: { width: 'cm', height: 'cm', depth: 'cm', weight: 'kg' } },
-      }],
+      name: "",
+      description: "",
+      category: "",
+      tags: "",
+      material: "",
+      trial: false,
+      thumbnails: [],
+      dimension: { width: "", height: "", depth: "", weight: "" },
+      variants: [
+        {
+          colorId: "",
+          price: "",
+          quantityInStock: "",
+          trial: false,
+          image: null,
+        },
+      ],
     });
   };
+
   return (
-    <div>
-        <Navbar />
-        <div className='flex justify-center'>
-          <div className="w-full max-w-5xl bg-white p-12 rounded-3xl shadow-xl border border-gray-100 mt-12">
-      <h2 className="text-4xl font-light text-gray-800 mb-8 text-center tracking-wide">Add Product</h2>
+    <div className="min-h-screen flex flex-col overflow-x-hidden">
+      <Navbar />
+      <main className="flex-1">
+        <div className="py-10 px-4">
+          <div className="max-w-4xl mx-auto w-full">
+            <h2 className="text-3xl md:text-4xl font-light text-gray-800 mb-8 text-center tracking-wide">
+              Add New Product
+            </h2>
+            <form onSubmit={handleSubmit} className="space-y-8 w-full">
+          {/* Product Info */}
+          <div className="space-y-6">
+            {/* Product Name */}
+            <div className="grid grid-cols-1 gap-6">
+              <div>
+                <label className="block text-gray-700 font-medium mb-2">Product Name</label>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border rounded-xl"
+                  required
+                />
+              </div>
+            </div>
 
-      <form onSubmit={handleSubmit} className="space-y-8">
-        {/* Product Information Section */}
-        <div className="space-y-6">
-          <h3 className="text-2xl font-light text-gray-800 border-b border-gray-200 pb-2">ข้อมูลสินค้า</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Description */}
             <div>
-              <label htmlFor="productID" className="block text-gray-700 font-medium mb-2">Product ID</label>
-              <input type="text" id="productID" name="productID" value={formData.productID} onChange={handleChange} className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#B29674]" required />
+              <label className="block text-gray-700 font-medium mb-2">Description</label>
+              <textarea
+                name="description"
+                value={formData.description}
+                onChange={handleChange}
+                rows="4"
+                className="w-full px-4 py-3 border rounded-xl"
+                required
+              ></textarea>
             </div>
-            <div>
-              <label htmlFor="Name" className="block text-gray-700 font-medium mb-2">Name</label>
-              <input type="text" id="Name" name="Name" value={formData.Name} onChange={handleChange} className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#B29674]" required />
-            </div>
-          </div>
 
-          <div>
-            <label htmlFor="Description" className="block text-gray-700 font-medium mb-2">Description</label>
-            <textarea id="Description" name="Description" value={formData.Description} onChange={handleChange} rows="4" className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#B29674]" required></textarea>
-          </div>
+            {/* Category / Tags / Material */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div>
+                <label className="block text-gray-700 font-medium mb-2">Category</label>
+                <select
+                  name="category"
+                  value={formData.category}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border rounded-xl"
+                >
+                  <option value="" disabled>
+                    Select category
+                  </option>
+                  <option value="Chairs">Chairs</option>
+                  <option value="Tables">Tables</option>
+                  <option value="Accessories">Accessories</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-gray-700 font-medium mb-2">Tags</label>
+                <input
+                  type="text"
+                  name="tags"
+                  value={formData.tags}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border rounded-xl"
+                  placeholder="e.g., mouse pad, wrist rest"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 font-medium mb-2">Material</label>
+                <input
+                  type="text"
+                  name="material"
+                  value={formData.material}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border rounded-xl"
+                />
+              </div>
+            </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div>
-              <label htmlFor="category" className="block text-gray-700 font-medium mb-2">Category</label>
-              <select id="category" name="category" value={formData.category} onChange={handleChange} className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#B29674] appearance-none cursor-pointer">
-                <option value="" disabled>เลือกหมวดหมู่</option>
-                <option value="Chairs">Chairs</option>
-                <option value="Tables">Tables</option>
-                <option value="Accessories">Accessories</option>
-              </select>
+            {/* Trial Checkbox */}
+            <div className="flex items-center space-x-2 mt-4">
+              <input
+                type="checkbox"
+                name="trial"
+                checked={formData.trial}
+                onChange={handleChange}
+                className="h-4 w-4"
+              />
+              <label className="text-gray-700">Trial product</label>
             </div>
-            <div>
-              <label htmlFor="tag" className="block text-gray-700 font-medium mb-2">Tags</label>
-              <input type="text" id="tag" name="tag" value={formData.tag} onChange={handleChange} className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#B29674]" placeholder="เช่น: แผ่นรองเมาส์, รองข้อมือ" />
-            </div>
-            <div>
-              <label htmlFor="material" className="block text-gray-700 font-medium mb-2">material</label>
-              <input type="text" id="material" name="material" value={formData.material} onChange={handleChange} className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#B29674]" />
-            </div>
-            <div>
-              <label htmlFor="space" className="block text-gray-700 font-medium mb-2">Space</label>
-              <input type="text" id="space" name="space" value={formData.space} onChange={handleChange} className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#B29674]" placeholder="เช่น: Workspace, Bedroom" />
-            </div>
-          </div>
 
-          {/* อัปโหลดรูปภาพหลัก */}
-          <div>
-            <label htmlFor="main-image-upload" className="block text-gray-700 font-medium mb-2">Upload Image</label>
-            <input
+            {/* Dimensions (dimension) */}
+            <div>
+              <label className="block text-gray-700 font-medium mb-2">Dimensions</label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+                {["width", "height", "depth", "weight"].map((key) => (
+                  <div key={key}>
+                    <label className="block text-gray-700 text-sm mb-1">
+                      {key === 'width' ? 'Width' : key === 'height' ? 'Height' : key === 'depth' ? 'Depth' : 'Weight'}
+                    </label>
+                    <input
+                      type="number"
+                      name={key}
+                      value={formData.dimension[key]}
+                      onChange={handleDimensionChange}
+                      className="w-full px-4 py-3 border rounded-xl"
+                      min="0"
+                      required
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Thumbnails Upload */}
+            <div>
+              <label className="block text-gray-700 font-medium mb-2">
+                Upload main images — multiple allowed
+              </label>
+              <input
                 type="file"
-                id="main-image-upload"
-                name="imageFiles"
+                id="thumbnail-upload"
+                name="thumbnails"
                 accept="image/*"
-                onChange={handleMainImageChange}
-                multiple // Allow multiple file selection
+                onChange={handleThumbnailChange}
+                multiple
                 className="hidden"
               />
-            <div className="flex items-center space-x-4">
-              <label htmlFor="main-image-upload" className="bg-[#E7E2D8] text-gray-800 font-medium py-3 px-6 rounded-xl cursor-pointer hover:bg-[#d6cfc1] transition-colors duration-200">
-                Choose image
-              </label>
-              {formData.mainImages.length > 0 && (
-                  <span className="text-sm text-gray-600 truncate">
-                      {formData.mainImages.length} ไฟล์ที่ถูกเลือก
+              <div className="flex items-center space-x-4">
+                <label
+                  htmlFor="thumbnail-upload"
+                  className="bg-[#E7E2D8] py-3 px-6 rounded-xl cursor-pointer"
+                >
+                  Choose files
+                </label>
+                {formData.thumbnails.length > 0 && (
+                  <span className="text-sm text-gray-600">
+                    {formData.thumbnails.length} files selected
                   </span>
-              )}
+                )}
+              </div>
             </div>
+
+            {/* Thumbnail Previews */}
+            {formData.thumbnails.length > 0 && (
+              <div className="flex flex-wrap gap-6 mt-4">
+                {formData.thumbnails.map((file, index) => (
+                  <div key={index} className="relative w-32 h-32 border rounded-lg overflow-hidden group">
+                    <img
+                      src={URL.createObjectURL(file)}
+                      alt={`Preview ${index + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeThumbnail(index)}
+                    className="absolute top-1 right-1 bg-white/80 hover:bg-white text-red-600 rounded-full px-2 py-0.5 text-xs shadow"
+                    aria-label="Remove this image"
+                  >
+                    Remove
+                  </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
-          {/* Image Preview and Alt Text Inputs Section */}
-          {formData.mainImages.length > 0 && (
-              <div className="flex flex-wrap gap-6 mt-4">
-                  {formData.mainImages.map((img, index) => (
-                      <div key={index} className="flex flex-col items-center">
-                          <div className="relative w-32 h-32 rounded-lg overflow-hidden border border-gray-300">
-                              <img
-                                  src={URL.createObjectURL(img.file)}
-                                  alt={img.altText || `Preview ${index + 1}`}
-                                  className="w-full h-full object-cover"
-                              />
-                          </div>
-                          <input
-                            type="text"
-                            name={`altText-${index}`}
-                            value={img.altText}
-                            onChange={(e) => handleMainAltTextChange(e, index)}
-                            className="mt-2 w-32 px-2 py-1 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#B29674] text-center"
-                            placeholder={`Alt Text ${index + 1}`}
-                          />
-                      </div>
-                  ))}
+     {/* Variants Section */}
+<div className="space-y-6">
+  <h3 className="text-2xl font-light text-gray-800 border-b pb-2">Variants</h3>
+
+  {formData.variants.map((variant, variantIndex) => (
+    <div
+      key={variantIndex}
+      className="space-y-4 border p-6 rounded-2xl bg-gray-50 relative"
+    >
+      <h4 className="text-lg font-bold">Variant #{variantIndex + 1}</h4>
+
+      {formData.variants.length > 1 && (
+        <button
+          type="button"
+          onClick={() => handleRemoveVariant(variantIndex)}
+          className="absolute top-4 right-4 text-red-500"
+        >
+          ✕
+        </button>
+      )}
+
+      {/* Variant Inputs */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-x-8 gap-y-6">
+        {/* Color */}
+        <div className="relative lg:col-span-2">
+          <label htmlFor={`color-${variantIndex}`} className="block text-gray-700 font-medium mb-2">
+            Color
+          </label>
+
+          {/* ใช้ flex กันซ้อน + ให้ select ยืด และปุ่มไม่บีบ */}
+          <div className="flex items-center gap-4 min-w-0">
+            <select
+              id={`color-${variantIndex}`}
+              name="colorId"
+              value={variant.colorId}
+              onChange={(e) => handleVariantChange(e, variantIndex)}
+              required
+              className="flex-1 min-w-0 h-12 px-4 text-base border-2 border-[#B29674]/50 rounded-2xl focus:ring-2 focus:ring-[#B29674]/40"
+            >
+              <option value="" disabled>Select color (colorId)</option>
+              {colors.map((c) => (
+                <option key={c._id} value={c._id}>
+                  {c.name_th || c.name_en || c.hex || c._id}
+                </option>
+              ))}
+            </select>
+
+            <button
+              type="button"
+              onClick={() => openAddColor(variantIndex)}
+              className="h-12 px-4 bg-[#E7E2D8] rounded-xl border hover:bg-[#ddd7cb] whitespace-nowrap shrink-0"
+              title="Add new color"
+            >
+              + New Color
+            </button>
+          </div>
+
+          {addColorOpen === variantIndex && (
+            <div className="absolute z-40 right-0 top-[calc(100%+0.5rem)] w-[30rem] max-w-[95vw] border rounded-xl p-4 bg-white space-y-3 shadow-lg">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-sm text-gray-700 mb-1">Color name (TH)</label>
+                  <input
+                    type="text"
+                    value={newColor.name_th}
+                    onChange={(e) => setNewColor({ ...newColor, name_th: e.target.value })}
+                    className="w-full px-3 py-2 border rounded-md"
+                    placeholder="e.g., Dark gray (TH)"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-700 mb-1">Color name (EN)</label>
+                  <input
+                    type="text"
+                    value={newColor.name_en}
+                    onChange={(e) => setNewColor({ ...newColor, name_en: e.target.value })}
+                    className="w-full px-3 py-2 border rounded-md"
+                    placeholder="e.g., Dark Gray"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-700 mb-1">Hex</label>
+                  <input
+                    type="text"
+                    value={newColor.hex}
+                    onChange={(e) => setNewColor({ ...newColor, hex: e.target.value })}
+                    className="w-full px-3 py-2 border rounded-md"
+                    placeholder="#000000"
+                  />
+                </div>
               </div>
+              <div className="flex gap-2 justify-end">
+                <button type="button" onClick={cancelAddColor} className="px-4 py-2 rounded-lg border">
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  disabled={savingColor}
+                  onClick={() => saveNewColor(variantIndex)}
+                  className="px-4 py-2 rounded-lg bg-[#B29674] text-white disabled:opacity-50"
+                >
+                  {savingColor ? "Saving..." : "Save color"}
+                </button>
+              </div>
+            </div>
           )}
         </div>
 
-        {/* Product Variants Section */}
-        <div className="space-y-6">
-          <h3 className="text-2xl font-light text-gray-800 border-b border-gray-200 pb-2">รุ่นสินค้า (Variants)</h3>
-          {formData.variants.map((variant, variantIndex) => (
-            <div key={variantIndex} className="space-y-4 border border-gray-200 p-6 rounded-2xl bg-gray-50 relative">
-              <h4 className="text-lg font-bold text-gray-700">Variant #{variantIndex + 1}</h4>
+        {/* Price */}
+        <div>
+          <label htmlFor={`price-${variantIndex}`} className="block text-gray-700 font-medium mb-2">
+            Price
+          </label>
+          <input
+            id={`price-${variantIndex}`}
+            type="number"
+            name="price"
+            value={variant.price}
+            onChange={(e) => handleVariantChange(e, variantIndex)}
+            onWheel={(e) => e.currentTarget.blur()}
+            inputMode="decimal"
+            step="1"
+            min="0"
+            required
+            placeholder="Price (price)"
+            className="w-full h-12 px-4 text-base border-2 border-[#B29674]/50 rounded-2xl focus:ring-2 focus:ring-[#B29674]/40"
+          />
+        </div>
 
-              {formData.variants.length > 1 && (
-                <button
-                  type="button"
-                  onClick={() => handleRemoveVariant(variantIndex)}
-                  className="absolute top-4 right-4 text-red-500 hover:text-red-700 transition-colors"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              )}
+        {/* Stock */}
+        <div>
+          <label htmlFor={`stock-${variantIndex}`} className="block text-gray-700 font-medium mb-2">
+            In stock
+          </label>
+          <input
+            id={`stock-${variantIndex}`}
+            type="number"
+            name="quantityInStock"
+            value={variant.quantityInStock}
+            onChange={(e) => handleVariantChange(e, variantIndex)}
+            onWheel={(e) => e.currentTarget.blur()}
+            inputMode="numeric"
+            step="1"
+            min="0"
+            required
+            placeholder="In stock (quantityInStock)"
+            className="w-full h-12 px-4 text-base border-2 border-[#B29674]/50 rounded-2xl focus:ring-2 focus:ring-[#B29674]/40"
+          />
+        </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div>
-                  <label htmlFor={`skuID-${variantIndex}`} className="block text-gray-700 font-medium mb-2">SKU ID</label>
-                  <input type="text" id={`skuID-${variantIndex}`} name="skuID" value={variant.skuID} onChange={(e) => handleVariantChange(e, variantIndex)} className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#B29674]" required />
-                </div>
-                <div>
-                  <label htmlFor={`variantName-${variantIndex}`} className="block text-gray-700 font-medium mb-2">ชื่อตัวเลือก</label>
-                  <input type="text" id={`variantName-${variantIndex}`} name="variantName" value={variant.variantName} onChange={(e) => handleVariantChange(e, variantIndex)} className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#B29674]" />
-                </div>
-                <div>
-                  <label htmlFor={`variantOption-${variantIndex}`} className="block text-gray-700 font-medium mb-2">ตัวเลือก</label>
-                  <input type="text" id={`variantOption-${variantIndex}`} name="variantOption" value={variant.variantOption} onChange={(e) => handleVariantChange(e, variantIndex)} className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#B29674]" />
-                </div>
-                <div>
-                  <label htmlFor={`price-${variantIndex}`} className="block text-gray-700 font-medium mb-2">ราคา (บาท)</label>
-                  <input type="number" id={`price-${variantIndex}`} name="price" value={variant.price} onChange={(e) => handleVariantChange(e, variantIndex)} className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#B29674]" required min="0" />
-                </div>
-                <div>
-                  <label htmlFor={`quantityInStock-${variantIndex}`} className="block text-gray-700 font-medium mb-2">จำนวนในคลัง</label>
-                  <input type="number" id={`quantityInStock-${variantIndex}`} name="quantityInStock" value={variant.quantityInStock} onChange={(e) => handleVariantChange(e, variantIndex)} className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#B29674]" required min="0" />
-                </div>
-                <div>
-                  <label htmlFor={`availability-${variantIndex}`} className="block text-gray-700 font-medium mb-2">Availability</label>
-                  <select id={`availability-${variantIndex}`} name="availability" value={variant.availability} onChange={(e) => handleVariantChange(e, variantIndex)} className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#B29674] appearance-none cursor-pointer">
-                    <option>In Stock</option>
-                    <option>Out of Stock</option>
-                    <option>Pre-order</option>
-                  </select>
-                </div>
-                {/* Variant Image Upload Section (Updated) */}
-                <div className="col-span-full space-y-4">
-                  <label htmlFor={`variant-image-${variantIndex}`} className="block text-gray-700 font-medium mb-2">อัปโหลดรูปภาพรุ่นสินค้า</label>
-                  <input
-                    type="file"
-                    id={`variant-image-${variantIndex}`}
-                    accept="image/*"
-                    onChange={(e) => handleVariantImageChange(e, variantIndex)}
-                    multiple // Now allows multiple file selection
-                    className="hidden"
-                  />
-                  <div className="flex items-center space-x-4">
-                    <label htmlFor={`variant-image-${variantIndex}`} className="bg-[#E7E2D8] text-gray-800 font-medium py-3 px-6 rounded-xl cursor-pointer hover:bg-[#d6cfc1] transition-colors duration-200">
-                      เลือกไฟล์
-                    </label>
-                    {variant.variantImages.length > 0 && (
-                      <span className="text-sm text-gray-600 truncate">
-                        {variant.variantImages.length} ไฟล์ที่ถูกเลือก
-                      </span>
-                    )}
-                  </div>
-                </div>
+        {/* Variant Image Upload — วางใน grid แถวของตัวเอง */}
+        <div className="col-span-1 md:col-span-2 lg:col-span-5">
+          <label className="block text-gray-700 font-medium mb-2">Variant image</label>
+          <div className="flex items-center gap-4">
+            <input
+              type="file"
+              id={`variant-image-${variantIndex}`}
+              accept="image/*"
+              onChange={(e) => handleVariantImageChange(e, variantIndex)}
+              className="hidden"
+            />
+            <label
+              htmlFor={`variant-image-${variantIndex}`}
+              className="bg-[#E7E2D8] py-3 px-6 rounded-xl cursor-pointer border hover:bg-[#ddd7cb]"
+            >
+              Choose image
+            </label>
 
-                {/* Variant Image Preview and Alt Text Inputs */}
-                {variant.variantImages.length > 0 && (
-                  <div className="flex flex-wrap gap-6 mt-4 col-span-full">
-                    {variant.variantImages.map((img, imageIndex) => (
-                      <div key={imageIndex} className="flex flex-col items-center">
-                        <div className="relative w-32 h-32 rounded-lg overflow-hidden border border-gray-300">
-                          <img
-                            src={URL.createObjectURL(img.file)}
-                            alt={img.altText || `Variant Preview ${imageIndex + 1}`}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                        <input
-                          type="text"
-                          name={`variant-altText-${variantIndex}-${imageIndex}`}
-                          value={img.altText}
-                          onChange={(e) => handleVariantAltTextChange(e, variantIndex, imageIndex)}
-                          className="mt-2 w-32 px-2 py-1 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#B29674] text-center"
-                          placeholder={`Alt Text ${imageIndex + 1}`}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                )}
+            {variant.image && (
+              <span
+                className="text-sm text-gray-600 inline-block max-w-[60vw] md:max-w-xs truncate align-middle"
+                title={variant.image.name}
+              >
+                {variant.image.name}
+              </span>
+            )}
+          </div>
 
-                {/* Checkbox for Trial Product */}
-                <div className="col-span-full flex items-center space-x-2 mt-4">
-                  <input type="checkbox" id={`isTrial-${variantIndex}`} name="isTrial" checked={variant.isTrial} onChange={(e) => handleVariantChange(e, variantIndex)} className="h-4 w-4 text-[#B29674] border-gray-300 rounded" />
-                  <label htmlFor={`isTrial-${variantIndex}`} className="text-gray-700">สินค้าทดลอง</label>
-                </div>
-              </div>
-
-              {/* Dimensions Section */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 pt-4 border-t border-gray-200 mt-4">
-                <div>
-                  <label htmlFor={`width-${variantIndex}`} className="block text-gray-700 font-medium mb-2">ความกว้าง (ซม.)</label>
-                  <input type="number" id={`width-${variantIndex}`} name="width" value={variant.dimensions.width} onChange={(e) => handleVariantChange(e, variantIndex)} className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#B29674]" min="0" />
-                </div>
-                <div>
-                  <label htmlFor={`height-${variantIndex}`} className="block text-gray-700 font-medium mb-2">ความสูง (ซม.)</label>
-                  <input type="number" id={`height-${variantIndex}`} name="height" value={variant.dimensions.height} onChange={(e) => handleVariantChange(e, variantIndex)} className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#B29674]" min="0" />
-                </div>
-                <div>
-                  <label htmlFor={`depth-${variantIndex}`} className="block text-gray-700 font-medium mb-2">ความลึก (ซม.)</label>
-                  <input type="number" id={`depth-${variantIndex}`} name="depth" value={variant.dimensions.depth} onChange={(e) => handleVariantChange(e, variantIndex)} className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#B29674]" min="0" />
-                </div>
-                <div>
-                  <label htmlFor={`weight-${variantIndex}`} className="block text-gray-700 font-medium mb-2">น้ำหนัก (กก.)</label>
-                  <input type="number" id={`weight-${variantIndex}`} name="weight" value={variant.dimensions.weight} onChange={(e) => handleVariantChange(e, variantIndex)} className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#B29674]" min="0" />
-                </div>
-              </div>
+          {variant.image && (
+            <div className="mt-4 w-32 h-32 border rounded-lg">
+              <img
+                src={URL.createObjectURL(variant.image)}
+                onLoad={(e) => URL.revokeObjectURL(e.currentTarget.src)}
+                alt="Variant Preview"
+                className="w-full h-full object-cover"
+              />
             </div>
-          ))}
-          <button
-            type="button"
-            onClick={handleAddVariant}
-            className="w-full py-3 px-8 rounded-3xl border border-dashed border-[#B29674] text-[#B29674] font-medium hover:bg-[#E7E2D8] transition-colors duration-200"
-          >
-            + เพิ่มรุ่นสินค้า
-          </button>
+          )}
         </div>
-
-        {/* Action Buttons */}
-        <div className="flex justify-center space-x-4 pt-4">
-          <button
-            type="submit"
-            className="bg-[#B29674] text-white font-bold py-3 px-8 rounded-3xl shadow-lg hover:bg-[#a18c6a] transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[#B29674] focus:ring-offset-2"
-          >
-            บันทึกสินค้า
-          </button>
-          <button
-            type="button"
-            onClick={handleCancel}
-            className="bg-gray-300 text-gray-800 font-bold py-3 px-8 rounded-3xl shadow-lg hover:bg-gray-400 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
-          >
-            ยกเลิก
-          </button>
-        </div>
-      </form>
-    </div>
       </div>
     </div>
-  )
-}
+  ))}
+
+  <button
+    type="button"
+    onClick={handleAddVariant}
+    className="w-full py-3 px-8 border border-dashed rounded-3xl text-[#B29674] hover:bg-[#E7E2D8]"
+  >
+    + Add variant
+  </button>
+</div>
+
+{/* Action Buttons */}
+<div className="flex justify-center space-x-4 pt-4">
+  <button
+    type="submit"
+    className="bg-[#B29674] text-white py-3 px-8 rounded-3xl shadow-lg disabled:opacity-60 disabled:cursor-not-allowed"
+    disabled={submitting}
+  >
+    {submitting ? "Saving..." : "Save product"}
+  </button>
+  <button
+    type="button"
+    onClick={handleCancel}
+    className="bg-gray-300 text-gray-800 py-3 px-8 rounded-3xl shadow-lg disabled:opacity-60 disabled:cursor-not-allowed"
+    disabled={submitting}
+  >
+    Cancel
+  </button>
+</div>
+
+          </form>
+        </div>
+        </div>
+      </main>
+      {submitting && (
+        <div className="fixed inset-0 z-[60] bg-white/70 backdrop-blur-sm flex items-center justify-center">
+          <div className="flex items-center gap-3 text-[#49453A]">
+            <Loader2 className="w-6 h-6 animate-spin" />
+            <span className="text-base font-medium">กำลังสร้างสินค้า...</span>
+          </div>
+        </div>
+      )}
+      <Footer />
+    </div>
+  );
+};

@@ -22,12 +22,6 @@ import { ValueContext } from "./context/ValueContext";
 import { Toaster } from "sonner";
 import { AdminProductManagement } from "./pages/AdminProductManagement";
 
-
-
-
-
-
-
 export default function App() {
   return (
     <BrowserRouter>
@@ -52,6 +46,8 @@ export default function App() {
         <Route path="/orderhistorylist" element={<Order_History_List />} />
         <Route path="/orderhistorydetail" element={<Order_History_Detail />} />
         <Route path="/adminproductmanagement" element={<AdminProductManagement />} />
+        <Route path="/pageproductdetail" element={<Page_Product_Detail />} />
+        <Route path="/pageproductlist" element={<Page_Product_List />} />
         
 
         {/* TODO: category pages, product detail, cart, etc. */}

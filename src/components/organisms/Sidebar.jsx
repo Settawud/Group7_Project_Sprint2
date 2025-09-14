@@ -1,8 +1,13 @@
 import { useState, useEffect } from "react";
+import { Menu, LogOut, User, MapPin, Wallet, TicketPercent, PlusCircle } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { api } from "../../lib/api";
 
 const Sidebar = () => {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -12,6 +17,18 @@ const Sidebar = () => {
     };
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const { data } = await api.get("/users/me");
+        const role = data?.user?.role || data?.role;
+        setIsAdmin(role === "admin");
+      } catch {
+        setIsAdmin(false);
+      }
+    })();
   }, []);
 
   const sidebarClass = `
@@ -37,7 +54,7 @@ const Sidebar = () => {
           onClick={() => setIsMobileOpen(true)}
           className="flex items-center gap-2 text-[#B29675]"
         >
-          <img src="./icon/Hamburger.svg" className="h-6 w-6" alt="Menu" />
+          <Menu className="h-6 w-6" />
           <span className="font-semibold">My Account</span>
         </button>
       </div>
@@ -48,35 +65,36 @@ const Sidebar = () => {
             <span className={`flex items-center gap-2 ${sidebarLabelClass}`}>
               My Account
             </span>
-            <button
-              onClick={() => setIsCollapsed(!isCollapsed)}
-              className="hidden lg:flex items-center"
-            >
-              <img src="./icon/Hamburger.svg" alt="Toggle" />
+            <button onClick={() => setIsCollapsed(!isCollapsed)} className="hidden lg:flex items-center">
+              <Menu className="w-5 h-5" />
             </button>
           </div>
 
           <nav className="mb-6 flex flex-col gap-4 indent-4 text-sm text-white">
             {[
-              { label: "Profile", icon: "Profile" },
-              { label: "Address", icon: "Address" },
-              { label: "Purchase", icon: "Purchase", active: true },
-              { label: "Payment", icon: "Payment" },
-            ].map(({ label, icon, active }) => (
-              <div
+              { label: "Profile", icon: <User className="w-4 h-4" />, onClick: () => {} },
+              { label: "Address", icon: <MapPin className="w-4 h-4" />, onClick: () => {} },
+              { label: "Coupons", icon: <TicketPercent className="w-4 h-4" />, onClick: () => { document.getElementById("coupons")?.scrollIntoView({ behavior: "smooth" }); } },
+              ...(isAdmin ? [
+                { label: "Add Product", icon: <PlusCircle className="w-4 h-4" />, onClick: () => navigate("/AddProductPage") },
+                { label: "Add Coupon", icon: <TicketPercent className="w-4 h-4" />, onClick: () => { document.getElementById("create-coupon")?.scrollIntoView({ behavior: "smooth" }); } },
+              ] : []),
+              { label: "Purchase", icon: <Wallet className="w-4 h-4" />, onClick: () => {} },
+            ].map(({ label, icon, onClick }) => (
+              <button
+                type="button"
                 key={label}
-                className={`flex items-center gap-2 rounded py-2 hover:bg-[#A8A8A880] cursor-pointer ${
-                  active ? "bg-[#A8A8A830] hover:bg-[#A8A8A8]" : ""
-                }`}
+                onClick={onClick}
+                className="flex items-center gap-2 rounded py-2 hover:bg-[#A8A8A880] cursor-pointer text-left"
               >
-                <img src={`./icon/${icon}.svg`} alt={label} />
+                {icon}
                 <span className={sidebarLabelClass}>{label}</span>
-              </div>
+              </button>
             ))}
           </nav>
 
           <div className="mt-auto flex items-center gap-2 rounded py-2 indent-2 text-sm text-white hover:bg-[#A8A8A880] cursor-pointer">
-            <img src="./icon/Logout.svg" alt="Logout" />
+            <LogOut className="w-4 h-4" />
             <span className={sidebarLabelClass}>Log out</span>
           </div>
         </div>

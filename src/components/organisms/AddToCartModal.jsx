@@ -2,6 +2,18 @@ import { useContext, useState } from "react";
 import { ValueContext } from "../../context/ValueContext";
 import { ClipboardType } from "lucide-react";
 
+function normalizePublicImage(p) {
+  if (!p) return null;
+  const s = String(p);
+  if (/^https?:\/\//i.test(s)) return s;
+  let cleaned = s.replace(/^\.\/+/, "");
+  if (cleaned.startsWith("/images/")) return cleaned;
+  if (cleaned.startsWith("images/")) return "/" + cleaned;
+  const idx = cleaned.indexOf("images/");
+  if (idx >= 0) return "/" + cleaned.slice(idx);
+  return `/images/${cleaned}`;
+}
+
 const AddToCartModal = ({ product}) => {
   const {
     productID,
@@ -48,7 +60,7 @@ const AddToCartModal = ({ product}) => {
   return (
     <div className="flex flex-col gap-3 text-black">
       <div className="text-2xl font-semibold leading-snug">{Name}</div>
-      <img src={`../images/${currentVariant.image}`}  alt={`${Name}`} className="h-50 w-50 p-1 border-1 mx-auto rounded-sm border-gray-300 shadow-[0_2px_4px_1px_rgba(209,213,219,0.2)]"/>
+      <img src={normalizePublicImage(currentVariant.image)}  alt={`${Name}`} className="h-50 w-50 p-1 border-1 mx-auto rounded-sm border-gray-300 shadow-[0_2px_4px_1px_rgba(209,213,219,0.2)]"/>
           <div className="pt-4">
         <ul className="list-disc list-inside text-sm text-[#A8A8A8]">
  
@@ -151,7 +163,7 @@ const AddToCartModal = ({ product}) => {
         </div>
 
         <button
-          onClick={() => addToCart(productID, Name, selectedColor, quantity, price, `../images/${image}`, altText, selected, variants)}
+          onClick={() => addToCart(productID, Name, selectedColor, quantity, price, normalizePublicImage(image), altText, selected, variants)}
           disabled={quantityInStock === 0}
           className={`h-12 px-4 py-2 rounded text-sm w-full lg:w-1/2 transition ${
             quantityInStock === 0

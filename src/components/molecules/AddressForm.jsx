@@ -1,517 +1,98 @@
-// import React, { useState, useEffect } from "react";
-// import Button from "../atoms/Button";
-
-// export default function AddressForm({ onSave, editData, editIndex }) {
-//   const [form, setForm] = useState({
-//     building: "",
-//     detail: "",
-//     province: "",
-//     district: "",
-//     subDistrict: "",
-//     postalCode: "",
-//     isDefault: false,
-//   });
-
-//   const provinces = ["กรุงเทพมหานคร", "กำแพงเพชร", "เชียงใหม่"];
-//   const districts = ["คลองสาน", "ขาณุวรลักษบุรี", "เมืองเชียงใหม่"];
-//   const subDistricts = ["คลองต้นไทร", "ดอนแตง", "สุเทพ"];
-
-//   useEffect(() => {
-//     if (editData) {
-//       setForm(editData);
-//     } else {
-//       setForm({
-//         building: "",
-//         detail: "",
-//         province: "",
-//         district: "",
-//         subDistrict: "",
-//         postalCode: "",
-//         isDefault: false,
-//       });
-//     }
-//   }, [editData]);
-
-//   const handleChange = (key, value) => {
-//     setForm((prev) => ({ ...prev, [key]: value }));
-//   };
-
-//   const handleSubmit = () => {
-//     if (!form.building || !form.province || !form.postalCode) {
-//       alert("Please complete all required fields.");
-//       return;
-//     }
-
-//     onSave(form, editIndex);
-//   };
-
-//   return (
-//     <div className="bg-white rounded-2xl p-6 shadow-md border border-gray-100">
-//       <h3 className="text-lg font-semibold text-gray-800 mb-5">
-//         {editData ? "Edit Address" : "Add Address"}
-//       </h3>
-
-//       <div className="space-y-4">
-//         <input
-//           type="text"
-//           placeholder="Building No."
-//           value={form.building}
-//           onChange={(e) => handleChange("building", e.target.value)}
-//           className="w-full px-4 py-2 rounded-xl border border-gray-300 bg-white focus:outline-none focus:ring-1 focus:ring-[#B29674]"
-//         />
-
-//         <input
-//           type="text"
-//           placeholder="Detail"
-//           value={form.detail}
-//           onChange={(e) => handleChange("detail", e.target.value)}
-//           className="w-full px-4 py-2 rounded-xl border border-gray-300 bg-white focus:outline-none focus:ring-1 focus:ring-[#B29674]"
-//         />
-
-//         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-//           <select
-//             value={form.province}
-//             onChange={(e) => handleChange("province", e.target.value)}
-//             className={`w-full px-4 py-2 rounded-xl border border-gray-300 bg-white focus:outline-none focus:ring-1 focus:ring-[#B29674] ${
-//               form.province === "" ? "text-stone-500" : "text-gray-800"
-//             }`}
-//           >
-//             <option value="">Province</option>
-//             {provinces.map((p, i) => (
-//               <option key={i} value={p}>
-//                 {p}
-//               </option>
-//             ))}
-//           </select>
-
-//           <select
-//             value={form.district}
-//             onChange={(e) => handleChange("district", e.target.value)}
-//             className={`w-full px-4 py-2 rounded-xl border border-gray-300 bg-white focus:outline-none focus:ring-1 focus:ring-[#B29674] ${
-//               form.district === "" ? "text-stone-500" : "text-gray-800"
-//             }`}
-//           >
-//             <option value="">District</option>
-//             {districts.map((d, i) => (
-//               <option key={i} value={d}>
-//                 {d}
-//               </option>
-//             ))}
-//           </select>
-
-//           <select
-//             value={form.subDistrict}
-//             onChange={(e) => handleChange("subDistrict", e.target.value)}
-//             className={`w-full px-4 py-2 rounded-xl border border-gray-300 bg-white focus:outline-none focus:ring-1 focus:ring-[#B29674] ${
-//               form.subDistrict === "" ? "text-stone-500" : "text-gray-800"
-//             }`}
-//           >
-//             <option value="">Subdistrict</option>
-//             {subDistricts.map((s, i) => (
-//               <option key={i} value={s}>
-//                 {s}
-//               </option>
-//             ))}
-//           </select>
-//         </div>
-
-//         <input
-//           type="text"
-//           placeholder="Postal Code"
-//           value={form.postalCode}
-//           onChange={(e) => handleChange("postalCode", e.target.value)}
-//           className="w-full px-4 py-2 rounded-xl border border-gray-300 bg-white focus:outline-none focus:ring-1 focus:ring-[#B29674]"
-//         />
-
-//         <div className="flex items-center pt-1">
-//           <input
-//             type="checkbox"
-//             id="isDefault"
-//             checked={form.isDefault}
-//             onChange={(e) => handleChange("isDefault", e.target.checked)}
-//             className="mr-2 accent-[#B29674]"
-//           />
-//           <label htmlFor="isDefault" className="text-sm text-gray-700">
-//             Set as default address
-//           </label>
-//         </div>
-//       </div>
-
-//       <div className="flex justify-end mt-6">
-//         <Button onClick={handleSubmit} className="px-4">
-//           {editData ? "Update" : "Save"}
-//         </Button>
-//       </div>
-//     </div>
-//   );
-// }
-
-// import React, { useState, useEffect } from "react";
-// import Button from "../atoms/Button";
-// import axios from "axios";
-
-// export default function AddressForm({ onSave, editData, editIndex }) {
-//   const [form, setForm] = useState({
-//     building: "",
-//     detail: "",
-//     province: "",
-//     district: "",
-//     subDistrict: "",
-//     postalCode: "",
-//     isDefault: false,
-//   });
-
-//   // ✅ state สำหรับข้อมูลจาก API
-//   const [provinces, setProvinces] = useState([]);
-//   const [districts, setDistricts] = useState([]);
-//   const [subDistricts, setSubDistricts] = useState([]);
-
-//   const API_BASE = import.meta.env.VITE_API_BASE || "/api/v1/mongo/users/me";
-
-//   useEffect(() => {
-//     if (editData) {
-//       setForm(editData);
-//     } else {
-//       setForm({
-//         building: "",
-//         detail: "",
-//         province: "",
-//         district: "",
-//         subDistrict: "",
-//         postalCode: "",
-//         isDefault: false,
-//       });
-//     }
-//   }, [editData]);
-
-//   // ✅ โหลด provinces ตอน mount
-//   useEffect(() => {
-//     const fetchProvinces = async () => {
-//       try {
-//         const { data } = await axios.get(`${API_BASE}/provinces`);
-//         setProvinces(data || []);
-//       } catch (err) {
-//         console.error("Failed to fetch provinces:", err);
-//       }
-//     };
-//     fetchProvinces();
-//   }, []);
-
-//   // ✅ โหลด districts เมื่อ province เปลี่ยน
-//   useEffect(() => {
-//     if (!form.province) return;
-//     const fetchDistricts = async () => {
-//       try {
-//         const { data } = await axios.get(`${API_BASE}/districts?provinceId=${form.province}`);
-//         setDistricts(data || []);
-//         setSubDistricts([]); // reset subdistrict
-//       } catch (err) {
-//         console.error("Failed to fetch districts:", err);
-//       }
-//     };
-//     fetchDistricts();
-//   }, [form.province]);
-
-//   // ✅ โหลด subDistricts เมื่อ district เปลี่ยน
-//   useEffect(() => {
-//     if (!form.district) return;
-//     const fetchSubDistricts = async () => {
-//       try {
-//         const { data } = await axios.get(`${API_BASE}/subdistricts?districtId=${form.district}`);
-//         setSubDistricts(data || []);
-//       } catch (err) {
-//         console.error("Failed to fetch subdistricts:", err);
-//       }
-//     };
-//     fetchSubDistricts();
-//   }, [form.district]);
-
-//   const handleChange = (key, value) => {
-//     setForm((prev) => ({ ...prev, [key]: value }));
-//   };
-
-//   const handleSubmit = async () => {
-//     if (!form.building || !form.province || !form.postalCode) {
-//       alert("Please complete all required fields.");
-//       return;
-//     }
-
-//     // map ให้ตรง schema backend
-//     const addressPayload = {
-//       buildingNo: form.building,
-//       detail: form.detail,
-//       postcode: form.postalCode,
-//       province: form.province,   // เป็น ObjectId จาก select
-//       district: form.district,
-//       subdistrict: form.subDistrict,
-//       isDefault: form.isDefault,
-//     };
-
-//     try {
-//       const token = localStorage.getItem("token");
-//       const { data } = await axios.patch(
-//         `${API_BASE}/users/me`,
-//         { addresses: [addressPayload] },
-//         { headers: { Authorization: `Bearer ${token}` } }
-//       );
-
-//       console.log("Saved to backend:", data);
-//       alert("Address saved successfully!");
-//       onSave(form, editIndex);
-//     } catch (err) {
-//       console.error("Save address failed:", err);
-//       alert("Failed to save address");
-//     }
-//   };
-
-//   return (
-//     <div className="bg-white rounded-2xl p-6 shadow-md border border-gray-100">
-//       <h3 className="text-lg font-semibold text-gray-800 mb-5">
-//         {editData ? "Edit Address" : "Add Address"}
-//       </h3>
-
-//       <div className="space-y-4">
-//         <input
-//           type="text"
-//           placeholder="Building No."
-//           value={form.building}
-//           onChange={(e) => handleChange("building", e.target.value)}
-//           className="w-full px-4 py-2 rounded-xl border border-gray-300 bg-white focus:outline-none focus:ring-1 focus:ring-[#B29674]"
-//         />
-
-//         <input
-//           type="text"
-//           placeholder="Detail"
-//           value={form.detail}
-//           onChange={(e) => handleChange("detail", e.target.value)}
-//           className="w-full px-4 py-2 rounded-xl border border-gray-300 bg-white focus:outline-none focus:ring-1 focus:ring-[#B29674]"
-//         />
-
-//         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-//           {/* Province */}
-//           <select
-//             value={form.province}
-//             onChange={(e) => handleChange("province", e.target.value)}
-//             className={`w-full px-4 py-2 rounded-xl border border-gray-300 bg-white focus:outline-none focus:ring-1 focus:ring-[#B29674] ${
-//               form.province === "" ? "text-stone-500" : "text-gray-800"
-//             }`}
-//           >
-//             <option value="">Province</option>
-//             {provinces.map((p) => (
-//               <option key={p._id} value={p._id}>
-//                 {p.name}
-//               </option>
-//             ))}
-//           </select>
-
-//           {/* District */}
-//           <select
-//             value={form.district}
-//             onChange={(e) => handleChange("district", e.target.value)}
-//             className={`w-full px-4 py-2 rounded-xl border border-gray-300 bg-white focus:outline-none focus:ring-1 focus:ring-[#B29674] ${
-//               form.district === "" ? "text-stone-500" : "text-gray-800"
-//             }`}
-//           >
-//             <option value="">District</option>
-//             {districts.map((d) => (
-//               <option key={d._id} value={d._id}>
-//                 {d.name}
-//               </option>
-//             ))}
-//           </select>
-
-//           {/* Subdistrict */}
-//           <select
-//             value={form.subDistrict}
-//             onChange={(e) => handleChange("subDistrict", e.target.value)}
-//             className={`w-full px-4 py-2 rounded-xl border border-gray-300 bg-white focus:outline-none focus:ring-1 focus:ring-[#B29674] ${
-//               form.subDistrict === "" ? "text-stone-500" : "text-gray-800"
-//             }`}
-//           >
-//             <option value="">Subdistrict</option>
-//             {subDistricts.map((s) => (
-//               <option key={s._id} value={s._id}>
-//                 {s.name}
-//               </option>
-//             ))}
-//           </select>
-//         </div>
-
-//         <input
-//           type="text"
-//           placeholder="Postal Code"
-//           value={form.postalCode}
-//           onChange={(e) => handleChange("postalCode", e.target.value)}
-//           className="w-full px-4 py-2 rounded-xl border border-gray-300 bg-white focus:outline-none focus:ring-1 focus:ring-[#B29674]"
-//         />
-
-//         <div className="flex items-center pt-1">
-//           <input
-//             type="checkbox"
-//             id="isDefault"
-//             checked={form.isDefault}
-//             onChange={(e) => handleChange("isDefault", e.target.checked)}
-//             className="mr-2 accent-[#B29674]"
-//           />
-//           <label htmlFor="isDefault" className="text-sm text-gray-700">
-//             Set as default address
-//           </label>
-//         </div>
-//       </div>
-
-//       <div className="flex justify-end mt-6">
-//         <Button onClick={handleSubmit} className="px-4">
-//           {editData ? "Update" : "Save"}
-//         </Button>
-//       </div>
-//     </div>
-//   );
-// }
-
-
-import { useEffect, useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Button from "../atoms/Button";
-import axios from "axios";
+import { api } from "../../lib/api";
 
-export default function AddressForm({ onSave, editData, editIndex }) {
+export default function AddressForm({ onSave, editData, editId }) {
   const [form, setForm] = useState({
-    building: "",
+    buildingNo: "",
     detail: "",
-    province: "",
-    district: "",
-    subDistrict: "",
-    postalCode: "",
+    provinceId: "",
+    districtId: "",
+    subdistrictId: "",
+    postcode: "",
     isDefault: false,
   });
 
-  const [errors, setErrors] = useState({}); // ✅ state สำหรับ error
   const [provinces, setProvinces] = useState([]);
   const [districts, setDistricts] = useState([]);
-  const [subDistricts, setSubDistricts] = useState([]);
-
-  const API_BASE = import.meta.env.VITE_API_BASE || "/api/v1/mongo";
+  const [subdistricts, setSubdistricts] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (editData) {
-      setForm(editData);
-    } else {
-      setForm({
-        building: "",
-        detail: "",
-        province: "",
-        district: "",
-        subDistrict: "",
-        postalCode: "",
-        isDefault: false,
-      });
-    }
-  }, [editData]);
-
-  // ✅ โหลด provinces ตอน mount
-  useEffect(() => {
-    const fetchProvinces = async () => {
+    (async () => {
       try {
-        const { data } = await axios.get(`${API_BASE}/provinces`);
-        setProvinces(data || []);
-      } catch (err) {
-        console.error("Failed to fetch provinces:", err);
-      }
-    };
-    fetchProvinces();
+        const { data } = await api.get("/users/me/address/provinces");
+        setProvinces(Array.isArray(data?.items) ? data.items : []);
+      } catch {}
+    })();
   }, []);
 
-  // ✅ โหลด districts เมื่อ province เปลี่ยน
+  // Prefill when editing
   useEffect(() => {
-    if (!form.province) return;
-    const fetchDistricts = async () => {
-      try {
-        const { data } = await axios.get(
-          `${API_BASE}/districts?provinceId=${form.province}`
-        );
-        setDistricts(data || []);
-        setSubDistricts([]);
-        setForm((prev) => ({ ...prev, district: "", subDistrict: "", postalCode: "" }));
-      } catch (err) {
-        console.error("Failed to fetch districts:", err);
+    (async () => {
+      if (!editData) {
+        setForm({ buildingNo: "", detail: "", provinceId: "", districtId: "", subdistrictId: "", postcode: "", isDefault: false });
+        setDistricts([]);
+        setSubdistricts([]);
+        return;
       }
-    };
-    fetchDistricts();
-  }, [form.province]);
-
-  // ✅ โหลด subDistricts เมื่อ district เปลี่ยน
-  useEffect(() => {
-    if (!form.district) return;
-    const fetchSubDistricts = async () => {
+      const provinceId = editData?.province?._id || editData?.province || "";
+      const districtId = editData?.district?._id || editData?.district || "";
+      const subdistrictId = editData?.subdistrict?._id || editData?.subdistrict || "";
+      setForm({
+        buildingNo: editData.buildingNo || "",
+        detail: editData.detail || "",
+        provinceId,
+        districtId,
+        subdistrictId,
+        postcode: editData.postcode || editData?.subdistrict?.postcode || "",
+        isDefault: !!editData.isDefault,
+      });
       try {
-        const { data } = await axios.get(
-          `${API_BASE}/subdistricts?districtId=${form.district}`
-        );
-        setSubDistricts(data || []);
-        setForm((prev) => ({ ...prev, subDistrict: "", postalCode: "" }));
-      } catch (err) {
-        console.error("Failed to fetch subdistricts:", err);
-      }
-    };
-    fetchSubDistricts();
-  }, [form.district]);
+        if (provinceId) {
+          const d = await api.get(`/users/me/address/province/${provinceId}/districts`);
+          setDistricts(Array.isArray(d?.data?.items) ? d.data.items : []);
+        }
+        if (districtId) {
+          const s = await api.get(`/users/me/address/district/${districtId}/subdistricts`);
+          setSubdistricts(Array.isArray(s?.data?.items) ? s.data.items : []);
+        }
+      } catch {}
+    })();
+  }, [editData]);
 
-  // ✅ handle change + auto postalCode
-  const handleChange = (key, value) => {
-    if (key === "subDistrict") {
-      const selected = subDistricts.find((s) => s._id === value);
-      setForm((prev) => ({
-        ...prev,
-        subDistrict: value,
-        postalCode: selected ? selected.postcode : prev.postalCode,
-      }));
-    } else {
-      setForm((prev) => ({ ...prev, [key]: value }));
+  const handleChange = async (key, value) => {
+    setForm((prev) => ({ ...prev, [key]: value }));
+    if (key === "provinceId") {
+      setForm((prev) => ({ ...prev, districtId: "", subdistrictId: "", postcode: "" }));
+      try {
+        const { data } = await api.get(`/users/me/address/province/${value}/districts`);
+        setDistricts(Array.isArray(data?.items) ? data.items : []);
+        setSubdistricts([]);
+      } catch {}
+    }
+    if (key === "districtId") {
+      setForm((prev) => ({ ...prev, subdistrictId: "", postcode: "" }));
+      try {
+        const { data } = await api.get(`/users/me/address/district/${value}/subdistricts`);
+        setSubdistricts(Array.isArray(data?.items) ? data.items : []);
+      } catch {}
+    }
+    if (key === "subdistrictId") {
+      try {
+        const { data } = await api.get(`/users/me/address/subdistrict/${value}`);
+        const code = data?.item?.postcode || "";
+        setForm((prev) => ({ ...prev, postcode: code }));
+      } catch {}
     }
   };
 
-  // ✅ validate form
-  const validateForm = () => {
-    let newErrors = {};
-    if (!form.building) newErrors.building = "Building number is required.";
-    if (!form.province) newErrors.province = "Please select a province.";
-    if (!form.district) newErrors.district = "Please select a district.";
-    if (!form.subDistrict) newErrors.subDistrict = "Please select a subdistrict.";
-    if (!/^\d{5}$/.test(form.postalCode)) {
-      newErrors.postalCode = "Postal code must be 5 digits.";
-    }
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  // ✅ submit
   const handleSubmit = async () => {
-    if (!validateForm()) return;
-
-    const addressPayload = {
-      buildingNo: form.building,
-      detail: form.detail,
-      postcode: form.postalCode,
-      province: form.province,
-      district: form.district,
-      subdistrict: form.subDistrict,
-      isDefault: form.isDefault,
-    };
-
-    try {
-      const token = localStorage.getItem("token");
-      const { data } = await axios.patch(
-        `${API_BASE}/users/me`,
-        { addresses: [addressPayload] },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      console.log("Saved to backend:", data);
-      alert("Address saved successfully!");
-      onSave(form, editIndex);
-    } catch (err) {
-      console.error("Save address failed:", err);
-      alert("Failed to save address: " + (err.response?.data?.message || ""));
+    if (!form.buildingNo || !form.provinceId || !form.districtId || !form.subdistrictId || !/^\d{5}$/.test(String(form.postcode))) {
+      alert("Please complete required fields (including valid 5-digit postal code).");
+      return;
     }
+    onSave(form, editId || null);
   };
 
   return (
@@ -521,107 +102,59 @@ export default function AddressForm({ onSave, editData, editIndex }) {
       </h3>
 
       <div className="space-y-4">
-        {/* Building */}
-        <div>
-          <input
-            type="text"
-            placeholder="Building No."
-            value={form.building}
-            onChange={(e) => handleChange("building", e.target.value)}
-            className="w-full px-4 py-2 rounded-xl border border-gray-300 bg-white focus:outline-none focus:ring-1 focus:ring-[#B29674]"
-          />
-          {errors.building && (
-            <p className="text-red-500 text-sm">{errors.building}</p>
-          )}
-        </div>
+        <input
+          type="text"
+          placeholder="Building No."
+          value={form.buildingNo}
+          onChange={(e) => setForm((p) => ({ ...p, buildingNo: e.target.value }))}
+          className="w-full px-4 py-2 rounded-xl border border-gray-300 bg-white focus:outline-none focus:ring-1 focus:ring-[#B29674]"
+        />
 
         {/* Detail */}
         <input
           type="text"
           placeholder="Detail"
           value={form.detail}
-          onChange={(e) => handleChange("detail", e.target.value)}
+          onChange={(e) => setForm((p) => ({ ...p, detail: e.target.value }))}
           className="w-full px-4 py-2 rounded-xl border border-gray-300 bg-white focus:outline-none focus:ring-1 focus:ring-[#B29674]"
         />
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          {/* Province */}
-          <div>
-            <select
-              value={form.province}
-              onChange={(e) => handleChange("province", e.target.value)}
-              className={`w-full px-4 py-2 rounded-xl border border-gray-300 bg-white focus:outline-none focus:ring-1 focus:ring-[#B29674] ${
-                form.province === "" ? "text-stone-500" : "text-gray-800"
-              }`}
-            >
-              <option value="">Province</option>
-              {provinces.map((p) => (
-                <option key={p._id} value={p._id}>
-                  {p.name}
-                </option>
-              ))}
-            </select>
-            {errors.province && (
-              <p className="text-red-500 text-sm">{errors.province}</p>
-            )}
-          </div>
-
-          {/* District */}
-          <div>
-            <select
-              value={form.district}
-              onChange={(e) => handleChange("district", e.target.value)}
-              className={`w-full px-4 py-2 rounded-xl border border-gray-300 bg-white focus:outline-none focus:ring-1 focus:ring-[#B29674] ${
-                form.district === "" ? "text-stone-500" : "text-gray-800"
-              }`}
-            >
-              <option value="">District</option>
-              {districts.map((d) => (
-                <option key={d._id} value={d._id}>
-                  {d.name}
-                </option>
-              ))}
-            </select>
-            {errors.district && (
-              <p className="text-red-500 text-sm">{errors.district}</p>
-            )}
-          </div>
-
-          {/* Subdistrict */}
-          <div>
-            <select
-              value={form.subDistrict}
-              onChange={(e) => handleChange("subDistrict", e.target.value)}
-              className={`w-full px-4 py-2 rounded-xl border border-gray-300 bg-white focus:outline-none focus:ring-1 focus:ring-[#B29674] ${
-                form.subDistrict === "" ? "text-stone-500" : "text-gray-800"
-              }`}
-            >
-              <option value="">Subdistrict</option>
-              {subDistricts.map((s) => (
-                <option key={s._id} value={s._id}>
-                  {s.name}
-                </option>
-              ))}
-            </select>
-            {errors.subDistrict && (
-              <p className="text-red-500 text-sm">{errors.subDistrict}</p>
-            )}
-          </div>
-        </div>
-
-        {/* Postal Code */}
-        <div>
-          <input
-            type="text"
-            placeholder="Postal Code"
-            value={form.postalCode}
-            onChange={(e) => handleChange("postalCode", e.target.value)}
-            className="w-full px-4 py-2 rounded-xl border border-gray-300 bg-white focus:outline-none focus:ring-1 focus:ring-[#B29674]"
+          <SelectSearch
+            items={provinces}
+            valueId={form.provinceId}
+            onChange={(id) => handleChange("provinceId", id)}
+            placeholder="Province"
+            getId={(p) => p._id || p.province_id}
+            getLabel={(p) => p.name_th || p.name_en}
           />
-          {errors.postalCode && (
-            <p className="text-red-500 text-sm">{errors.postalCode}</p>
-          )}
+          <SelectSearch
+            items={districts}
+            valueId={form.districtId}
+            onChange={(id) => handleChange("districtId", id)}
+            placeholder="District"
+            disabled={!form.provinceId}
+            getId={(d) => d._id || d.district_id}
+            getLabel={(d) => d.name_th || d.name_en}
+          />
+          <SelectSearch
+            items={subdistricts}
+            valueId={form.subdistrictId}
+            onChange={(id) => handleChange("subdistrictId", id)}
+            placeholder="Subdistrict"
+            disabled={!form.districtId}
+            getId={(s) => s._id || s.subdistrict_id}
+            getLabel={(s) => s.name_th || s.name_en}
+          />
         </div>
+
+        <input
+          type="text"
+          placeholder="Postal Code"
+          value={form.postcode}
+          onChange={(e) => setForm((p) => ({ ...p, postcode: e.target.value }))}
+          className="w-full px-4 py-2 rounded-xl border border-gray-300 bg-white focus:outline-none focus:ring-1 focus:ring-[#B29674]"
+        />
 
         {/* Default address */}
         <div className="flex items-center pt-1">
@@ -629,7 +162,7 @@ export default function AddressForm({ onSave, editData, editIndex }) {
             type="checkbox"
             id="isDefault"
             checked={form.isDefault}
-            onChange={(e) => handleChange("isDefault", e.target.checked)}
+            onChange={(e) => setForm((p) => ({ ...p, isDefault: e.target.checked }))}
             className="mr-2 accent-[#B29674]"
           />
           <label htmlFor="isDefault" className="text-sm text-gray-700">
@@ -648,4 +181,79 @@ export default function AddressForm({ onSave, editData, editIndex }) {
   );
 }
 
+// Lightweight searchable select with scrollable dropdown
+function SelectSearch({
+  items = [],
+  valueId = "",
+  onChange,
+  placeholder = "Select...",
+  disabled = false,
+  getId = (x) => x?.id ?? x?._id ?? x?.value,
+  getLabel = (x) => x?.label ?? x?.name_th ?? x?.name_en ?? String(getId(x) ?? ""),
+}) {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const [inputValue, setInputValue] = useState("");
+  const ref = useRef(null);
 
+  useEffect(() => {
+    const sel = items.find((it) => String(getId(it)) === String(valueId));
+    setInputValue(sel ? getLabel(sel) : "");
+  }, [valueId, items]);
+
+  useEffect(() => {
+    function onDoc(e) {
+      if (!ref.current) return;
+      if (!ref.current.contains(e.target)) setOpen(false);
+    }
+    function onKey(e) { if (e.key === "Escape") setOpen(false); }
+    document.addEventListener("mousedown", onDoc);
+    document.addEventListener("keydown", onKey);
+    return () => { document.removeEventListener("mousedown", onDoc); document.removeEventListener("keydown", onKey); };
+  }, []);
+
+  const filtered = query
+    ? items.filter((it) => getLabel(it).toLowerCase().includes(query.toLowerCase()))
+    : items;
+
+  return (
+    <div ref={ref} className={`relative ${disabled ? "opacity-60 pointer-events-none" : ""}`}>
+      <div className="flex items-center">
+        <input
+          type="text"
+          value={open ? query : inputValue}
+          onChange={(e) => { setQuery(e.target.value); if (!open) setOpen(true); }}
+          onFocus={() => setOpen(true)}
+          placeholder={placeholder}
+          className={`w-full px-4 py-2 rounded-xl border border-gray-300 bg-white focus:outline-none focus:ring-1 focus:ring-[#B29674] ${
+            (!inputValue && !query) ? "text-stone-500" : "text-gray-800"
+          }`}
+        />
+        <button type="button" onClick={() => setOpen((v) => !v)} className="-ml-8 px-2 py-2 text-stone-500">▾</button>
+      </div>
+      {open && (
+        <div className="absolute z-50 left-0 right-0 mt-1 rounded-xl border bg-white shadow max-h-60 overflow-auto">
+          {filtered.length === 0 ? (
+            <div className="px-3 py-2 text-sm text-stone-500">No results</div>
+          ) : (
+            filtered.map((it) => {
+              const id = getId(it);
+              const label = getLabel(it);
+              const active = String(id) === String(valueId);
+              return (
+                <button
+                  key={String(id)}
+                  type="button"
+                  onClick={() => { onChange?.(String(id)); setOpen(false); setQuery(""); setInputValue(label); }}
+                  className={`block w-full text-left px-3 py-2 text-sm hover:bg-stone-100 ${active ? "bg-stone-50 font-medium" : ""}`}
+                >
+                  {label}
+                </button>
+              );
+            })
+          )}
+        </div>
+      )}
+    </div>
+  );
+}

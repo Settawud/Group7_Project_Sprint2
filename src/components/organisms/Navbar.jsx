@@ -30,8 +30,21 @@ export default function Navbar() {
   const isActive = useMemo(() => {
     const params = new URLSearchParams(location.search);
     const cat = params.get("category");
-    return (key) => location.pathname === "/pageproductlist" && cat === key;
+    const base = cat ? String(cat).split("(")[0] : null;
+    return (key) => location.pathname === "/products" && base === key;
   }, [location.pathname, location.search]);
+
+  const mapCategoryAlias = (raw) => {
+    const q = String(raw || "").trim().toLowerCase();
+    if (!q) return null;
+    // normalize spaces and dashes
+    const n = q.replace(/\s+/g, " ").replace(/-/g, " ").trim();
+    const inSet = (arr) => arr.some((w) => n === w || n.includes(w));
+    if (inSet(["เก้าอี้", "เก้าอี้เพื่อสุขภาพ", "chair", "chairs", "ergonomic chair", "ergonomic chairs"])) return "Chairs(เก้าอี้)";
+    if (inSet(["โต๊ะ", "โต๊ะยืน", "standing desk", "standing desks", "table", "tables", "desk", "desks"])) return "Tables(โต๊ะ)";
+    if (inSet(["อุปกรณ์", "อุปกรณ์เสริม", "accessory", "accessories"])) return "Accessories(อุปกรณ์เสริม)";
+    return null;
+  };
 
   return (
     <header
@@ -44,9 +57,9 @@ export default function Navbar() {
           <Link to="/" className="font-semibold"><img src="/images/logoCutBackground.webp" alt="logo image" width="56" height="56"/></Link>
           <Link to="/" className="font-semibold text-[#49453A]">Livin’ Lab</Link>
           <nav className="hidden md:flex gap-1 text-stone-700">
-            <Link to="/pageproductlist?category=chairs" className={`px-3 py-2 rounded-xl hover:bg-stone-900/5 ${isActive("chairs") ? "text-stone-900 bg-stone-900/5" : ""}`}>Ergonomic Chairs</Link>
-            <Link to="/pageproductlist?category=tables" className={`px-3 py-2 rounded-xl hover:bg-stone-900/5 ${isActive("tables") ? "text-stone-900 bg-stone-900/5" : ""}`}>Standing Desks</Link>
-            <Link to="/pageproductlist?category=accessories" className={`px-3 py-2 rounded-xl hover:bg-stone-900/5 ${isActive("accessories") ? "text-stone-900 bg-stone-900/5" : ""}`}>Accessories</Link>
+            <Link to="/products?category=Chairs(เก้าอี้)" className={`px-3 py-2 rounded-xl hover:bg-stone-900/5 ${isActive("Chairs") ? "text-stone-900 bg-stone-900/5" : ""}`}>Ergonomic Chairs</Link>
+            <Link to="/products?category=Tables(โต๊ะ)" className={`px-3 py-2 rounded-xl hover:bg-stone-900/5 ${isActive("Tables") ? "text-stone-900 bg-stone-900/5" : ""}`}>Standing Desks</Link>
+            <Link to="/products?category=Accessories(อุปกรณ์เสริม)" className={`px-3 py-2 rounded-xl hover:bg-stone-900/5 ${isActive("Accessories") ? "text-stone-900 bg-stone-900/5" : ""}`}>Accessories</Link>
           </nav>
         </div>
 
@@ -56,7 +69,12 @@ export default function Navbar() {
             onSubmit={(e) => {
               e.preventDefault();
               const q = query.trim();
-              navigate(`/pageproductlist${q ? `?q=${encodeURIComponent(q)}` : ""}`);
+              const mapped = mapCategoryAlias(q);
+              if (mapped) {
+                navigate(`/products?category=${encodeURIComponent(mapped)}`);
+              } else {
+                navigate(`/products${q ? `?search=${encodeURIComponent(q)}` : ""}`);
+              }
             }}
           >
             <Input
@@ -122,15 +140,20 @@ export default function Navbar() {
         <div className="md:hidden border-t border-stone-200 bg-white/90 backdrop-blur">
           <Container className="py-2">
             <nav className="grid gap-1 text-stone-700">
-              <Link to="/pageproductlist?category=chairs" className={`px-3 py-2 rounded-lg hover:bg-stone-900/5 ${isActive("chairs") ? "text-stone-900 bg-stone-900/5" : ""}`}>Ergonomic Chairs</Link>
-              <Link to="/pageproductlist?category=tables" className={`px-3 py-2 rounded-lg hover:bg-stone-900/5 ${isActive("tables") ? "text-stone-900 bg-stone-900/5" : ""}`}>Standing Desks</Link>
-              <Link to="/pageproductlist?category=accessories" className={`px-3 py-2 rounded-lg hover:bg-stone-900/5 ${isActive("accessories") ? "text-stone-900 bg-stone-900/5" : ""}`}>Accessories</Link>
+              <Link to="/products?category=Chairs(เก้าอี้)" className={`px-3 py-2 rounded-lg hover:bg-stone-900/5 ${isActive("Chairs") ? "text-stone-900 bg-stone-900/5" : ""}`}>Ergonomic Chairs</Link>
+              <Link to="/products?category=Tables(โต๊ะ)" className={`px-3 py-2 rounded-lg hover:bg-stone-900/5 ${isActive("Tables") ? "text-stone-900 bg-stone-900/5" : ""}`}>Standing Desks</Link>
+              <Link to="/products?category=Accessories(อุปกรณ์เสริม)" className={`px-3 py-2 rounded-lg hover:bg-stone-900/5 ${isActive("Accessories") ? "text-stone-900 bg-stone-900/5" : ""}`}>Accessories</Link>
               <form
                 className="mt-2"
                 onSubmit={(e) => {
                   e.preventDefault();
                   const q = query.trim();
-                  navigate(`/pageproductlist${q ? `?q=${encodeURIComponent(q)}` : ""}`);
+                  const mapped = mapCategoryAlias(q);
+                  if (mapped) {
+                    navigate(`/products?category=${encodeURIComponent(mapped)}`);
+                  } else {
+                    navigate(`/products${q ? `?search=${encodeURIComponent(q)}` : ""}`);
+                  }
                 }}
               >
                 <Input

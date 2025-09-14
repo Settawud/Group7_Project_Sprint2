@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import axios from "axios";
+import { api } from "../lib/api";
 
 import StickyImage from "../components/organisms/StickyImage";
 import ProductContent from "../components/organisms/ProductContent";
@@ -14,13 +14,7 @@ const Page_Product_Detail = () => {
   const [productData, setProductData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const images = [
-    "/images/product1.jpg",
-    "/images/product2.jpg",
-    "/images/product3.jpg",
-    "/images/product4.jpg",
-    "/images/product5.jpg",
-  ];
+  const [images, setImages] = useState([]);
 
   const reviews = [
     {
@@ -52,13 +46,13 @@ const Page_Product_Detail = () => {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const res = await axios.get(`http://localhost:4000/api/v1/mongo/products/${id}`);
+        const res = await api.get(`/products/${id}`);
         const data = res.data.item;
 
         const colorResponses = await Promise.all(
           data.variants.map((v) =>
-            axios
-              .get(`http://localhost:4000/api/v1/mongo/colors/${v.colorId}`)
+            api
+              .get(`/colors/${v.colorId}`)
               .then((res) => ({ id: v.colorId, hex: res.data.item.hex }))
               .catch(() => ({ id: v.colorId, hex: "#D3D3D3" }))
           )
@@ -75,7 +69,6 @@ const Page_Product_Detail = () => {
           Description: data.description,
           tag: data.tags,
           material: data.material,
-          trial: data.trial || false,
           variants: data.variants.map((v) => ({
             _id: v._id,
             trial: v.trial,
@@ -86,10 +79,20 @@ const Page_Product_Detail = () => {
           })),
         };
 
+        const firstThumb = Array.isArray(data.thumbnails)
+          ? (typeof data.thumbnails[0] === 'string' ? data.thumbnails[0] : data.thumbnails[0]?.url)
+          : null;
+
+        const variantImages = (data.variants || [])
+          .map((v) => (typeof v.image === 'string' ? v.image : v.image?.url))
+          .filter(Boolean);
+        const allImages = [firstThumb, ...variantImages].filter(Boolean);
+
         setProductData({
           ...mappedProducts,
-          image: data.thumbnails?.[0],
+          image: firstThumb,
         });
+        setImages(allImages);
 
         setIsLoading(false);
       } catch (err) {

@@ -1,4 +1,5 @@
 import axios from "axios";
+import { useEffect } from "react";
 import { useState } from "react";
 
 const ProductContent = ({ product }) => {
@@ -8,13 +9,15 @@ const ProductContent = ({ product }) => {
     Description = [],
     tag,
     material,
-    trial,
     variants = [],
   } = product;
 
   const [selected, setSelected] = useState("buy");
   const [quantity, setQuantity] = useState(1);
   const [selectedColor, setSelectedColor] = useState(null);
+
+   const trialTest = variants.some(variant => variant.trial)
+ 
 
   const filteredVariants = variants.filter((v) =>
     selected === "trial"
@@ -30,11 +33,13 @@ const ProductContent = ({ product }) => {
   const decrement = () => setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
 
   const quantityInStock = currentVariant.quantityInStock || 0;
-  const price = currentVariant.price || 0;
+  
+
+  const price = currentVariant.price || 0
+  
 
   const handleAddToCart = async () => {
     try {
-      const token = localStorage.getItem("token");
 
       const res = await axios.post(
         "http://localhost:4000/api/v1/mongo/cart/items",
@@ -44,10 +49,7 @@ const ProductContent = ({ product }) => {
           quantity: quantity,
         },
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
+          withCredentials: true,
         }
       );
 
@@ -58,6 +60,7 @@ const ProductContent = ({ product }) => {
       alert("Error!");
     }
   };
+
 
   return (
     <div className="flex flex-col gap-3 text-black">
@@ -74,7 +77,7 @@ const ProductContent = ({ product }) => {
         ))}
       </div>
 
-      <div className="text-3xl font-bold">฿{price.toLocaleString()}</div>
+      <div className="text-3xl font-bold">฿{price}</div>
 
       <hr className="my-3 border-[#B29675]" />
 
@@ -111,7 +114,7 @@ const ProductContent = ({ product }) => {
 
       <div className="flex flex-col gap-4 w-full">
         <div className="flex flex-col sm:flex-row gap-2 w-full">
-          {trial && (
+          {trialTest && (
             <button
               onClick={() => {
                 setSelected("trial");
@@ -124,7 +127,7 @@ const ProductContent = ({ product }) => {
               }`}
             >
               ทดลองใช้ ฿
-              {variants.find((v) => v.trial === true)?.price}
+              {variants.find((v) => v.trial === true && currentVariant.color === v.color)?.price}
             </button>
           )}
           <button
@@ -139,7 +142,7 @@ const ProductContent = ({ product }) => {
             }`}
           >
             ซื้อเดี๋ยวนี้ ฿
-            {variants.find((v) => v.trial !== true)?.price}
+            {variants.find((v) => v.trial !== true && currentVariant.color === v.color)?.price}
           </button>
         </div>
       </div>

@@ -1,6 +1,7 @@
 import { ValueContext } from './ValueContext';
 import { useMemo, useState, useEffect } from "react";
 import { Toaster, toast } from 'sonner';
+import { api } from '../lib/api';
 
 export const ValueProvider = ({ children }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -118,8 +119,25 @@ export const ValueProvider = ({ children }) => {
     setCart((prev) => prev.filter((x) => x.skuId !== skuId));
   };
 
-  const removeChecked = () => {
-    setCart((prev) => prev.filter((item) => !item.checked));
+  const removeChecked = async (cart) => {
+
+    try {
+
+    const deleteCart = cart
+      .filter((item) => item.checked)
+      .map((item) =>
+        api.delete(`/cart/items/${item.productId}/${item.variantId}`)
+      );
+
+    await Promise.all(deleteCart);
+      
+    } catch (error) {
+    console.error("Failed to remove items:", error);
+    alert("Failed to remove some items. Please try again.");
+    }
+
+    
+    
   };
 
   const cartCount = useMemo(

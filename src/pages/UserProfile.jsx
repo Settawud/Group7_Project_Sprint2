@@ -3,9 +3,12 @@ import UserAddress from "../components/organisms/UserAddress";
 import Navbar from "../components/organisms/Navbar";
 import Footer from "../components/organisms/Footer";
 import UserCoupon from "../components/molecules/UserCoupon";
+import CouponCreateForm from "../components/molecules/CouponCreateForm";
+import { useState } from "react";
 import Sidebar from "../components/organisms/Sidebar";
 
 export default function UserProfile() {
+  const [couponRefreshKey, setCouponRefreshKey] = useState(0);
   return (
     <div className="min-h-screen flex flex-col bg-[#faf6f1]">
       <Navbar />
@@ -15,7 +18,8 @@ export default function UserProfile() {
           <div className="max-w-4xl mx-auto space-y-10">
             <ProfileData />
             <UserAddress />
-            <UserCoupon />
+            <CouponCreateForm onCreated={() => setCouponRefreshKey((k)=>k+1)} />
+            <UserCoupon refreshKey={couponRefreshKey} />
           </div>
         </main>
       </div>
@@ -23,5 +27,4 @@ export default function UserProfile() {
     </div>
   );
 }
-
 
