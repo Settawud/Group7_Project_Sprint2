@@ -1,10 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useSearchParams } from "react-router-dom";
 import { api } from "../lib/api";
 
 import Navbar from "../components/organisms/Navbar";
 import ProductFilterSortTags from "../components/organisms/ProductFilterSortTags";
 import ProductGridList from "../components/organisms/ProductGridList";
+import { ValueContext } from "../context/ValueContext";
+import AddToCartModal from "../components/organisms/AddToCartModal";
 
 const Page_Product_List = () => {
   const [filters, setFilters] = useState({
@@ -12,6 +14,8 @@ const Page_Product_List = () => {
     price: null,
     availability: null,
   });
+
+  const { isModalOpen, setIsModalOpen, product } = useContext(ValueContext)
 
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -177,7 +181,9 @@ const Page_Product_List = () => {
       tag: Array.isArray(product.tags) ? product.tags : [],
       size: safeSize,
       price: priceNum ? priceNum.toLocaleString() : "-",
+      material: product.material,
       trial,
+      variants: product.variants
     };
   });
 
@@ -208,6 +214,28 @@ const Page_Product_List = () => {
           )}
         </div>
       </div>
+
+        <div>
+                            {isModalOpen && (
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+            onClick={() => setIsModalOpen(false)}
+          >
+            <div
+              className="bg-yellow-100 border-4 border-black rounded-2xl shadow-[8px_8px_0_0_#000] p-8 w-full max-w-lg relative"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="absolute top-4 right-4 text-black bg-white  border-black border-1 rounded-3xl w-8 h-8 flex items-center justify-center hover:bg-pink-200 transition"
+              >
+                ✖
+              </button>
+              <AddToCartModal product={mappedProducts.find(item => item._id === product)} />
+            </div>
+          </div>
+        )}
+</div>
     </div>
   );
 };

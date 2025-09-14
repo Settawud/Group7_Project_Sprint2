@@ -48,7 +48,6 @@ const Cart = () => {
           }
           
           return null;
-        
 
         })
 
@@ -67,7 +66,7 @@ const Cart = () => {
     }
     fetchCart()
   }
-    , [cart])
+    , [])
 
   return (
     <div className="min-h-screen flex flex-col bg-off-white">

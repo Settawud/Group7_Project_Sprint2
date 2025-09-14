@@ -1,6 +1,16 @@
 import { Link } from "react-router-dom";
+import { ValueContext } from "../../context/ValueContext";
+import { useContext } from "react";
 
 const ProductCardList = ({ _id, imageSrc, title, tag, size, price, trial = false }) => {
+
+  const { isModalOpen, setIsModalOpen, setProduct } = useContext(ValueContext)
+
+    const clickAddToCart = (id) => {
+    setIsModalOpen(true)
+    //console.log(id)
+    setProduct(id)
+  }
 
   return (
     <div className="relative w-full max-w-sm overflow-hidden bg-white border border-[#b29675] rounded-xl shadow transition-transform duration-300 ease-in-out hover:scale-105">
@@ -42,7 +52,7 @@ const ProductCardList = ({ _id, imageSrc, title, tag, size, price, trial = false
         </div>
         <div className="flex flex-col sm:flex-row justify-between gap-2 text-white">
           <div className="flex items-center justify-center w-full h-12 bg-[#B29675] rounded-lg hover:bg-[#B2967590] transition"> {/*sm:w-2/3*/}
-            <button className="text-lg">Add to Cart</button>
+            <button className="text-lg" onClick={() => clickAddToCart(_id)}>Add to Cart</button>
           </div>
         </div>
       </div>

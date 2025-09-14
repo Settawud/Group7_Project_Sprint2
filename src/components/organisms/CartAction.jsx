@@ -19,7 +19,7 @@ const CartAction = ({ className = "" }) => {
       sum += 200;
     }
     setTotal(sum);
-    console.log(cart)
+    //console.log(cart)
   }, [cart, installChecked]);
   //console.log(total)
 
