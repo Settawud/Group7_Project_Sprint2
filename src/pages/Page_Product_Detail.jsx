@@ -16,32 +16,9 @@ const Page_Product_Detail = () => {
 
   const [images, setImages] = useState([]);
 
-  const reviews = [
-    {
-      id: 1,
-      name: "คุณธีระ",
-      rating: 5.0,
-      comment: "โต๊ะสวยมาก วัสดุดี แข็งแรง แต่ประกอบเองยากนิดหน่อย",
-    },
-    {
-      id: 2,
-      name: "คุณธีระ",
-      rating: 5.0,
-      comment: "ส่งไว ประกอบง่าย ใช้งานดีมากครับ ประทับใจ",
-    },
-    {
-      id: 3,
-      name: "คุณธีระ",
-      rating: 5.0,
-      comment: "สินค้าคุณภาพดีแต่สีไม่ตรงกับภาพเล็กน้อย",
-    },
-    {
-      id: 4,
-      name: "คุณธีระ",
-      rating: 5.0,
-      comment: "เหมาะกับการใช้งานในออฟฟิศมาก",
-    },
-  ];
+  const [reviews, setReviews] = useState([]);
+  const [reviewsLoading, setReviewsLoading] = useState(true);
+  const [reviewsError, setReviewsError] = useState(null);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -86,6 +63,7 @@ const Page_Product_Detail = () => {
         const variantImages = (data.variants || [])
           .map((v) => (typeof v.image === 'string' ? v.image : v.image?.url))
           .filter(Boolean);
+
         const allImages = [firstThumb, ...variantImages].filter(Boolean);
 
         setProductData({
@@ -93,21 +71,40 @@ const Page_Product_Detail = () => {
           image: firstThumb,
         });
         setImages(allImages);
-
-        setIsLoading(false);
       } catch (err) {
         console.error("Error fetching product:", err);
+        setProductData(null);
+      } finally {
         setIsLoading(false);
       }
     };
 
+    const fetchReviews = async () => {
+      try {
+        setReviewsLoading(true);
+        setReviewsError(null);
+
+        const res = await api.get(`/reviews/product/${id}`);
+        const reviewItems = res.data.items || res.data || [];
+
+        setReviews(reviewItems);
+      } catch (err) {
+        console.error("Error fetching reviews:", err);
+        setReviewsError("ไม่สามารถโหลดรีวิวได้");
+        setReviews([]);
+      } finally {
+        setReviewsLoading(false);
+      }
+    };
+
     fetchProduct();
+    fetchReviews();
   }, [id]);
 
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-screen">
-        <span className="text-xl">Loading...</span>
+        <span className="text-xl">Loading product...</span>
       </div>
     );
   }
@@ -128,7 +125,17 @@ const Page_Product_Detail = () => {
         <ProductContent product={productData} />
       </div>
       <ScrollableThumbnails images={images} />
-      <UsersReviewSection reviews={reviews} />
+
+      {reviewsLoading && (
+        <p className="text-center py-4 text-gray-500">Loading reviews...</p>
+      )}
+      {reviewsError && (
+        <p className="text-center py-4 text-red-500">{reviewsError}</p>
+      )}
+
+      {!reviewsLoading && !reviewsError && (
+        <UsersReviewSection reviews={reviews} />
+      )}
     </div>
   );
 };
