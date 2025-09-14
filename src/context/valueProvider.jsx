@@ -119,27 +119,33 @@ export const ValueProvider = ({ children }) => {
     setCart((prev) => prev.filter((x) => x.skuId !== skuId));
   };
 
-  const removeChecked = async (cart) => {
-
-    try {
-
-    const deleteCart = cart
+const removeChecked = async (cart) => {
+  try {
+    // 1. Get an array of all items to be deleted
+    const itemsToDelete = cart
       .filter((item) => item.checked)
-      .map((item) =>
-        api.delete(`/cart/items/${item.productId}/${item.variantId}`)
-      );
+      .map((item) => ({
+        productId: item.productId,
+        variantId: item.variantId,
+      }));
 
-    await Promise.all(deleteCart);
-      
-    } catch (error) {
-    console.error("Failed to remove items:", error);
-    alert("Failed to remove some items. Please try again.");
+    if (itemsToDelete.length === 0) {
+      console.log("No items selected for deletion.");
+      return;
     }
+    
+    // 2. Send a single request with the array of items
+    await api.post("/cart/items/delete-multiple", { items: itemsToDelete });
 
-    
-    
+    // 3. If the request is successful, update the UI
+    setCart((prevCart) => prevCart.filter((item) => !item.checked));
+
+  } catch (error) {
+    console.error("Failed to remove items:", error);
+    alert("Failed to remove items. Please try again.");
+  }
   };
-
+  
   const cartCount = useMemo(
     () => cart.reduce((sum, it) => sum + (it.quantity || 0), 0),
     [cart]

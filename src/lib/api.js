@@ -6,7 +6,7 @@ export const api = axios.create({
   baseURL: API_BASE,
   withCredentials: true,
   // Do not set global Content-Type: let axios choose based on payload
-  timeout: 15000,
+ 
 });
 
 // Attach Authorization from localStorage (if available)
