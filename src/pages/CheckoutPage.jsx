@@ -74,6 +74,7 @@ export default function CheckoutPage() {
             coupon={coupon}
             setCoupon={setCoupon}
             onConfirmOrder={handleConfirmOrder}
+            installationFee={installChecked ? 200 : 0}
           />
         </div>
       </main>

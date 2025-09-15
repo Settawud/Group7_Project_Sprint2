@@ -191,19 +191,18 @@ import { api } from "../../lib/api";
 import { toast } from "sonner";
 import dayjs from "dayjs";
 
-export default function OrderSummary({ cart, coupon, setCoupon, onConfirmOrder }) {
+export default function OrderSummary({ cart, coupon, setCoupon, onConfirmOrder, installationFee }) {
   const [discounts, setDiscounts] = useState([]);
   const [discountAmount, setDiscountAmount] = useState(0);
   const [selectedDiscount, setSelectedDiscount] = useState(null);
 
-  const assemblyFee = 200;
   const shippingFee = 0;
 
   const subtotal = cart
     .filter((item) => item.checked)
     .reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-  const total = subtotal + assemblyFee + shippingFee - discountAmount;
+  const total = subtotal + installationFee + shippingFee - discountAmount;
 
   useEffect(() => {
     async function fetchDiscounts() {
@@ -302,7 +301,7 @@ export default function OrderSummary({ cart, coupon, setCoupon, onConfirmOrder }
         </div>
         <div className="flex justify-between">
           <span>Assembly Service Fee</span>
-          <span>฿{assemblyFee.toLocaleString()}</span>
+          <span>฿{installationFee.toLocaleString()}</span>
         </div>
         <div className="flex justify-between">
           <span>Shipping Fee</span>
