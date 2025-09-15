@@ -16,12 +16,6 @@ const OrderHistory = ({ orders }) => {
                 <td className="space-y-1 px-6 py-4 align-top">
                   <p>
                     <span className="font-medium text-[#00000090]">
-                      Order ID:
-                    </span>{" "}
-                    {order.orderId}
-                  </p>
-                  <p>
-                    <span className="font-medium text-[#00000090]">
                       Order Date:
                     </span>{" "}
                     {order.orderDate}
@@ -36,19 +30,13 @@ const OrderHistory = ({ orders }) => {
                 <td className="space-y-1 px-6 py-4 align-top">
                   <p>
                     <span className="font-medium text-[#00000090]">
-                      Carrier Name:
-                    </span>{" "}
-                    {order.shipping.carrierName}
-                  </p>
-                  <p>
-                    <span className="font-medium text-[#00000090]">
                       Shipping Date:
                     </span>{" "}
                     {order.shipping.shippingDate}
                   </p>
                   <p>
                     <span className="font-medium text-[#00000090]">
-                      Shipping Method:
+                      Tracking Number:
                     </span>{" "}
                     {order.shipping.shippingMethod}
                   </p>

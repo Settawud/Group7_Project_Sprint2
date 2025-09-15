@@ -188,16 +188,19 @@ import { useContext, useState, useEffect } from "react";
 import { ValueContext } from "../../context/ValueContext";
 import Button from "../atoms/Button";
 import CouponInput from "./CouponInput";
+import { useNavigate } from "react-router-dom";
 
 export default function OrderSummary() {
   const { cart, installChecked } = useContext(ValueContext); // ✅ ใช้ cart โดยตรง
   const [coupon, setCoupon] = useState("");
   const [subtotal, setSubtotal] = useState(0);
   const [total, setTotal] = useState(0);
+  const navigate = useNavigate()
 
   const assemblyFee = installChecked ? 200 : 0;
   const shippingFee = 0;
   const discount = 0;
+
 
   useEffect(() => {
     const selectedItems = cart.filter((item) => item.checked); // ✅ เอาเฉพาะที่เลือก
@@ -207,6 +210,12 @@ export default function OrderSummary() {
     );
     setSubtotal(sub);
     setTotal(sub + assemblyFee + shippingFee - discount);
+
+    if (!selectedItems.length) {
+      alert("Please select at least one item to checkout")
+      navigate("/cart")
+    }
+
   }, [cart, installChecked]);
 
   const handleApplyCoupon = () => {

@@ -24,7 +24,7 @@ const CartItem = ({ item }) => {
 
 
   return (
-    <tr key={item.skuId}>
+    <tr key={item.variantId}>
                       <td className="p-4 text-center">
               <CheckboxWithText name="select" skuId={item.variantId} checked={item.checked} onChange={() => handleSelect(item.variantId)} />
                       </td>

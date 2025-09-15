@@ -19,14 +19,15 @@ const Cart = () => {
       const variant = product.variants.find(variant => variant._id === variantId)
 
       if (!variant) {
-      console.warn(`Variant ${variantId} not found for product ${productId}`);
+        //console.warn(`Variant ${variantId} not found for product ${productId}`);
+        console.warn(`Variant not found for product `);
       return null; 
     }
       const colorData = await api.get(`/colors/${variant.colorId}`)
 
       return [product.name, variant, colorData.data.item.name_en]
           } catch (error) {
-            console.error(`Error fetching details for product ${productId}, variant ${variantId}:`, error);
+            console.error(`Error fetching details for product:`, error);
             return null;
             
           }
@@ -43,11 +44,10 @@ const Cart = () => {
         const cartPromise = cart.map(async (item) => {
           const [name, variant, color] = await getProduct(item.productId, item.variantId)
           if (name && variant && color) {
-             return { productId: item.productId, variantId: item.variantId, name: name, trial: variant.trial, color: color, price: Number(variant.price), image: variant.image.url, quantity: item.quantity, checked: false }
+             return { productId: item.productId, variantId: item.variantId, name: name, trial: variant.trial, color: color, price: Number(variant.price), image: variant.image.url, quantity: item.quantity, checked: true }
           }
           
           return null;
-        
 
         })
 
@@ -66,7 +66,7 @@ const Cart = () => {
     }
     fetchCart()
   }
-    , [cart])
+    , [])
 
   return (
     <div className="min-h-screen flex flex-col bg-off-white">

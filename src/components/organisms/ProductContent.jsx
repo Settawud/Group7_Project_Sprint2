@@ -1,6 +1,8 @@
-import axios from "axios";
-import { useEffect } from "react";
+import { useContext, useEffect } from "react";
+import { api } from "../../lib/api";
 import { useState } from "react";
+
+import { ValueContext } from "../../context/ValueContext";
 
 const ProductContent = ({ product }) => {
   const {
@@ -15,8 +17,9 @@ const ProductContent = ({ product }) => {
   const [selected, setSelected] = useState("buy");
   const [quantity, setQuantity] = useState(1);
   const [selectedColor, setSelectedColor] = useState(null);
+  const {addToCart} = useContext(ValueContext)
 
-   const trialTest = variants.some(variant => variant.trial)
+   const trial = variants.some(variant => variant.trial)
  
 
   const filteredVariants = variants.filter((v) =>
@@ -37,31 +40,6 @@ const ProductContent = ({ product }) => {
 
   const price = currentVariant.price || 0
   
-
-  const handleAddToCart = async () => {
-    try {
-
-      const res = await axios.post(
-        "http://localhost:4000/api/v1/mongo/cart/items",
-        {
-          productId: _id,
-          variantId: currentVariant._id,
-          quantity: quantity,
-        },
-        {
-          withCredentials: true,
-        }
-      );
-
-      console.log("Added to cart success:", res.data);
-      alert("Success!");
-    } catch (error) {
-      console.error("Add to cart error:", error);
-      alert("Error!");
-    }
-  };
-
-
   return (
     <div className="flex flex-col gap-3 text-black">
       <div className="text-3xl font-semibold leading-snug">{Name}</div>
@@ -114,7 +92,7 @@ const ProductContent = ({ product }) => {
 
       <div className="flex flex-col gap-4 w-full">
         <div className="flex flex-col sm:flex-row gap-2 w-full">
-          {trialTest && (
+          {trial && (
             <button
               onClick={() => {
                 setSelected("trial");
@@ -181,9 +159,8 @@ const ProductContent = ({ product }) => {
             +
           </button>
         </div>
-
         <button
-          onClick={handleAddToCart}
+          onClick={() => addToCart(_id, currentVariant._id, quantity,selectedColor)}
           disabled={quantityInStock === 0}
           className={`h-12 px-4 py-2 rounded text-sm w-full lg:w-1/2 transition ${
             quantityInStock === 0

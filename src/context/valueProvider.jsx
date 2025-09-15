@@ -53,93 +53,87 @@ export const ValueProvider = ({ children }) => {
   const [checkoutItem, setCheckoutItem] = useState([]);
   const [installChecked, setInstallChecked] = useState(false);
 
-  // const addToCart = (item, qty = 1) => {
-  //   setCart((prev) => {
-  //     const idx = prev.findIndex((cartItem) => cartItem.skuId === item.skuId);
-  //     console.log(idx)
-  //     if (idx >= 0) {
-  //       const next = [...prev];
-  //       next[idx] = { ...next[idx], quantity: (next[idx].quantity || 0) + qty };
-  //       return next;
-  //     }
-  //     return [
-  //       ...prev,
-  //       {
-  //         skuId: item.skuId,
-  //         image: item.image,
-  //         name: item.name,
-  //         altText: item.altText || item.name,
-  //         price: item.price,
-  //         quantity: qty,
-  //         checked: false,
-  //       },
-  //     ];
-  //   });
-  // };
 
-  function addToCart(productId, name, color, quantity, price, image, altText, sample, variants) {
+  async function addToCart(productId, variantId, quantity, color) {
     if (!color || !productId) {
       return toast.warning("Please select a color.")
     }
+      try {
 
-    const variantName = sample === "trial" ? "สินค้าทดลอง" : "สี"
-    const sku = variants.find(item => item.variantName === variantName && item.variantOption[0] === color[0]);
-    //console.log(sku)
-    const skuId = sku.skuID
+      const res = await api.post(
+        "/cart/items",
+        {
+          productId: productId,
+          variantId: variantId,
+          quantity: quantity,
+        }
+        );
 
-
-    setCart((prev) => {
-      const index = prev.findIndex((cartItem) => cartItem.skuId === skuId);
+      setCart((prev) => {
+      const index = prev.findIndex((cartItem) => cartItem.variantId === variantId);
       if (index >= 0) {
         const next = [...prev];
         next[index] = { ...next[index], quantity: (next[index].quantity || 0) + quantity };
-        toast.success('Added to cart', {duration: 1000})
+       
         return next;
       }
-      toast.success('Added to cart', {duration: 1000})
+      
       return [
         ...prev,
         {
           productId: productId,
-          skuId: skuId,
-          image: image,
-          name: name,
-          variantName: variantName,
-          color: color,
-          altText: altText,
-          price: price,
+          variantId: variantId,
+          image: null,
+          name: null,
+          variantName: null,
+          color: null,
+          price: null,
           quantity: quantity,
           checked: false,
         },
       ];
     });
-  }
+        
+      toast.success('Added to cart', {duration: 1000})
+
+      //console.log("Added to cart success:", res.data);
+    } catch (error) {
+      //console.error("Add to cart error:", error);
+      alert("Error Please Try again");
+    }
+  } // <-- Add this closing brace to properly end addToCart
 
   const removeFromCart = (skuId) => {
     setCart((prev) => prev.filter((x) => x.skuId !== skuId));
   };
 
-  const removeChecked = async (cart) => {
-
-    try {
-
-    const deleteCart = cart
+const removeChecked = async (cart) => {
+  try {
+    // 1. Get an array of all items to be deleted
+    const itemsToDelete = cart
       .filter((item) => item.checked)
-      .map((item) =>
-        api.delete(`/cart/items/${item.productId}/${item.variantId}`)
-      );
+      .map((item) => ({
+        productId: item.productId,
+        variantId: item.variantId,
+      }));
 
-    await Promise.all(deleteCart);
-      
-    } catch (error) {
-    console.error("Failed to remove items:", error);
-    alert("Failed to remove some items. Please try again.");
+    if (itemsToDelete.length === 0) {
+      console.log("No items selected for deletion.");
+      return;
     }
+    
+    // 2. Send a single request with the array of items
+    await api.post("/cart/items/delete-multiple", { items: itemsToDelete });
 
-    
-    
+    // 3. If the request is successful, update the UI
+    setCart((prevCart) => prevCart.filter((item) => !item.checked));
+
+  } catch (error) {
+    console.error("Failed to remove items:", error);
+    alert("Failed to remove items. Please try again.");
+  }
   };
-
+  
   const cartCount = useMemo(
     () => cart.reduce((sum, it) => sum + (it.quantity || 0), 0),
     [cart]

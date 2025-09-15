@@ -2,13 +2,14 @@ import React, { useState, useEffect,useContext } from "react";
 import CheckboxWithText from "../atoms/CheckboxWithText";
 import Button from "../atoms/Button";
 import { ValueContext } from "../../context/ValueContext";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 
 const CartAction = ({ className = "" }) => {
   const {cart, setCart,setCheckoutItem,checkoutItem,installChecked, setInstallChecked, removeChecked} = useContext(ValueContext)
   const [total, setTotal] = useState(0);
   const [selectAllChecked, setSelectAllChecked] = useState(false);
+  const navigate = useNavigate()
 
   useEffect(() => {
     let sum = cart.reduce((accum, item) => {
@@ -19,7 +20,7 @@ const CartAction = ({ className = "" }) => {
       sum += 200;
     }
     setTotal(sum);
-    console.log(cart)
+    //console.log(cart)
   }, [cart, installChecked]);
   //console.log(total)
 
@@ -42,7 +43,20 @@ const CartAction = ({ className = "" }) => {
     setCart(updatedCart)
     setCheckoutItem(updatedCart.filter(item => item.checked));
 
-  };
+  }
+    
+  const startOrder = () => {
+
+    const countItemChecked = cart.filter(item => item.checked).length
+    
+    if (countItemChecked) {
+        navigate('/checkout')
+    } else {
+      alert("Please select at least one item")
+      }
+    }
+    
+    ;
 
   return (
     <div className={`border rounded-2xl border-sandy-beige overflow-hidden shadow-[0_2px_4px_rgba(178,_150,_116,_1)] p-2 sm:px-4 bg-white ${className}`}>
@@ -79,11 +93,11 @@ const CartAction = ({ className = "" }) => {
         <div className="flex">
           <p className="mr-4 my-5 hidden sm:block">ยอดรวม ฿{total}</p>
           <p className="mr-2 my-5 sm:hidden">฿{total}</p>
-          <Link to ="/checkout">
-          <Button variant="primary" className="py-2 px-3 my-2">
+
+          <Button variant="primary" className="py-2 px-3 my-2" onClick={startOrder}>
             เริ่มการสั่งซื้อ
             </Button>
-            </Link>
+
         </div>
       </div>
     </div>
