@@ -1,13 +1,15 @@
-import { useState, useEffect } from "react";
-import { Menu, LogOut, User, MapPin, Wallet, TicketPercent, PlusCircle } from "lucide-react";
+import { useState, useEffect, useContext } from "react";
+import { Menu, LogOut, User, MapPin, Wallet, TicketPercent, PlusCircle, Store } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../../lib/api";
+import { ValueContext } from "../../context/ValueContext";
 
 const Sidebar = () => {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
+ 
   const navigate = useNavigate();
+  const {isAdmin} = useContext(ValueContext)
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -19,17 +21,6 @@ const Sidebar = () => {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const { data } = await api.get("/users/me");
-        const role = data?.user?.role || data?.role;
-        setIsAdmin(role === "admin");
-      } catch {
-        setIsAdmin(false);
-      }
-    })();
-  }, []);
 
   const sidebarClass = `
     top-16 left-0 z-40 h-[calc(100vh-64px)] p-6 bg-[#B29675] transition-all duration-300 fixed
@@ -76,7 +67,7 @@ const Sidebar = () => {
               { label: "Address", icon: <MapPin className="w-4 h-4" />, onClick: () => {} },
               { label: "Coupons", icon: <TicketPercent className="w-4 h-4" />, onClick: () => { document.getElementById("coupons")?.scrollIntoView({ behavior: "smooth" }); } },
               ...(isAdmin ? [
-                { label: "Add Product", icon: <PlusCircle className="w-4 h-4" />, onClick: () => navigate("/AddProductPage") },
+                { label: "Product Management", icon: <Store className="w-4 h-4" />, onClick: () => navigate("/adminproductmanagement") },
                 { label: "Add Coupon", icon: <TicketPercent className="w-4 h-4" />, onClick: () => { document.getElementById("create-coupon")?.scrollIntoView({ behavior: "smooth" }); } },
               ] : []),
               { label: "Purchase", icon: <Wallet className="w-4 h-4" />, onClick: () => {} },

@@ -4,11 +4,26 @@ import Navbar from "../components/organisms/Navbar";
 import Footer from "../components/organisms/Footer";
 import UserCoupon from "../components/molecules/UserCoupon";
 import CouponCreateForm from "../components/molecules/CouponCreateForm";
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import Sidebar from "../components/organisms/Sidebar";
+import { api } from "../lib/api";
+import { ValueContext } from "../context/ValueContext";
 
 export default function UserProfile() {
   const [couponRefreshKey, setCouponRefreshKey] = useState(0);
+  const {setIsAdmin, isAdmin} = useContext(ValueContext)
+
+    useEffect(() => {
+    (async () => {
+      try {
+        const { data } = await api.get("/users/me");
+        const role = data?.user?.role || data?.role;
+        setIsAdmin(role === "admin");
+      } catch {
+      }
+    })();
+    }, []);
+  
   return (
     <div className="min-h-screen flex flex-col bg-[#faf6f1]">
       <Navbar />
@@ -18,7 +33,8 @@ export default function UserProfile() {
           <div className="max-w-4xl mx-auto space-y-10">
             <ProfileData />
             <UserAddress />
-            <CouponCreateForm onCreated={() => setCouponRefreshKey((k)=>k+1)} />
+            {isAdmin && <CouponCreateForm onCreated={() => setCouponRefreshKey((k)=>k+1)} />}
+            
             <UserCoupon refreshKey={couponRefreshKey} />
           </div>
         </main>
