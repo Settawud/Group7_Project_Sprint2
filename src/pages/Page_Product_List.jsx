@@ -188,6 +188,10 @@ const Page_Product_List = () => {
     };
   });
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [page, filters]);
+
   return (
     <div className="bg-[#fefdf9]">
       <Navbar />

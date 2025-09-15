@@ -51,7 +51,11 @@ const Order_History_Detail = () => {
             phone={order.shippingAddress.phone}
             address={order.shippingAddress.address}
           />
-          <ProductDetails products={order.products} />
+          <ProductDetails
+            products={order.products}
+            discountAmount={order.discountAmount}
+            installationFee={order.installationFee}
+          />
           <OrderHistory orders={order.orderHistory} />
         </main>
       </div>
@@ -68,7 +72,9 @@ function mapOrderData(data) {
   return {
     orderNumber: data.orderNumber,
     orderStatus: data.orderStatus,
-    shippingStatus: data.shipping?.deliveryStatus || "Unknown",
+    shippingStatus: data.shipping?.deliveryStatus,
+    discountAmount: data.discountAmount,
+    installationFee: data.installationFee,
 
     products: items.map((item) => ({
       id: item.productId?.$oid || item.productId,

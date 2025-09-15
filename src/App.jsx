@@ -21,10 +21,12 @@ import { AddProductPage } from "./pages/AddProductPage";
 import { ValueContext } from "./context/ValueContext";
 import { Toaster } from "sonner";
 import { AdminProductManagement } from "./pages/AdminProductManagement";
+import ScrollToTop from "../ScrollToTop";
 
 export default function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <Routes>
         <Route index element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />

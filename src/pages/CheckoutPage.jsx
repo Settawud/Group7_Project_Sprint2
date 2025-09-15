@@ -91,7 +91,7 @@ export default function CheckoutPage() {
   const [contact, setContact] = useState({ name: "", phone: "" });
   const [coupon, setCoupon] = useState("");
   const [selectedAddress, setSelectedAddress] = useState(null);
-  const { cart } = useContext(ValueContext);
+  const { cart, installChecked } = useContext(ValueContext);
   const navigate = useNavigate();
 
   const handleAddressSelect = (address) => {
@@ -121,6 +121,7 @@ export default function CheckoutPage() {
         name: contact.name,
         phone: contact.phone,
         discountCode: coupon || "",
+        installationFee: installChecked ? 200 : 0,
         shipping: {
           address: selectedAddress.fullAddress || selectedAddress.address || "",
         },
