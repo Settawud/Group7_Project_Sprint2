@@ -73,7 +73,7 @@ export default function NavUserMenu({
             </Link>
           </li>
           <li>
-            <Link to="/checkoutpage" onClick={() => setOpen(false)} className="flex items-center gap-3 rounded-xl px-3 py-2 hover:bg-stone-100" role="menuitem">
+            <Link to="/orderhistory" onClick={() => setOpen(false)} className="flex items-center gap-3 rounded-xl px-3 py-2 hover:bg-stone-100" role="menuitem">
               <Icon><Wallet className="w-4 h-4" /></Icon> <span>Purchase</span>
             </Link>
           </li>
