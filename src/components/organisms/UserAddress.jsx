@@ -106,7 +106,7 @@ export default function UserAddress({ onSelectAddress }) {
     const subdistrict = addr.subdistrictName || addr?.subdistrict?.name_th || addr?.subdistrict?.name_en || "";
     const building = addr.buildingNo || addr.building || "";
     const full = `${building} ${addr.detail || ""} ${subdistrict} ${district} ${province} ${addr.postcode || ""}`.replace(/\s+/g, " ").trim();
-    return addr.isDefault ? `[Default] ${full}` : full;
+    return addr.isDefault ? ` ${full}` : full;
   };
 
   const handleSelect = async (i) => {

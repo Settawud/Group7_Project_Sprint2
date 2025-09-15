@@ -103,6 +103,10 @@ export default function CheckoutPage() {
       toast.error("Please enter your contact details");
       return;
     }
+    if (contact.phone.length !== 10) {
+      toast.error("Phone number must be 10 digits.");
+      return;
+    }
     if (!selectedAddress) {
       toast.error("Please select a shipping address");
       return;
