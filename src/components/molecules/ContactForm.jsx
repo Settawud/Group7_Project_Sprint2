@@ -39,8 +39,8 @@ export default function ContactForm({ value, onChange }) {
           className="w-full px-4 py-2 rounded-xl border border-gray-300
                      focus:outline-none focus:ring-1 focus:ring-[#B29674] bg-white"
           required
-          pattern="\d{10}"
-          title="Phone number must be 10 digits."
+          pattern="^0\d{9}$"
+          title="Phone number must be 10 digits and start with 0."
         />
       </div>
     </div>
