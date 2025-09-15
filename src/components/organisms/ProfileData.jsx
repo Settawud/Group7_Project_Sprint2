@@ -158,7 +158,7 @@ export default function ProfileData() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
+    <div id="profile" className="max-w-3xl mx-auto bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
       {/* Header */}
       <div className="flex justify-between items-start mb-6">
         <h2 className="text-xl font-bold text-sand">User Data</h2>
