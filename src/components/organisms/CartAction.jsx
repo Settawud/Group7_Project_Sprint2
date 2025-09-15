@@ -63,17 +63,17 @@ const CartAction = ({ className = "" }) => {
       <div className="flex sm:justify-end px-2 sm:px-4 pt-4 pb-2 border-b border-gray-400">
         <CheckboxWithText
           name="install"
-          text="บริการประกอบสินค้าแบบเหมา 200 บาท"
+          text="product installation service ฿200"
           className="text-end"
           onChange={handleInstallationChecked}
           checked={installChecked}
         />
       </div>
       <div className="flex justify-between py-2 sm:mx-4 mx-2">
-        <div className="flex my-4">
+        <div className="flex my-2 items-center">
           <CheckboxWithText
             name="selectAll"
-            text="ทั้งหมด"
+            text="Select All"
             className="my-3"
             setCart={setCart}
             cart={cart}
@@ -86,16 +86,16 @@ const CartAction = ({ className = "" }) => {
             onClick={() => handleDeleteCartItem(cart)}
             //disabled={!cart.some((i) => i.checked)}
           >
-            ลบที่เลือก
+            Delete
           </Button>
         </div>
 
         <div className="flex">
-          <p className="mr-4 my-5 hidden sm:block">ยอดรวม ฿{total}</p>
+          <p className="mr-4 my-5 hidden sm:block">Total ฿{total}</p>
           <p className="mr-2 my-5 sm:hidden">฿{total}</p>
 
           <Button variant="primary" className="py-2 px-3 my-2" onClick={startOrder}>
-            เริ่มการสั่งซื้อ
+            checkout
             </Button>
 
         </div>

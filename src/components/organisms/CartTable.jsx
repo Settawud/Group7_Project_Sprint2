@@ -12,11 +12,11 @@ const CartTable = ({ className }) => {
       <div className='overflow-y-auto'>   
       <table className="w-full sm:table-fixed mx-auto bg-white">
               <thead className="hidden sm:contents w-full">
-                <th className="p-4 sm:w-1/10 sm:border-b sm:border-charcoal">เลือก</th>
-                <th className="py-4 px-2 sm:w-15/100 sm:border-b sm:border-charcoal">รูปสินค้า</th>
-                <th className="p-4 sm:w-40/100 sm:border-b sm:border-charcoal">ชื่อสินค้า</th>
-                <th className="p-4 sm:w-15/100 sm:border-b sm:border-charcoal">จำนวน</th>
-                <th className="p-4 sm:w-20/100 sm:border-b sm:border-charcoal sm:min-w-6">ราคารวม</th>
+                <th className="p-4 sm:w-1/10 sm:border-b sm:border-charcoal">Select</th>
+                <th className="py-4 px-2 sm:w-15/100 sm:border-b sm:border-charcoal">image</th>
+                <th className="p-4 sm:w-40/100 sm:border-b sm:border-charcoal">name</th>
+                <th className="p-4 sm:w-15/100 sm:border-b sm:border-charcoal">quantity</th>
+                <th className="p-4 sm:w-20/100 sm:border-b sm:border-charcoal sm:min-w-6">price</th>
               </thead>
               <tbody className="divide-y divide-gray-300">
                   {cart.map((item, index) => (
