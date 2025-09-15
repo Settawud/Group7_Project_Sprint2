@@ -138,52 +138,49 @@
 //   );
 // };
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import Navbar from "../components/organisms/Navbar";
 import { useNavigate } from "react-router-dom";
+import { api } from "../lib/api.js"; 
+import Button from "../components/atoms/Button.jsx";
+import { ValueContext } from "../context/ValueContext";
 
 export const AdminProductManagement = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [products, setProducts] = useState([]);
 
-  // Mock Data
-  const mockProducts = [
-    {
-      productID: "P001",
-      Name: "Wooden Chair",
-      category: "chairs",
-      mainImages: [{ url: "https://via.placeholder.com/100" }],
-    },
-    {
-      productID: "P002",
-      Name: "Modern Sofa",
-      category: "sofas",
-      mainImages: [{ url: "https://via.placeholder.com/100" }],
-    },
-    {
-      productID: "P003",
-      Name: "Dining Table",
-      category: "tables",
-      mainImages: [{ url: "https://via.placeholder.com/100" }],
-    },
-  ];
 
   // จำลองการโหลดข้อมูลจาก backend
   useEffect(() => {
-    setProducts(mockProducts);
+    //setProducts(mockProducts);
+    const fetchProduct = async () => {
+          try {
+      const productResponse = await api.get("/products")
+      setProducts(productResponse.data.items)
+            
+    } catch (error) {
+      console.error("error: ", error)
+    }
+    }
+
+    fetchProduct()
+
   }, []);
 
   // ลบจาก state (mock)
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (!window.confirm("คุณแน่ใจว่าจะลบสินค้านี้?")) return;
-    setProducts(products.filter((p) => p.productID !== id));
+
+    await api.delete(`/products/${id}`)
+    setProducts(products.filter((p) => p._id !== id));
   };
 
+  //console.log(products)
   const filteredProducts = products.filter(
     (p) =>
-      p.Name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.productID.toLowerCase().includes(searchTerm.toLowerCase())
+      p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      p._id.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -196,7 +193,7 @@ export const AdminProductManagement = () => {
               Product Management
             </h2>
             <button
-              onClick={() => navigate("/AddProductPage")}
+              onClick={() => navigate("/products/add")}
               className="bg-[#B29674] text-white font-semibold px-6 py-3 rounded-2xl shadow hover:bg-[#a18c6a] transition-colors"
             >
               + Add Product
@@ -230,32 +227,27 @@ export const AdminProductManagement = () => {
                 {filteredProducts.length > 0 ? (
                   filteredProducts.map((p) => (
                     <tr
-                      key={p.productID}
+                      key={p._id}
                       className="border-b hover:bg-gray-50 transition-colors"
                     >
                       <td className="p-4">
                         <img
-                          src={p.mainImages?.[0]?.url || "https://via.placeholder.com/100"}
-                          alt={p.Name}
+                          src={p.thumbnails?.[0]?.url || "https://via.placeholder.com/100"}
+                          alt={p.name}
                           className="w-16 h-16 object-cover rounded-lg border"
                         />
                       </td>
-                      <td className="p-4">{p.productID}</td>
-                      <td className="p-4">{p.Name}</td>
+                      <td className="p-4">{p._id}</td>
+                      <td className="p-4">{p.name}</td>
                       <td className="p-4">{p.category}</td>
                       <td className="p-4 flex justify-center space-x-3">
-                        <button
-                          onClick={() => navigate(`/EditProduct/${p.productID}`)}
-                          className="px-4 py-2 rounded-xl bg-blue-500 text-white hover:bg-blue-600 transition-colors"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleDelete(p.productID)}
-                          className="px-4 py-2 rounded-xl bg-red-500 text-white hover:bg-red-600 transition-colors"
+                        <Button onClick={() => navigate(`/products/edit/${p._id}`)}>Edit</Button>
+                        <Button
+                          onClick={() => handleDelete(p._id)}
+                          className=" hover:bg-red-600 transition-colors"
                         >
                           Delete
-                        </button>
+                        </Button>
                       </td>
                     </tr>
                   ))
