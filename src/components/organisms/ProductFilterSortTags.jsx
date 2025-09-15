@@ -104,7 +104,7 @@ export const FilterProduct = ({ filters, setFilters }) => {
     <div className="grid grid-cols-1 sm:grid-cols-4 w-full sm:w-fit gap-2">
       <Dropdown
         label="Category"
-        options={["Chairs(เก้าอี้)", "Tables(โต๊ะ)", "Accessories(อุปกรณ์เสริม)"]}
+        options={["Chairs", "Tables", "Accessories"]}
         selected={filters.category}
         setSelected={(value) => setFilters((f) => ({ ...f, category: value }))}
         useFixedLabel={true}

@@ -189,11 +189,9 @@ import { ValueContext } from "../../context/ValueContext";
 import Button from "../atoms/Button";
 import CouponInput from "./CouponInput";
 import { useNavigate } from "react-router-dom";
-import { api } from "../../lib/api"; // 👈 ใช้ api เหมือน Cart.jsx
 
-export default function OrderSummary() {
+export default function OrderSummary({ coupon, setCoupon, onConfirmOrder }) {
   const { cart, installChecked } = useContext(ValueContext);
-  const [coupon, setCoupon] = useState("");
   const [subtotal, setSubtotal] = useState(0);
   const [total, setTotal] = useState(0);
   const navigate = useNavigate();
@@ -219,40 +217,7 @@ export default function OrderSummary() {
 
   const handleApplyCoupon = () => {
     console.log("Apply coupon:", coupon);
-    // TODO: logic คำนวณส่วนลดจาก coupon
-  };
-
-  // ✅ เชื่อม API ยืนยันคำสั่งซื้อ
-  const handleConfirmOrder = async () => {
-    try {
-      const orderPayload = {
-        items: cart
-          .filter((item) => item.checked)
-          .map((item) => ({
-            productId: item.productId,
-            variantId: item.variantId,
-            quantity: item.quantity,
-            trial: item.trial,
-            color: item.color,
-            price: item.price,
-          })),
-        subtotal,
-        assemblyFee,
-        shippingFee,
-        discount,
-        total,
-        coupon: coupon || null,
-      };
-
-      const { data } = await api.post("/orders", orderPayload);
-      alert("Order placed successfully!");
-      console.log("Order response:", data);
-
-      navigate("/order-success"); // 👈 หรือเปลี่ยน path ตามจริง
-    } catch (error) {
-      console.error("Failed to confirm order:", error);
-      alert("Failed to confirm order. Please try again.");
-    }
+    // TODO: logic for discount
   };
 
   return (
@@ -270,35 +235,26 @@ export default function OrderSummary() {
           </tr>
         </thead>
         <tbody>
-          {cart
-            .filter((item) => item.checked)
-            .map((item, index) => (
-              <tr key={index}>
-                <td className="py-2">
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    className="w-14 rounded-lg"
-                  />
-                </td>
-                <td className="py-2 align-top">
-                  {item.name}
-                  <div className="text-gray-500 text-xs">
-                    {item.trial && (
-                      <span className="text-amber-600 font-medium mr-2">
-                        สินค้าทดลองใช้ (7 วัน)
-                      </span>
-                    )}
-                    Color: {item.color}
-                    <br />
-                    Quantity: {item.quantity} item
-                  </div>
-                </td>
-                <td className="py-2 text-right align-top">
-                  ฿{(item.price * item.quantity).toLocaleString()}
-                </td>
-              </tr>
-            ))}
+          {cart.filter(item => item.checked).map((item, index) => ( 
+            <tr key={index}>
+              <td className="py-2">
+                <img
+                  src={item.image}
+                  alt={item.name}
+                  className="w-14 rounded-lg"
+                />
+              </td>
+              <td className="py-2 align-top">
+                {item.name}
+                <div className="text-gray-500 text-xs">
+                  Quantity {item.quantity} item
+                </div>
+              </td>
+              <td className="py-2 text-right align-top">
+                ฿{(item.price * item.quantity).toLocaleString()}
+              </td>
+            </tr>
+          ))}
         </tbody>
       </table>
 
@@ -332,16 +288,10 @@ export default function OrderSummary() {
         <span className="text-gray-800">฿{total.toLocaleString()}</span>
       </div>
 
-      {/* ✅ ปุ่ม Confirm Order เชื่อม API */}
-      <Button className="mt-4 w-full" onClick={handleConfirmOrder}>
+      <Button className="mt-4 w-full" onClick={onConfirmOrder}>
         Confirm Order
       </Button>
     </div>
   );
 }
-
-
-
-
-
 

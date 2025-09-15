@@ -1,7 +1,5 @@
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 import { api } from "../../lib/api";
-import { useState } from "react";
-
 import { ValueContext } from "../../context/ValueContext";
 
 const ProductContent = ({ product }) => {
@@ -17,29 +15,31 @@ const ProductContent = ({ product }) => {
   const [selected, setSelected] = useState("buy");
   const [quantity, setQuantity] = useState(1);
   const [selectedColor, setSelectedColor] = useState(null);
-  const {addToCart} = useContext(ValueContext)
+  const { addToCart } = useContext(ValueContext);
 
-   const trial = variants.some(variant => variant.trial)
- 
+  const trial = variants.some((variant) => variant.trial);
 
   const filteredVariants = variants.filter((v) =>
-    selected === "trial"
-      ? v.trial === true
-      : v.trial !== true
+    selected === "trial" ? v.trial === true : v.trial !== true
   );
+
+  useEffect(() => {
+    if (!selectedColor && filteredVariants.length > 0) {
+      setSelectedColor(filteredVariants[0]._id);
+    }
+  }, [filteredVariants, selectedColor]);
 
   const currentVariant = selectedColor
     ? filteredVariants.find((v) => v._id === selectedColor)
     : filteredVariants[0] || {};
 
   const increment = () => setQuantity((prev) => prev + 1);
-  const decrement = () => setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
+  const decrement = () =>
+    setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
 
   const quantityInStock = currentVariant.quantityInStock || 0;
-  
+  const price = currentVariant.price || 0;
 
-  const price = currentVariant.price || 0
-  
   return (
     <div className="flex flex-col gap-3 text-black">
       <div className="text-3xl font-semibold leading-snug">{Name}</div>
@@ -105,7 +105,12 @@ const ProductContent = ({ product }) => {
               }`}
             >
               ทดลองใช้ ฿
-              {variants.find((v) => v.trial === true && currentVariant.color === v.color)?.price}
+              {
+                variants.find(
+                  (v) =>
+                    v.trial === true && currentVariant.color === v.color
+                )?.price
+              }
             </button>
           )}
           <button
@@ -120,7 +125,12 @@ const ProductContent = ({ product }) => {
             }`}
           >
             ซื้อเดี๋ยวนี้ ฿
-            {variants.find((v) => v.trial !== true && currentVariant.color === v.color)?.price}
+            {
+              variants.find(
+                (v) =>
+                  v.trial !== true && currentVariant.color === v.color
+              )?.price
+            }
           </button>
         </div>
       </div>
@@ -160,7 +170,9 @@ const ProductContent = ({ product }) => {
           </button>
         </div>
         <button
-          onClick={() => addToCart(_id, currentVariant._id, quantity,selectedColor)}
+          onClick={() =>
+            addToCart(_id, currentVariant._id, quantity, selectedColor)
+          }
           disabled={quantityInStock === 0}
           className={`h-12 px-4 py-2 rounded text-sm w-full lg:w-1/2 transition ${
             quantityInStock === 0

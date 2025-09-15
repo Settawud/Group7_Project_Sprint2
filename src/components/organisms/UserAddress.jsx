@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { CirclePlus, Loader2 } from "lucide-react";
 import AddressList from "../molecules/AddressList";
 import AddressForm from "../molecules/AddressForm";
@@ -7,14 +7,13 @@ import Button from "../atoms/Button";
 import { api } from "../../lib/api";
 import { toast } from "sonner";
 
-export default function UserAddress() {
+export default function UserAddress({ onSelectAddress }) {
   const [addresses, setAddresses] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(null);
   const [showPopup, setShowPopup] = useState(false);
   const [editId, setEditId] = useState(null);
 
-  // Load addresses from backend
   const loadAddresses = async () => {
     try {
       setLoading(true);
@@ -23,6 +22,13 @@ export default function UserAddress() {
       setAddresses(items);
       const idx = items.findIndex((a) => a.isDefault);
       setSelectedIndex(idx >= 0 ? idx : items.length ? 0 : null);
+
+      if (onSelectAddress && idx >= 0) {
+        onSelectAddress({
+          ...items[idx],
+          fullAddress: formatAddress(items[idx]),
+        });
+      }
     } catch (err) {
       const msg = err?.response?.data?.message || err?.message || "Failed to load addresses";
       toast.error(msg);
@@ -31,7 +37,9 @@ export default function UserAddress() {
     }
   };
 
-  useEffect(() => { loadAddresses(); }, []);
+  useEffect(() => {
+    loadAddresses();
+  }, []);
 
   const handleSave = async (formData, addressId = null) => {
     try {
@@ -92,7 +100,6 @@ export default function UserAddress() {
     setShowPopup(true);
   };
 
-  // ✅ แปลง address ให้เป็น string แสดงผล
   const formatAddress = (addr) => {
     const province = addr.provinceName || addr?.province?.name_th || addr?.province?.name_en || "";
     const district = addr.districtName || addr?.district?.name_th || addr?.district?.name_en || "";
@@ -102,15 +109,36 @@ export default function UserAddress() {
     return addr.isDefault ? `[Default] ${full}` : full;
   };
 
+  const handleSelect = async (i) => {
+    try {
+      setSelectedIndex(i);
+      const addr = addresses[i];
+      if (!addr) return;
+      setLoading(true);
+      await api.patch(`/users/me/addresses/${addr.addressId}`, { isDefault: true });
+      await loadAddresses();
+
+      if (onSelectAddress) {
+        onSelectAddress({
+          ...addr,
+          fullAddress: formatAddress(addr),
+        });
+      }
+    } catch (err) {
+      const msg = err?.response?.data?.message || err?.message || "Failed to set default";
+      toast.error(msg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div>
       <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-md p-6">
-        {/* Header */}
         <h2 className="text-xl font-bold text-gray-800 border-gray-200 pb-4">
           Shipping Address
         </h2>
 
-        {/* Address List */}
         <div className="space-y-3">
           {loading ? (
             <div className="flex items-center justify-center py-6 text-stone-600">
@@ -120,28 +148,13 @@ export default function UserAddress() {
             <AddressList
               addresses={addresses.map((a) => formatAddress(a))}
               selectedAddress={selectedIndex}
-              onSelect={async (i) => {
-                try {
-                  setSelectedIndex(i);
-                  const addr = addresses[i];
-                  if (!addr) return;
-                  setLoading(true);
-                  await api.patch(`/users/me/addresses/${addr.addressId}`, { isDefault: true });
-                  await loadAddresses();
-                } catch (err) {
-                  const msg = err?.response?.data?.message || err?.message || "Failed to set default";
-                  toast.error(msg);
-                } finally {
-                  setLoading(false);
-                }
-              }}
+              onSelect={handleSelect}
               onEdit={handleEdit}
               onDelete={handleDelete}
             />
           )}
         </div>
 
-        {/* Add new address button */}
         <div className="mt-2">
           <button
             onClick={() => {
@@ -156,7 +169,6 @@ export default function UserAddress() {
         </div>
       </div>
 
-      {/* Modal for Address Form */}
       {showPopup && (
         <Modal onClose={() => setShowPopup(false)}>
           <AddressForm
