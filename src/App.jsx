@@ -14,7 +14,7 @@ import OrderConfirmationMessage from "./components/atoms/OrderConfirmationMessag
 import ShippingAddress from "./components/atoms/ShippingAddress";
 import Cart from "./pages/Cart";
 import Orderconfirm from "./pages/OrderconfirmPage";
-import { AddProductPage } from "./pages/AddProductPage";
+import { ProductPage } from "./pages/ProductPage";
 
 
 // import { useContext } from "react";
@@ -42,7 +42,7 @@ export default function App() {
         <Route path="/cart" element={<Cart />} />
         <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/order-confirm/:orderId" element={<Orderconfirm />} />
-        <Route path="/AddProductPage" element={<AddProductPage />} />
+        <Route path="/products/add" element={<ProductPage />} />
         <Route path="/products/:id" element={<Page_Product_Detail />} />
         <Route path="/products" element={<Page_Product_List />} />
         <Route path="/orderhistory" element={<Order_History_List />} />
@@ -50,6 +50,7 @@ export default function App() {
         <Route path="/adminproductmanagement" element={<AdminProductManagement />} />
         <Route path="/pageproductdetail" element={<Page_Product_Detail />} />
         <Route path="/pageproductlist" element={<Page_Product_List />} />
+        <Route path="/products/edit/:id" element={<ProductPage />} />
         
 
         {/* TODO: category pages, product detail, cart, etc. */}

@@ -56,7 +56,7 @@ export default function LoginPage() {
         try {
           const data = await post("/auth/login", { email, password });
           const name = data?.user?.name || email?.split("@")[0] || "User";
-          login?.({ name, email, token: data?.token });
+          login?.({ name, email, token: data?.token, role: data?.user?.role });
         } catch (err) {
           setGeneralError("Invalid email or password");
           return;

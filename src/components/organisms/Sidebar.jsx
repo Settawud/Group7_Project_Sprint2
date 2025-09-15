@@ -1,14 +1,15 @@
-import { useState, useEffect } from "react";
-import { Menu, LogOut, User, MapPin, Wallet, TicketPercent, PlusCircle } from "lucide-react";
+import { useState, useEffect, useContext } from "react";
+import { Menu, LogOut, User, MapPin, Wallet, TicketPercent, PlusCircle, Store } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../../lib/api";
+import { ValueContext } from "../../context/ValueContext";
 
 const Sidebar = () => {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [showContent, setShowContent] = useState(true); // 🆕 NEW
-  const [isAdmin, setIsAdmin] = useState(false);
+ 
   const navigate = useNavigate();
+  const {isAdmin} = useContext(ValueContext)
 
   // Handle ESC key to close sidebar on mobile
   useEffect(() => {
@@ -21,18 +22,6 @@ const Sidebar = () => {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  // Get user role
-  useEffect(() => {
-    (async () => {
-      try {
-        const { data } = await api.get("/users/me");
-        const role = data?.user?.role || data?.role;
-        setIsAdmin(role === "admin");
-      } catch {
-        setIsAdmin(false);
-      }
-    })();
-  }, []);
 
   // Delay rendering content until collapse animation is done
   useEffect(() => {
@@ -106,8 +95,8 @@ const Sidebar = () => {
 
               { label: "Coupons", icon: <TicketPercent className="w-4 h-4" />, onClick: () => { document.getElementById("coupons")?.scrollIntoView({ behavior: "smooth" }); } },
               ...(isAdmin ? [
-                { label: "Add Product", icon: <PlusCircle className="w-4 h-4" />, onClick: () => navigate("/AddProductPage") },
-                { label: "Add Coupon", icon: <TicketPercent className="w-4 h-4" />, onClick: () => document.getElementById("create-coupon")?.scrollIntoView({ behavior: "smooth", block: "center" }) },
+                { label: "Product Management", icon: <Store className="w-4 h-4" />, onClick: () => navigate("/adminproductmanagement") },
+                { label: "Add Coupon", icon: <TicketPercent className="w-4 h-4" />, onClick: () => { document.getElementById("create-coupon")?.scrollIntoView({ behavior: "smooth" }); } },
               ] : []),
               { label: "Order History", icon: <Wallet className="w-4 h-4" />, onClick: () => navigate("/orderhistory") },
             ].map(({ label, icon, onClick }) => (
