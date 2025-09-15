@@ -114,8 +114,8 @@ const UsersReviewSection = ({ reviews }) => {
       </div>
 
       <div className="mt-10 space-y-6">
-        {(showAllComments ? reviews : reviews.slice(0, 2)).map((r) => (
-          <Review key={r.id} {...r} />
+        {(showAllComments ? reviews : reviews.slice(0, 5)).map((r, index) => (
+          <Review key={index} {...r} />
         ))}
       </div>
 

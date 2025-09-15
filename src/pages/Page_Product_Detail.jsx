@@ -14,6 +14,8 @@ const Page_Product_Detail = () => {
   const [productData, setProductData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const [selectedImage, setSelectedImage] = useState(null);
+
   const [images, setImages] = useState([]);
 
   const [reviews, setReviews] = useState([]);
@@ -26,12 +28,18 @@ const Page_Product_Detail = () => {
         const res = await api.get(`/products/${id}`);
         const data = res.data.item;
 
+        const variantsArr = Array.isArray(data?.variants) ? data.variants : [];
+
+        const uniqueColorIds = Array.from(
+          new Set(variantsArr.map((v) => String(v?.colorId ?? "")).filter(Boolean))
+        );
+
         const colorResponses = await Promise.all(
-          data.variants.map((v) =>
+          uniqueColorIds.map((colorId) =>
             api
-              .get(`/colors/${v.colorId}`)
-              .then((res) => ({ id: v.colorId, hex: res.data.item.hex }))
-              .catch(() => ({ id: v.colorId, hex: "#D3D3D3" }))
+              .get(`/colors/${colorId}`)
+              .then((r) => ({ id: colorId, hex: r.data?.item?.hex || "#D3D3D3" }))
+              .catch(() => ({ id: colorId, hex: "#D3D3D3" }))
           )
         );
 
@@ -44,36 +52,53 @@ const Page_Product_Detail = () => {
           _id: data._id,
           Name: data.name,
           Description: data.description,
-          tag: data.tags,
+          tag: data.tags || [],
           material: data.material,
-          variants: data.variants.map((v) => ({
+          variants: variantsArr.map((v) => ({
             _id: v._id,
             trial: v.trial,
-            color: colorMap[v.colorId],
-            price: v.price ? v.price.toLocaleString() : 0,
+            colorId: v.colorId,
+            color: colorMap[String(v.colorId)] || v.color || "#D3D3D3",
+            price: v.price,
             quantityInStock: v.quantityInStock,
             dimensions: data.dimension,
+            image: typeof v.image === "string" ? v.image : v.image?.url || null,
           })),
         };
 
-        const firstThumb = Array.isArray(data.thumbnails)
-          ? (typeof data.thumbnails[0] === 'string' ? data.thumbnails[0] : data.thumbnails[0]?.url)
+        const firstThumb = Array.isArray(data?.thumbnails) && data.thumbnails.length
+          ? (typeof data.thumbnails[0] === "string" ? data.thumbnails[0] : data.thumbnails[0]?.url)
           : null;
 
-        const variantImages = (data.variants || [])
-          .map((v) => (typeof v.image === 'string' ? v.image : v.image?.url))
+        const uniqueColorVariants = variantsArr.reduce((acc, current) => {
+          const idStr = String(current?.colorId ?? "");
+          if (!idStr) return acc;
+          if (!acc.some((v) => String(v?.colorId ?? "") === idStr)) {
+            acc.push(current);
+          }
+          return acc;
+        }, []);
+
+        const variantImages = uniqueColorVariants
+          .map((v) => (typeof v.image === "string" ? v.image : v.image?.url))
           .filter(Boolean);
 
-        const allImages = [firstThumb, ...variantImages].filter(Boolean);
+        const thumbnailsToShow = variantImages.length > 0 ? variantImages : (firstThumb ? [firstThumb] : []);
 
         setProductData({
           ...mappedProducts,
           image: firstThumb,
         });
-        setImages(allImages);
+
+        setImages(thumbnailsToShow);
+
+        const defaultSelected = firstThumb || thumbnailsToShow[0] || null;
+        setSelectedImage(defaultSelected);
       } catch (err) {
         console.error("Error fetching product:", err);
         setProductData(null);
+        setImages([]);
+        setSelectedImage(null);
       } finally {
         setIsLoading(false);
       }
@@ -85,7 +110,11 @@ const Page_Product_Detail = () => {
         setReviewsError(null);
 
         const res = await api.get(`/reviews/product/${id}`);
-        const reviewItems = res.data.items || res.data || [];
+        const reviewItems = Array.isArray(res.data?.items)
+          ? res.data.items
+          : Array.isArray(res.data)
+          ? res.data
+          : [];
 
         setReviews(reviewItems);
       } catch (err) {
@@ -120,11 +149,19 @@ const Page_Product_Detail = () => {
   return (
     <div className="bg-[#fefdf9]">
       <Navbar />
-      <div className="grid lg:grid-cols-[2fr_1fr] gap-10 mx-auto px-4 py-10">
-        <StickyImage src={productData.image} />
-        <ProductContent product={productData} />
+      <div className="flex flex-col lg:flex-row gap-10 mx-auto px-4 py-10">
+        <div className="w-full lg:w-2/3 flex flex-row gap-5">
+          <ScrollableThumbnails
+            images={images}
+            setSelectedImage={setSelectedImage}
+            selectedImage={selectedImage}
+          />
+          <StickyImage src={selectedImage} />
+        </div>
+        <div className="w-full lg:w-1/3">
+          <ProductContent product={productData} />
+        </div>
       </div>
-      <ScrollableThumbnails images={images} />
 
       {reviewsLoading && (
         <p className="text-center py-4 text-gray-500">Loading reviews...</p>

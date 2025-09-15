@@ -40,18 +40,6 @@ const ProductDetails = ({ products, discountAmount = 0, installationFee = 0 }) =
               <td className="px-6 py-2 text-right font-semibold">{subtotal.toLocaleString()}</td>
             </tr>
 
-            {/* Discount Amount */}
-            {discountAmount > 0 && (
-              <tr>
-                <td colSpan="3" className="px-6 py-2 text-right font-semibold text-red-600">
-                  Discount Amount
-                </td>
-                <td className="px-6 py-2 text-right font-semibold text-red-600">
-                  -{discountAmount.toLocaleString()}
-                </td>
-              </tr>
-            )}
-
             {/* Installation Fee */}
             {installationFee > 0 && (
               <tr>
@@ -60,6 +48,18 @@ const ProductDetails = ({ products, discountAmount = 0, installationFee = 0 }) =
                 </td>
                 <td className="px-6 py-2 text-right font-semibold ">
                   +{installationFee.toLocaleString()}
+                </td>
+              </tr>
+            )}
+
+            {/* Discount Amount */}
+            {discountAmount > 0 && (
+              <tr>
+                <td colSpan="3" className="px-6 py-2 text-right font-semibold text-red-600">
+                  Discount Amount
+                </td>
+                <td className="px-6 py-2 text-right font-semibold text-red-600">
+                  -{discountAmount.toLocaleString()}
                 </td>
               </tr>
             )}
