@@ -92,6 +92,7 @@ export default function UserAddress() {
     setShowPopup(true);
   };
 
+  // ✅ แปลง address ให้เป็น string แสดงผล
   const formatAddress = (addr) => {
     const province = addr.provinceName || addr?.province?.name_th || addr?.province?.name_en || "";
     const district = addr.districtName || addr?.district?.name_th || addr?.district?.name_en || "";
@@ -100,8 +101,6 @@ export default function UserAddress() {
     const full = `${building} ${addr.detail || ""} ${subdistrict} ${district} ${province} ${addr.postcode || ""}`.replace(/\s+/g, " ").trim();
     return addr.isDefault ? `[Default] ${full}` : full;
   };
-
- 
 
   return (
     <div>

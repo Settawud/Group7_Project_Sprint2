@@ -110,6 +110,7 @@ export default function AddressForm({ onSave, editData, editId }) {
           className="w-full px-4 py-2 rounded-xl border border-gray-300 bg-white focus:outline-none focus:ring-1 focus:ring-[#B29674]"
         />
 
+        {/* Detail */}
         <input
           type="text"
           placeholder="Detail"
@@ -155,6 +156,7 @@ export default function AddressForm({ onSave, editData, editId }) {
           className="w-full px-4 py-2 rounded-xl border border-gray-300 bg-white focus:outline-none focus:ring-1 focus:ring-[#B29674]"
         />
 
+        {/* Default address */}
         <div className="flex items-center pt-1">
           <input
             type="checkbox"
@@ -169,6 +171,7 @@ export default function AddressForm({ onSave, editData, editId }) {
         </div>
       </div>
 
+      {/* Save button */}
       <div className="flex justify-end mt-6">
         <Button onClick={handleSubmit} className="px-4">
           {editData ? "Update" : "Save"}
