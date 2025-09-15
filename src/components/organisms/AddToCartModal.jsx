@@ -68,6 +68,15 @@ const AddToCartModal = ({ product}) => {
 
       fetchProduct();
     }, []);
+
+    useEffect(() => {
+      const filtered = variants.filter((v) =>
+        selected === "trial" ? v.trial === true : v.trial !== true
+      );
+      if (filtered.length > 0 && !selectedColor) {
+        setSelectedColor(filtered[0]._id);
+      }
+    }, [selected, variants, selectedColor]);
    
   
     const filteredVariants = variants.filter((v) =>

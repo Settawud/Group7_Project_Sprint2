@@ -55,8 +55,8 @@ export const ValueProvider = ({ children }) => {
 
 
   async function addToCart(productId, variantId, quantity, color) {
-    if (!color || !productId) {
-      return toast.warning("Please select a color.")
+    if (!productId) {
+      return toast.warning("Product not found.")
     }
       try {
 
