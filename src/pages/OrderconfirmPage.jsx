@@ -10,11 +10,12 @@ export default function OrderconfirmPage() {
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // ดึงข้อมูล Order
   useEffect(() => {
     const fetchOrder = async () => {
       try {
         const res = await api.get(`/orders/${orderId}`);
-        setOrder(res.data.item);
+        setOrder(res.data?.item || null);
       } catch (err) {
         console.error("Failed to fetch order:", err);
         alert("ไม่พบคำสั่งซื้อนี้ หรือคุณไม่ได้เข้าสู่ระบบ");
@@ -42,15 +43,31 @@ export default function OrderconfirmPage() {
     );
   }
 
+  // ✅ Validate + Sanitize ตัวเลขก่อนใช้
+  const safeNumber = (value) => {
+    const n = Number(value);
+    return isNaN(n) ? 0 : n;
+  };
+
+  const subtotal = safeNumber(order?.subtotalAmount);
+  const discount = safeNumber(order?.discountAmount);
+  const installationFee = safeNumber(order?.installationFee);
+  const totalAmount = subtotal - discount + installationFee;
+
   return (
     <div>
       <Navbar />
       <div className="bg-gray-100 min-h-screen p-4 md:p-8">
         {/* Confirmation Message */}
         <section className="bg-yellow-50 text-yellow-800 p-4 rounded-md mx-auto mt-6 max-w-4xl shadow-sm text-center">
-          <p className="text-xl font-semibold">ขอบคุณที่คุณช้อปปิ้งกับเรา!</p>
-          <p className="font-bold text-yellow-900 text-xl">
-            คำสั่งซื้อหมายเลข {order.orderNumber}
+          <h1 className="text-2xl md:text-3xl font-bold text-yellow-700">
+            ✅ สั่งซื้อสำเร็จ!
+          </h1>
+          <p className="text-yellow-700 font-bold mt-2">
+            ขอบคุณที่เลือกซื้อสินค้ากับเรา
+          </p>
+          <p className="text-lg font-semibold text-yellow-800 mt-1">
+            เลขที่คำสั่งซื้อ: {order?.orderNumber || "-"}
           </p>
         </section>
 
@@ -70,44 +87,54 @@ export default function OrderconfirmPage() {
                 <div className="text-right">ราคา</div>
               </div>
 
-              {order.items.map((item, idx) => (
-                <div
-                  key={idx}
-                  className="grid grid-cols-[100px_1fr_auto] gap-6 items-center my-3"
-                >
-                  {/* Image */}
-                  <div className="bg-gray-100 rounded-lg p-2 shadow-sm">
-                    <img
-                      src={item.variant.image}
-                      alt={item.productName}
-                      className="w-24 h-24 object-cover rounded-md"
-                    />
-                  </div>
+              {order?.items?.length > 0 ? (
+                order.items.map((item, idx) => {
+                  const price = safeNumber(item?.variant?.price);
+                  const qty = safeNumber(item?.variant?.quantity);
+                  return (
+                    <div
+                      key={idx}
+                      className="grid grid-cols-[100px_1fr_auto] gap-6 items-center my-3"
+                    >
+                      {/* Image */}
+                      <div className="bg-gray-100 rounded-lg p-2 shadow-sm">
+                        <img
+                          src={item?.variant?.image || "/placeholder.png"}
+                          alt={item?.productName || "no-name"}
+                          className="w-24 h-24 object-cover rounded-md"
+                        />
+                      </div>
 
-                  {/* Details */}
-                  <div>
-                    <p className="font-medium text-gray-800">
-                      {item.productName}
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      {item.variant.trial && (
-                        <span className="text-amber-600 font-medium mr-2">
-                          สินค้าทดลองใช้ (7 วัน)
-                        </span>
-                      )}
-                      Color: {item.variant.variantOption}
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      จำนวน {item.variant.quantity} รายการ
-                    </p>
-                  </div>
+                      {/* Details */}
+                      <div>
+                        <p className="font-medium text-gray-800">
+                          {item?.productName || "-"}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          {item?.variant?.trial && (
+                            <span className="text-amber-600 font-medium mr-2">
+                              สินค้าทดลองใช้ (7 วัน)
+                            </span>
+                          )}
+                          Color: {item?.variant?.variantOption || "-"}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          จำนวน {qty} รายการ
+                        </p>
+                      </div>
 
-                  {/* Price */}
-                  <div className="text-right font-semibold text-gray-700">
-                    ฿{(item.variant.price * item.variant.quantity).toLocaleString()}
-                  </div>
-                </div>
-              ))}
+                      {/* Price */}
+                      <div className="text-right font-semibold text-gray-700">
+                        ฿{(price * qty).toLocaleString()}
+                      </div>
+                    </div>
+                  );
+                })
+              ) : (
+                <p className="text-center text-gray-500 mt-4">
+                  ไม่มีสินค้าในคำสั่งซื้อ
+                </p>
+              )}
             </div>
 
             {/* Price Breakdown */}
@@ -115,19 +142,19 @@ export default function OrderconfirmPage() {
               <div className="flex justify-between">
                 <span>ยอดรวมสินค้า</span>
                 <span className="font-medium">
-                  ฿{order.subtotalAmount.toLocaleString()}
+                  ฿{subtotal.toLocaleString()}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span>ส่วนลด</span>
                 <span className="font-medium text-red-600">
-                  -฿{order.discountAmount.toLocaleString()}
+                  -฿{discount.toLocaleString()}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span>ค่าบริการประกอบสินค้า</span>
                 <span className="font-medium">
-                  ฿{order.installationFee.toLocaleString()}
+                  ฿{installationFee.toLocaleString()}
                 </span>
               </div>
               <div className="flex justify-between">
@@ -142,12 +169,7 @@ export default function OrderconfirmPage() {
                 รวมยอดชำระ
               </span>
               <span className="text-2xl font-extrabold text-black">
-                ฿
-                {(
-                  order.subtotalAmount -
-                  order.discountAmount +
-                  order.installationFee
-                ).toLocaleString()}
+                ฿{totalAmount.toLocaleString()}
               </span>
             </div>
           </div>
@@ -161,17 +183,17 @@ export default function OrderconfirmPage() {
             <div className="space-y-4 text-gray-700">
               <div>
                 <p className="font-semibold text-lg mb-1">ชื่อผู้รับ</p>
-                <p className="text-gray-800">{order.name}</p>
+                <p className="text-gray-800">{order?.name || "-"}</p>
               </div>
               <div>
                 <p className="font-semibold text-lg mb-1">ที่อยู่</p>
                 <p className="text-gray-800">
-                  {order.shipping?.address || "ไม่พบที่อยู่"}
+                  {order?.shipping?.address || "ไม่พบที่อยู่"}
                 </p>
               </div>
               <div>
                 <p className="font-semibold text-lg mb-1">เบอร์โทรศัพท์</p>
-                <p className="text-gray-800">{order.phone}</p>
+                <p className="text-gray-800">{order?.phone || "-"}</p>
               </div>
             </div>
           </div>
@@ -181,4 +203,3 @@ export default function OrderconfirmPage() {
     </div>
   );
 }
-
