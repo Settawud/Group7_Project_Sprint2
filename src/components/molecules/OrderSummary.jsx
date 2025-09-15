@@ -184,40 +184,68 @@
 //   );
 // }
 
-import { useContext, useState, useEffect } from "react";
-import { ValueContext } from "../../context/ValueContext";
+import { useEffect, useState } from "react";
 import Button from "../atoms/Button";
 import CouponInput from "./CouponInput";
-import { useNavigate } from "react-router-dom";
+import { api } from "../../lib/api";
+import { toast } from "sonner";
+import dayjs from "dayjs";
 
-export default function OrderSummary({ coupon, setCoupon, onConfirmOrder }) {
-  const { cart, installChecked } = useContext(ValueContext);
-  const [subtotal, setSubtotal] = useState(0);
-  const [total, setTotal] = useState(0);
-  const navigate = useNavigate();
+export default function OrderSummary({ cart, coupon, setCoupon, onConfirmOrder, installationFee }) {
+  const [discounts, setDiscounts] = useState([]);
+  const [discountAmount, setDiscountAmount] = useState(0);
+  const [selectedDiscount, setSelectedDiscount] = useState(null);
 
-  const assemblyFee = installChecked ? 200 : 0;
   const shippingFee = 0;
-  const discount = 0;
+
+  const subtotal = cart
+    .filter((item) => item.checked)
+    .reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+  const total = subtotal + installationFee + shippingFee - discountAmount;
 
   useEffect(() => {
-    const selectedItems = cart.filter((item) => item.checked);
-    const sub = selectedItems.reduce(
-      (sum, item) => sum + item.price * item.quantity,
-      0
-    );
-    setSubtotal(sub);
-    setTotal(sub + assemblyFee + shippingFee - discount);
-
-    if (!selectedItems.length) {
-      alert("Please select at least one item to checkout");
-      navigate("/cart");
+    async function fetchDiscounts() {
+      try {
+        const res = await api.get("/discounts");
+        setDiscounts(res.data?.items || []);
+      } catch (err) {
+        toast.error("Failed to load discount codes");
+      }
     }
-  }, [cart, installChecked]);
+
+    fetchDiscounts();
+  }, []);
 
   const handleApplyCoupon = () => {
-    console.log("Apply coupon:", coupon);
-    // TODO: logic for discount
+    if (!coupon.trim()) return;
+
+    const now = dayjs();
+    const matched = discounts.find((d) => {
+      const codeMatch = d.code.toLowerCase() === coupon.trim().toLowerCase();
+      const notExpired = dayjs(d.startDate).isBefore(now) && dayjs(d.endDate).isAfter(now);
+      const usageOk = d.usedCount < d.usageLimit;
+      return codeMatch && notExpired && usageOk;
+    });
+
+    if (!matched) {
+      toast.error("Invalid or expired discount code");
+      setDiscountAmount(0);
+      setSelectedDiscount(null);
+      return;
+    }
+
+    let discount = 0;
+
+    if (matched.type === "percentage" || matched.type === "PERCENT") {
+      discount = Math.floor((subtotal * matched.value) / 100);
+    } else if (matched.type === "amount" || matched.type === "AMOUNT") {
+      discount = matched.value;
+    }
+
+    setDiscountAmount(discount);
+    setSelectedDiscount(matched);
+    toast.success(`Discount applied: ${matched.code}`);
   };
 
   return (
@@ -235,26 +263,34 @@ export default function OrderSummary({ coupon, setCoupon, onConfirmOrder }) {
           </tr>
         </thead>
         <tbody>
-          {cart.filter(item => item.checked).map((item, index) => ( 
-            <tr key={index}>
-              <td className="py-2">
-                <img
-                  src={item.image}
-                  alt={item.name}
-                  className="w-14 rounded-lg"
-                />
-              </td>
-              <td className="py-2 align-top">
-                {item.name}
-                <div className="text-gray-500 text-xs">
-                  Quantity {item.quantity} item
-                </div>
-              </td>
-              <td className="py-2 text-right align-top">
-                ฿{(item.price * item.quantity).toLocaleString()}
-              </td>
-            </tr>
-          ))}
+          {cart
+            .filter((item) => item.checked)
+            .map((item, index) => (
+              <tr key={index}>
+                <td className="py-2">
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    className="w-14 rounded-lg"
+                  />
+                </td>
+                <td className="py-2 align-top">
+                  {item.name}
+                  <div className="text-gray-500 text-xs">
+                    {item.trial && (
+                      <span className="text-amber-600 font-medium mr-2">
+                        สินค้าทดลองใช้ (7 วัน)
+                      </span>
+                    )}
+                    Color: {item.color} <br />
+                    Quantity: {item.quantity} item
+                  </div>
+                </td>
+                <td className="py-2 text-right align-top">
+                  ฿{(item.price * item.quantity).toLocaleString()}
+                </td>
+              </tr>
+            ))}
         </tbody>
       </table>
 
@@ -265,16 +301,18 @@ export default function OrderSummary({ coupon, setCoupon, onConfirmOrder }) {
         </div>
         <div className="flex justify-between">
           <span>Assembly Service Fee</span>
-          <span>฿{assemblyFee.toLocaleString()}</span>
+          <span>฿{installationFee.toLocaleString()}</span>
         </div>
         <div className="flex justify-between">
           <span>Shipping Fee</span>
           <span>฿{shippingFee.toLocaleString()}</span>
         </div>
-        <div className="flex justify-between">
-          <span>Discount</span>
-          <span>฿{discount.toLocaleString()}</span>
-        </div>
+        {discountAmount > 0 && (
+          <div className="flex justify-between text-green-700 font-medium">
+            <span>Discount ({selectedDiscount?.code})</span>
+            <span>-฿{discountAmount.toLocaleString()}</span>
+          </div>
+        )}
       </div>
 
       <CouponInput
@@ -294,4 +332,8 @@ export default function OrderSummary({ coupon, setCoupon, onConfirmOrder }) {
     </div>
   );
 }
+
+
+
+
 

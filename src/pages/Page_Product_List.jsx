@@ -141,7 +141,7 @@ const Page_Product_List = () => {
         }
 
         setProducts(sorted);
-        setTotalPages(Math.ceil((data.total || 0) / 20));
+        setTotalPages(Math.ceil((data.total || 0) / 9));
       } catch (err) {
         console.error("Error fetching products:", err);
         setError(err?.response?.data?.message || err?.message || "Failed to load products");
@@ -187,6 +187,10 @@ const Page_Product_List = () => {
       variants: product.variants
     };
   });
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [page, filters]);
 
   return (
     <div className="bg-[#fefdf9]">

@@ -11,6 +11,7 @@ const Sidebar = () => {
   const navigate = useNavigate();
   const {isAdmin} = useContext(ValueContext)
 
+  // Handle ESC key to close sidebar on mobile
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === "Escape") {
@@ -22,17 +23,36 @@ const Sidebar = () => {
   }, []);
 
 
+  // Delay rendering content until collapse animation is done
+  useEffect(() => {
+    let timeoutId;
+
+    if (isCollapsed) {
+      setShowContent(false); // Hide immediately
+    } else {
+      timeoutId = setTimeout(() => {
+        setShowContent(true); // Show after animation
+      }, 300); // 300ms = same as transition duration
+    }
+
+    return () => clearTimeout(timeoutId);
+  }, [isCollapsed]);
+
+  // Sidebar class
   const sidebarClass = `
     top-16 left-0 z-40 h-[calc(100vh-64px)] p-6 bg-[#B29675] transition-all duration-300 fixed
     ${isMobileOpen ? "translate-x-0" : "translate-x-[-100%]"}
     ${isCollapsed ? "w-20" : "w-64"}
+    flex flex-col
     lg:translate-x-0 lg:sticky lg:top-16
   `;
 
-  const sidebarLabelClass = `${isCollapsed ? "hidden" : ""} sidebar-label`;
+  // Label visibility
+  const sidebarLabelClass = `${isCollapsed || !showContent ? "hidden" : ""} sidebar-label`;
 
   return (
     <>
+      {/* Overlay for mobile */}
       {isMobileOpen && (
         <div
           className="fixed inset-0 z-30 bg-black/30 lg:hidden"
@@ -40,6 +60,7 @@ const Sidebar = () => {
         />
       )}
 
+      {/* Mobile toggle button */}
       <div className="lg:hidden p-4">
         <button
           onClick={() => setIsMobileOpen(true)}
@@ -50,44 +71,61 @@ const Sidebar = () => {
         </button>
       </div>
 
+      {/* Sidebar */}
       <aside className={sidebarClass}>
-        <div className="flex flex-col h-full">
-          <div className="mb-6 flex items-center justify-between text-base font-bold text-white">
-            <span className={`flex items-center gap-2 ${sidebarLabelClass}`}>
-              My Account
-            </span>
+        <div className={`flex flex-col h-full w-full ${isCollapsed ? "items-center" : "items-start"}`}>
+          
+          {/* Header */}
+          <div className={`mb-6 flex ${isCollapsed ? "justify-center" : "justify-between"} items-center w-full text-base font-bold text-white`}>
+            {!isCollapsed && showContent && (
+              <span className="flex items-center gap-2">
+                My Account
+              </span>
+            )}
             <button onClick={() => setIsCollapsed(!isCollapsed)} className="hidden lg:flex items-center">
               <Menu className="w-5 h-5" />
             </button>
           </div>
 
-          <nav className="mb-6 flex flex-col gap-4 indent-4 text-sm text-white">
+          {/* Navigation */}
+          <nav className="mb-6 flex flex-col gap-4 text-sm text-white w-full">
             {[
-              { label: "Profile", icon: <User className="w-4 h-4" />, onClick: () => {} },
-              { label: "Address", icon: <MapPin className="w-4 h-4" />, onClick: () => {} },
+              { label: "Profile", icon: <User className="w-4 h-4" />, onClick: () => { document.getElementById("profile")?.scrollIntoView({ behavior: "smooth", block: "center" }); } },
+              { label: "Address", icon: <MapPin className="w-4 h-4" />, onClick: () => { document.getElementById("address")?.scrollIntoView({ behavior: "smooth", block: "center" }); } },
+
               { label: "Coupons", icon: <TicketPercent className="w-4 h-4" />, onClick: () => { document.getElementById("coupons")?.scrollIntoView({ behavior: "smooth" }); } },
               ...(isAdmin ? [
                 { label: "Product Management", icon: <Store className="w-4 h-4" />, onClick: () => navigate("/adminproductmanagement") },
                 { label: "Add Coupon", icon: <TicketPercent className="w-4 h-4" />, onClick: () => { document.getElementById("create-coupon")?.scrollIntoView({ behavior: "smooth" }); } },
               ] : []),
-              { label: "Purchase", icon: <Wallet className="w-4 h-4" />, onClick: () => {} },
+              { label: "Order History", icon: <Wallet className="w-4 h-4" />, onClick: () => navigate("/orderhistory") },
             ].map(({ label, icon, onClick }) => (
               <button
                 type="button"
                 key={label}
                 onClick={onClick}
-                className="flex items-center gap-2 rounded py-2 hover:bg-[#A8A8A880] cursor-pointer text-left"
+                className={`
+                  flex items-center rounded py-2 hover:bg-[#A8A8A880] cursor-pointer w-full text-left
+                  ${isCollapsed ? "justify-center" : "justify-start gap-2 indent-4"}
+                `}
               >
                 {icon}
-                <span className={sidebarLabelClass}>{label}</span>
+                {!isCollapsed && showContent && <span className="sidebar-label">{label}</span>}
               </button>
             ))}
           </nav>
 
-          <div className="mt-auto flex items-center gap-2 rounded py-2 indent-2 text-sm text-white hover:bg-[#A8A8A880] cursor-pointer">
+          {/* Logout */}
+          <div
+            className={`
+              mt-auto flex items-center rounded py-2 text-sm text-white hover:bg-[#A8A8A880] cursor-pointer w-full
+              ${isCollapsed ? "justify-center" : "justify-start gap-2 indent-2"}
+            `}
+          >
             <LogOut className="w-4 h-4" />
-            <span className={sidebarLabelClass}>Log out</span>
+            {!isCollapsed && showContent && <span>Log out</span>}
           </div>
+
         </div>
       </aside>
     </>

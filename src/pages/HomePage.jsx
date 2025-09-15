@@ -10,13 +10,6 @@ import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { ValueContext } from "../context/ValueContext";
 import { api } from "../lib/api";
 
-// Using backend aggregated popular endpoint instead of client-side aggregation
-// import products data (legacy fallback counts)
-// Remove all local mock product imports; rely on API only
-
-// No local mock "popular"; data comes from backend only
-
-
 export default function HomePage() {
   const navigate = useNavigate();
   const { addToCart } = useContext(ValueContext) || {};
