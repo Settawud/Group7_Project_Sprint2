@@ -7,7 +7,7 @@ import { Loader2 } from "lucide-react";
 export const AddProductPage = () => {
   const [colors, setColors] = useState([]);
   const [addColorOpen, setAddColorOpen] = useState(null); // variant index or null
-  const [newColor, setNewColor] = useState({ name_th: "", name_en: "", hex: "#000000" });
+  const [newColor, setNewColor] = useState({ name_th: "", name_en: "", hex: "" });
   const [savingColor, setSavingColor] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({
@@ -60,7 +60,7 @@ export const AddProductPage = () => {
 
   const openAddColor = (variantIndex) => {
     setAddColorOpen(variantIndex);
-    setNewColor({ name_th: "", name_en: "", hex: "#000000" });
+    setNewColor({ name_th: "", name_en: "", hex: "" });
   };
 
   const cancelAddColor = () => {
@@ -394,7 +394,7 @@ export const AddProductPage = () => {
                 {["width", "height", "depth", "weight"].map((key) => (
                   <div key={key}>
                     <label className="block text-gray-700 text-sm mb-1">
-                      {key === 'width' ? 'Width' : key === 'height' ? 'Height' : key === 'depth' ? 'Depth' : 'Weight'}
+                      {key === 'width' ? 'Width (cm)' : key === 'height' ? 'Height (cm)' : key === 'depth' ? 'Depth (cm)' : 'Weight (kg)'}
                     </label>
                     <input
                       type="number"
@@ -413,7 +413,7 @@ export const AddProductPage = () => {
             {/* Thumbnails Upload */}
             <div>
               <label className="block text-gray-700 font-medium mb-2">
-                Upload main images — multiple allowed
+                Upload main images (multiple allowed)
               </label>
               <input
                 type="file"
@@ -595,7 +595,7 @@ export const AddProductPage = () => {
         {/* Stock */}
         <div>
           <label htmlFor={`stock-${variantIndex}`} className="block text-gray-700 font-medium mb-2">
-            In stock
+            Stock Quantity
           </label>
           <input
             id={`stock-${variantIndex}`}
@@ -613,9 +613,22 @@ export const AddProductPage = () => {
           />
         </div>
 
+        <div className="flex items-center space-x-2 mt-4">
+          <label htmlFor={`trial-${variantIndex}`} className="block text-gray-700 font-medium mb-2"></label>
+          <input
+            id={`trial-${variantIndex}`}
+                type="checkbox"
+                name="trial"
+                checked={variant.trial}
+                onChange={(e) => handleVariantChange(e, variantIndex)}
+                className="h-4 w-4"
+              />
+              <label className="text-gray-700">Trial product</label>
+            </div>
+
         {/* Variant Image Upload — วางใน grid แถวของตัวเอง */}
         <div className="col-span-1 md:col-span-2 lg:col-span-5">
-          <label className="block text-gray-700 font-medium mb-2">Variant image</label>
+          <label className="block text-gray-700 font-medium mb-2">Variant image (only one image allowed)</label>
           <div className="flex items-center gap-4">
             <input
               type="file"
