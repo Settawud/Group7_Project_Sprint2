@@ -2,6 +2,7 @@ import { useState, useEffect, useContext } from "react";
 import { useSearchParams } from "react-router-dom";
 import { api } from "../lib/api";
 
+import Container from "../components/layout/Container";
 import Navbar from "../components/organisms/Navbar";
 import ProductFilterSortTags from "../components/organisms/ProductFilterSortTags";
 import ProductGridList from "../components/organisms/ProductGridList";
@@ -190,30 +191,28 @@ const Page_Product_List = () => {
   return (
     <div className="bg-[#fefdf9]">
       <Navbar />
-      <div className="flex min-h-screen justify-center px-4 py-10">
-        <div className="w-full">
-          <ProductFilterSortTags
-            filters={filters}
-            setFilters={setFilters}
-            sort={sort}
-            setSort={setSort}
+      <Container className="min-h-screen py-10">
+        <ProductFilterSortTags
+          filters={filters}
+          setFilters={setFilters}
+          sort={sort}
+          setSort={setSort}
+        />
+        {loading ? (
+          <div className="py-20 text-center text-stone-600">Loading products…</div>
+        ) : error ? (
+          <div className="py-10 text-center text-red-600">{error}</div>
+        ) : mappedProducts.length === 0 ? (
+          <div className="py-20 text-center text-stone-500">No products found.</div>
+        ) : (
+          <ProductGridList
+            products={mappedProducts}
+            page={page}
+            setPage={setPage}
+            totalPages={totalPages}
           />
-          {loading ? (
-            <div className="py-20 text-center text-stone-600">Loading products…</div>
-          ) : error ? (
-            <div className="py-10 text-center text-red-600">{error}</div>
-          ) : mappedProducts.length === 0 ? (
-            <div className="py-20 text-center text-stone-500">No products found.</div>
-          ) : (
-            <ProductGridList
-              products={mappedProducts}
-              page={page}
-              setPage={setPage}
-              totalPages={totalPages}
-            />
-          )}
-        </div>
-      </div>
+        )}
+      </Container>
 
         <div>
                             {isModalOpen && (
