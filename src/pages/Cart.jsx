@@ -44,7 +44,7 @@ const Cart = () => {
         const cartPromise = cart.map(async (item) => {
           const [name, variant, color] = await getProduct(item.productId, item.variantId)
           if (name && variant && color) {
-             return { productId: item.productId, variantId: item.variantId, name: name, trial: variant.trial, color: color, price: Number(variant.price), image: variant.image.url, quantity: item.quantity, checked: false }
+             return { productId: item.productId, variantId: item.variantId, name: name, trial: variant.trial, color: color, price: Number(variant.price), image: variant.image.url, quantity: item.quantity, checked: true }
           }
           
           return null;
