@@ -184,41 +184,18 @@
 //   );
 // }
 
-import { useContext, useState, useEffect } from "react";
-import { ValueContext } from "../../context/ValueContext";
 import Button from "../atoms/Button";
 import CouponInput from "./CouponInput";
-import { useNavigate } from "react-router-dom";
 
-export default function OrderSummary({ coupon, setCoupon, onConfirmOrder }) {
-  const { cart, installChecked } = useContext(ValueContext);
-  const [subtotal, setSubtotal] = useState(0);
-  const [total, setTotal] = useState(0);
-  const navigate = useNavigate();
-
-  const assemblyFee = installChecked ? 200 : 0;
+export default function OrderSummary({ cart, coupon, setCoupon, onConfirmOrder }) {
+  const assemblyFee = 200;
   const shippingFee = 0;
-  const discount = 0;
 
-  useEffect(() => {
-    const selectedItems = cart.filter((item) => item.checked);
-    const sub = selectedItems.reduce(
-      (sum, item) => sum + item.price * item.quantity,
-      0
-    );
-    setSubtotal(sub);
-    setTotal(sub + assemblyFee + shippingFee - discount);
+  const subtotal = cart
+    .filter((item) => item.checked)
+    .reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-    if (!selectedItems.length) {
-      alert("Please select at least one item to checkout");
-      navigate("/cart");
-    }
-  }, [cart, installChecked]);
-
-  const handleApplyCoupon = () => {
-    console.log("Apply coupon:", coupon);
-    // TODO: logic for discount
-  };
+  const total = subtotal + assemblyFee + shippingFee;
 
   return (
     <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
@@ -235,26 +212,34 @@ export default function OrderSummary({ coupon, setCoupon, onConfirmOrder }) {
           </tr>
         </thead>
         <tbody>
-          {cart.filter(item => item.checked).map((item, index) => ( 
-            <tr key={index}>
-              <td className="py-2">
-                <img
-                  src={item.image}
-                  alt={item.name}
-                  className="w-14 rounded-lg"
-                />
-              </td>
-              <td className="py-2 align-top">
-                {item.name}
-                <div className="text-gray-500 text-xs">
-                  Quantity {item.quantity} item
-                </div>
-              </td>
-              <td className="py-2 text-right align-top">
-                ฿{(item.price * item.quantity).toLocaleString()}
-              </td>
-            </tr>
-          ))}
+          {cart
+            .filter((item) => item.checked)
+            .map((item, index) => (
+              <tr key={index}>
+                <td className="py-2">
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    className="w-14 rounded-lg"
+                  />
+                </td>
+                <td className="py-2 align-top">
+                  {item.name}
+                  <div className="text-gray-500 text-xs">
+                    {item.trial && (
+                      <span className="text-amber-600 font-medium mr-2">
+                        สินค้าทดลองใช้ (7 วัน)
+                      </span>
+                    )}
+                    Color: {item.color} <br />
+                    Quantity: {item.quantity} item
+                  </div>
+                </td>
+                <td className="py-2 text-right align-top">
+                  ฿{(item.price * item.quantity).toLocaleString()}
+                </td>
+              </tr>
+            ))}
         </tbody>
       </table>
 
@@ -271,17 +256,9 @@ export default function OrderSummary({ coupon, setCoupon, onConfirmOrder }) {
           <span>Shipping Fee</span>
           <span>฿{shippingFee.toLocaleString()}</span>
         </div>
-        <div className="flex justify-between">
-          <span>Discount</span>
-          <span>฿{discount.toLocaleString()}</span>
-        </div>
       </div>
 
-      <CouponInput
-        value={coupon}
-        onChange={setCoupon}
-        onApply={handleApplyCoupon}
-      />
+      <CouponInput value={coupon} onChange={setCoupon} onApply={() => {}} />
 
       <div className="mt-4 flex justify-between font-bold text-lg text-gray-800">
         <span>Total Amount:</span>
@@ -294,4 +271,7 @@ export default function OrderSummary({ coupon, setCoupon, onConfirmOrder }) {
     </div>
   );
 }
+
+
+
 
