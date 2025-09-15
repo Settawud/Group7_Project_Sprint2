@@ -78,9 +78,9 @@ function mapOrderData(data) {
     })),
 
     shippingAddress: {
-      name: "Unknown",
-      phone: "Unknown",
-      address: data.shipping?.address || "No address provided",
+      name: data.name,
+      phone: data.phone,
+      address: data.shipping?.address,
     },
 
     orderHistory: [

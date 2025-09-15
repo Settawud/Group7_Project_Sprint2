@@ -53,7 +53,7 @@ const Page_Product_List = () => {
   };
 
   const displayLabelFromBackend = (eng) => {
-    const map = { Chairs: "Chairs(เก้าอี้)", Tables: "Tables(โต๊ะ)", Accessories: "Accessories(อุปกรณ์เสริม)" };
+    const map = { Chairs: "Chairs", Tables: "Tables", Accessories: "Accessories" };
     return map[eng] || eng;
   };
   // Sync category from URL to filters (normalize lowercase to proper case for backend)
