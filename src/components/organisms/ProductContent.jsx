@@ -55,7 +55,7 @@ const ProductContent = ({ product }) => {
         ))}
       </div>
 
-      <div className="text-3xl font-bold">฿{price}</div>
+      <div className="text-3xl font-bold">฿{price.toLocaleString()}</div>
 
       <hr className="my-3 border-[#B29675]" />
 

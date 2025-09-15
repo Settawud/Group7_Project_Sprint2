@@ -50,7 +50,7 @@ const Page_Product_Detail = () => {
             _id: v._id,
             trial: v.trial,
             color: colorMap[v.colorId],
-            price: v.price,
+            price: v.price ? v.price.toLocaleString() : 0,
             quantityInStock: v.quantityInStock,
             dimensions: data.dimension,
           })),
