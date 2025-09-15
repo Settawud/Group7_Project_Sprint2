@@ -1,10 +1,29 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Navbar from "../components/organisms/Navbar";
 import Footer from "../components/organisms/Footer";
 import { api, postForm } from "../lib/api";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 export const AddProductPage = () => {
+  const navigate = useNavigate();
+
+  // --- Role-based Access Control ---
+  useEffect(() => {
+    try {
+      const rawUser = localStorage.getItem("user");
+      if (!rawUser) throw new Error("Not logged in");
+      const user = JSON.parse(rawUser);
+      if (user?.role !== "admin") {
+        toast.error("You do not have permission to access this page.");
+        navigate("/"); // Redirect to home for non-admins
+      }
+    } catch (e) {
+      toast.error("Authentication error. Please log in.");
+      navigate("/login");
+    }
+  }, [navigate]);
+
   const [colors, setColors] = useState([]);
   const [addColorOpen, setAddColorOpen] = useState(null); // variant index or null
   const [newColor, setNewColor] = useState({ name_th: "", name_en: "", hex: "#000000" });
