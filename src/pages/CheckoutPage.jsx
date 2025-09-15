@@ -1,0 +1,77 @@
+import React, { useState, useContext } from "react";
+import ContactForm from "../components/molecules/ContactForm";
+import OrderSummary from "../components/molecules/OrderSummary";
+import UserAddress from "../components/organisms/UserAddress";
+import Navbar from "../components/organisms/Navbar";
+import Footer from "../components/organisms/Footer";
+import { ValueContext } from "../context/ValueContext";
+import { api } from "../lib/api";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
+
+export default function CheckoutPage() {
+  const [contact, setContact] = useState({ name: "", phone: "" });
+  const [coupon, setCoupon] = useState("");
+  const [selectedAddress, setSelectedAddress] = useState(null);
+  const { cart, token } = useContext(ValueContext);
+  const navigate = useNavigate();
+
+  const handleAddressSelect = (address) => {
+    setSelectedAddress(address);
+  };
+
+  const handleConfirmOrder = async () => {
+    if (!contact.name || !contact.phone) {
+      toast.error("Please enter your contact details");
+      return;
+    }
+    if (!selectedAddress) {
+      toast.error("Please select a shipping address");
+      return;
+    }
+    if (!cart.length) {
+      toast.error("Your cart is empty");
+      return;
+    }
+
+    try {
+      const payload = {
+        name: contact.name,
+        phone: contact.phone,
+        discountCode: coupon || "",
+        shipping: {
+          address: selectedAddress.fullAddress || selectedAddress.address || "",
+        },
+      };
+
+      await api.post("/orders", payload);
+
+      toast.success("Order placed successfully!");
+      navigate("/order-confirmation");
+    } catch (error) {
+      const msg = error?.response?.data?.message || error.message || "Order failed";
+      toast.error(msg);
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col bg-[#faf6f1]">
+      <Navbar />
+      <main className="flex-1">
+        <h1 className="p-4 text-center">Shipping details and order summary</h1>
+        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 pb-6 ">
+          <div className="space-y-4">
+            <ContactForm value={contact} onChange={setContact} />
+            <UserAddress onSelectAddress={handleAddressSelect} />
+          </div>
+          <OrderSummary
+            coupon={coupon}
+            setCoupon={setCoupon}
+            onConfirmOrder={handleConfirmOrder}
+          />
+        </div>
+      </main>
+      <Footer />
+    </div>
+  );
+}
