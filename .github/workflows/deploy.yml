@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - Develop
   workflow_dispatch: # Allows manual trigger from GitHub Actions tab
 
 jobs:
@@ -13,7 +14,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Trigger Vercel Deployment
+      - name: Trigger Vercel Deployment (Main)
         run: curl -X POST ${{ secrets.VERCEL_DEPLOY_HOOK }}
 
       - name: Trigger Vercel Deployment (DEV)

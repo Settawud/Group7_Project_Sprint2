@@ -2,6 +2,11 @@
 
 @tailwind utilities;
 
+/* Ensure the app can stretch full-height for a sticky footer layout */
+html, body, #root {
+  height: 100%;
+}
+
 @font-face {
   font-family: "tradewinds"; /* Choose a name for your font */
   src: url("./assets/fonts/TradeWinds-Regular.ttf") format("truetype"); /* Adjust the path and filename */
@@ -51,6 +56,9 @@
   --color-charcoal: rgba(73, 69, 58, 1);
   --color-off-white: rgba(254, 253, 249, 1);
   --color-sage-green: rgba(132, 158, 145, 1);
+  --color-footer-border: #334155;
+  --color-footer-link: #CBD5E1;
+  --color-footer-muted: #94A3B8;
   /* ... */
 }
 
@@ -59,6 +67,11 @@
   font-family: "tradewinds", cursive;
 }
 
+
+/* Utility font class for IBM Plex Sans Thai across components */
+.font-ibm-thai {
+  font-family: "IBM Plex Sans Thai", "Inter", Helvetica, sans-serif;
+}
 @layer base {
   html {
     font-family: "Inter", "IBM Plex Sans Thai", Helvetica, sans-serif; /* Applies Poppins globally */
