@@ -1,14 +1,16 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Navbar from "../components/organisms/Navbar";
 import Footer from "../components/organisms/Footer";
-import { api, postForm } from "../lib/api";
+import { api, patchForm, postForm, putForm } from "../lib/api";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { extractPublicId } from 'cloudinary-build-url'
+
 export const ProductPage = () => {
   const navigate = useNavigate();
-    const { id: productId } = useParams(); // Get productId from URL params
-  const isEditing = !!productId; // Determine if it's an edit operation
+    const { id: editProductId } = useParams(); // Get productId from URL params
+  const isEditing = !!editProductId; // Determine if it's an edit operation
 
   // --- Role-based Access Control ---
   useEffect(() => {
@@ -56,9 +58,13 @@ export const ProductPage = () => {
     ],
   });
 
+  const [initialThumbnails, setInitialThumbnails] = useState([]);
+  //console.log(initialThumbnails)
+
       const fetchProductData = useCallback(async () => {
-    if (!productId) return; // Only fetch if we have a productId
-    try {
+    if (!editProductId) return; // Only fetch if we have a productId
+        try {
+      const productId = editProductId
       const { data } = await api.get(`/products/${productId}`); // Assuming your API endpoint for single product is /products/:id
       // Format data to match the form state structure
       const formattedData = {
@@ -68,7 +74,8 @@ export const ProductPage = () => {
         tags: data.item.tags.join(", "), // Join tags back into a string
         material: data.item.material,
         trial: data.item.trial,
-        thumbnails: data.item.thumbnails.map(thumb => thumb.url), // Will be handled separately if needed, or assume API returns URLs
+        thumbnails: data.item.thumbnails.map(thumb => thumb.url),
+        thumbnailsPublicId: data.item.thumbnails.map(thumb => thumb.publicId),// Will be handled separately if needed, or assume API returns URLs
         dimension: {
           width: data.item.dimension?.width || "",
           height: data.item.dimension?.height || "",
@@ -84,6 +91,8 @@ export const ProductPage = () => {
           image: v.image.url, 
         })),
       };
+
+      setInitialThumbnails(formattedData.thumbnailsPublicId)
       setFormData(formattedData);
 
     } catch (err) {
@@ -96,11 +105,11 @@ export const ProductPage = () => {
         navigate("/products"); // Redirect if product not found
       }
     }
-  }, [productId, navigate]);
+  }, []);
 
   useEffect(() => {
     fetchProductData();
-  }, []);
+  }, [fetchProductData, editProductId]);
 
   // === Field Handlers ===
   const handleChange = (e) => {
@@ -263,10 +272,12 @@ export const ProductPage = () => {
       };
 
       const variants = formData.variants.map((v) => ({
+        ...(v._id && { _id: v._id }),
         colorId: v.colorId,
         price: Number(v.price || 0),
         quantityInStock: Number(v.quantityInStock || 0),
         trial: !!v.trial,
+        //image: v.image instanceof File ? null : v.image
       }));
 
       if (!variants.length) {
@@ -284,52 +295,111 @@ export const ProductPage = () => {
         category: formData.category,
         trial: !!formData.trial,
         tags,
-        material: formData.material,
-        thumbnails: [], // อัปโหลดทีหลัง
+        material: formData.material,// อัปโหลดทีหลัง
         dimension,
         variants,
       };
 
       // 2) สร้างสินค้า (JSON)
-      const createRes = await api.post("/products", payload);
-      const productId = createRes?.data?.item?._id;
-      const createdVariants = createRes?.data?.item?.variants || [];
+      let productId = isEditing ? editProductId : null
+      const productRes = isEditing ? await api.patch(`/products/${productId}`, payload) : await api.post("/products", payload);
+      productId = productRes?.data?.item?._id;
+      const createdVariants = productRes?.data?.item?.variants || [];
       if (!productId) throw new Error("Missing productId in response");
 
       // 3) อัปโหลดรูปหลัก (thumbnails) ทีละไฟล์ (ไม่ให้ล้มเหลวทั้งงาน)
+      // if (formData.thumbnails.length > 0) {
+      //   for (const file of formData.thumbnails) {
+      //     try {
+      //       const fd = new FormData();
+      //       fd.append("image", file);
+      //       await postForm(`/products/${productId}/images`, fd);
+      //     } catch (err) {
+      //       const status = err?.response?.status;
+      //       const msg = err?.response?.data?.message || err?.message || "Upload failed";
+      //       console.warn("Thumbnail upload failed:", status, msg);
+      //       // แจ้งเตือนแบบไม่หยุดการทำงาน
+      //       try { toast.warning(`Some images failed: ${msg}`); } catch {}
+      //     }
+      //   }
+      // }
+
       if (formData.thumbnails.length > 0) {
-        for (const file of formData.thumbnails) {
-          try {
-            const fd = new FormData();
-            fd.append("image", file);
-            await postForm(`/products/${productId}/images`, fd);
-          } catch (err) {
-            const status = err?.response?.status;
-            const msg = err?.response?.data?.message || err?.message || "Upload failed";
-            console.warn("Thumbnail upload failed:", status, msg);
-            // แจ้งเตือนแบบไม่หยุดการทำงาน
-            try { toast.warning(`Some images failed: ${msg}`); } catch {}
+        const thumbnailFormData = new FormData();
+        const publicIdsToKeep = [];
+
+        formData.thumbnails.forEach(fileOrUrl => {
+          if (fileOrUrl instanceof File) {
+            // Append new files under the "images" key, as the backend expects an array
+            thumbnailFormData.append("images", fileOrUrl);
+          } else if (typeof fileOrUrl === 'string') {
+            // Extract publicId from URL and add to a list
+            const publicId = extractPublicId(fileOrUrl);
+            if (publicId) {
+              publicIdsToKeep.push(publicId);
+            }
           }
+        });
+
+        // Append the list of public IDs as a JSON string
+        thumbnailFormData.append("currentPublicIds", JSON.stringify(publicIdsToKeep));
+
+        // Send a single PATCH request to the backend
+        try {
+          await patchForm(`/products/${productId}/images`, thumbnailFormData);
+          // Success message for the user
+          //toast.success("Thumbnails updated successfully!");
+        } catch (err) {
+          const status = err?.response?.status;
+          const msg = err?.response?.data?.message || err?.message || "Upload failed";
+          console.warn("Thumbnail update failed:", status, msg);
+          toast.error(`Some images failed to update: ${msg}`);
         }
       }
 
       // 4) อัปโหลดรูปของแต่ละ variant หากมี (แม็พตาม index) — ไม่ให้ล้มทั้งงาน
-      for (let i = 0; i < formData.variants.length; i++) {
-        try {
-          const file = formData.variants[i]?.image;
-          const variantId = createdVariants[i]?._id;
-          if (file && variantId) {
-            const fd = new FormData();
-            fd.append("image", file);
-            await postForm(`/products/${productId}/variants/${variantId}/images`, fd);
-          }
-        } catch (err) {
-          const status = err?.response?.status;
-          const msg = err?.response?.data?.message || err?.message || "Upload failed";
-          console.warn("Variant image upload failed:", status, msg);
-          try { toast.warning(`Variant image failed: ${msg}`); } catch {}
-        }
-      }
+for (let i = 0; i < formData.variants.length; i++) {
+  try {
+    const fileOrUrl = formData.variants[i]?.image;
+    const variantId = createdVariants[i]?._id;
+
+    if (!variantId) {
+      //console.warn(`Variant at index ${i} has no ID. Skipping image upload.`);
+      continue;
+    }
+    // Case 1: The user selected a new file. Use a PUT request.
+    if (fileOrUrl instanceof File) {
+      const fd = new FormData();
+      fd.append("image", fileOrUrl);
+
+      // ✅ Use a PUT request to replace the image
+      await putForm(`/products/${productId}/variants/${variantId}/images`, fd);
+    } 
+
+  } catch (err) {
+    const status = err?.response?.status;
+    const msg = err?.response?.data?.message || err?.message || "Upload failed";
+    console.warn("Variant image upload failed:", status, msg);
+
+  }
+}
+      
+      // for (let i = 0; i < formData.variants.length; i++) {
+      //   try {
+      //     const file = formData.variants[i]?.image;
+      //     const variantId = createdVariants[i]?._id;
+      //     if (file && variantId) {
+      //       const fd = new FormData();
+      //       fd.append("image", file);
+      //       await postForm(`/products/${productId}/variants/${variantId}/images`, fd);
+      //     }
+      //   } catch (err) {
+      //     const status = err?.response?.status;
+      //     const msg = err?.response?.data?.message || err?.message || "Upload failed";
+      //     console.warn("Variant image upload failed:", status, msg);
+      //     try { toast.warning(`Variant image failed: ${msg}`); } catch {}
+      //   }
+      // }
 
       try { toast.success("Product created successfully"); } catch {}
       // ปิดสถานะกำลังบันทึกก่อนแจ้งเตือน blocking

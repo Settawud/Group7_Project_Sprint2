@@ -149,7 +149,7 @@ const AddToCartModal = ({ product}) => {
                   setSelected("trial");
                   setSelectedColor(null);
                 }}
-                className={`flex-1 h-12 px-4 py-2 font-semibold rounded text-sm transition ${
+                className={`flex-1 h-12 bg-off-white px-4 py-2 font-semibold rounded text-sm transition ${
                   selected === "trial"
                     ? "bg-[#849E91] text-white hover:bg-[#849E9190] border-none"
                     : "border border-[#B29675] text-[#B29675] hover:bg-[#B2967590]"
