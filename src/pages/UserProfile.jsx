@@ -8,10 +8,25 @@ import { useContext, useEffect, useState } from "react";
 import Sidebar from "../components/organisms/Sidebar";
 import { api } from "../lib/api";
 import { ValueContext } from "../context/ValueContext";
+import { useLocation } from "react-router-dom";
 
 export default function UserProfile() {
   const [couponRefreshKey, setCouponRefreshKey] = useState(0);
   const {setIsAdmin, isAdmin} = useContext(ValueContext)
+
+  const location = useLocation();
+
+    useEffect(() => {
+      if (location.hash) {
+        const id = location.hash.replace("#", "");
+        const el = document.getElementById(id);
+        if (el) {
+          setTimeout(() => {
+            el.scrollIntoView({ behavior: "smooth", block: "center" });
+          }, 100);
+        }
+      }
+    }, [location]);
 
     useEffect(() => {
     (async () => {

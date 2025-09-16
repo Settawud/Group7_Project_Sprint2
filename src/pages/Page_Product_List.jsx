@@ -68,7 +68,6 @@ const Page_Product_List = () => {
     return map[eng] || eng;
   };
 
-  // Sync category from URL to filters (normalize lowercase to proper case for backend)
   useEffect(() => {
     const cat = searchParams.get("category");
     const normalized = normalizeCategoryToBackend(cat);
@@ -105,29 +104,24 @@ const Page_Product_List = () => {
         if (eng) query.category = eng;
       }
 
-      // ✅ AVAILABILITY
       if (filters.availability === "In Stock") {
         query.availability = "instock";
       }
 
-      // ✅ PRICE
       if (filters.price) {
         query.minPrice = filters.price[0];
         query.maxPrice = filters.price[1];
       }
 
-      // ✅ SORT
       const sortQuery = getSortQuery(sort);
       if (sortQuery) {
         query.sort = sortQuery;
       }
 
-      // ✅ SEARCH
       if (search.trim()) {
         query.search = search.trim();
       }
 
-      // Sync URL query string with current filters
       const current = new URLSearchParams(searchParams);
       const urlParams = { ...query };
 
@@ -147,7 +141,6 @@ const Page_Product_List = () => {
         const { data } = await api.get("/products", { params: query });
         const items = Array.isArray(data?.items) ? data.items : [];
 
-        // ✅ DON'T sort here anymore. Already sorted from backend.
         const withPrice = items.map((p) => ({
           ...p,
           __minPrice: Array.isArray(p.variants) && p.variants.length
@@ -167,9 +160,9 @@ const Page_Product_List = () => {
     };
 
     fetchProducts();
-  }, [filters, sort, page, search, hydrated]);
+    }, [filters, sort, page, search, hydrated]);
 
-  const mappedProducts = products.map((product) => {
+    const mappedProducts = products.map((product) => {
     const thumb = Array.isArray(product?.thumbnails) ? product.thumbnails[0] : null;
     const thumbUrl = typeof thumb === "string" ? thumb : thumb?.url;
     const variantWithImage = Array.isArray(product?.variants)
@@ -184,9 +177,14 @@ const Page_Product_List = () => {
     const safeSize = [d.width, d.height, d.depth].every((n) => Number.isFinite(n))
       ? `${d.width}x${d.height}x${d.depth} cm`
       : "";
-    const priceNum = Array.isArray(product?.variants) && product.variants[0]?.price
-      ? Number(product.variants[0].price)
+
+    const variantsNotTrial = Array.isArray(product?.variants)
+      ? product.variants.filter((v) => v.trial === false)
+      : [];
+    const priceNum = variantsNotTrial.length
+      ? Math.min(...variantsNotTrial.map((v) => Number(v.price || 0)))
       : 0;
+
     const trial = !!(product?.trial || (Array.isArray(product?.variants) && product.variants.some((v) => !!v.trial)));
 
     return {
@@ -202,7 +200,6 @@ const Page_Product_List = () => {
     };
   });
 
-  // Reset page when category changes
   useEffect(() => {
     setPage(1);
   }, [filters.category]);
