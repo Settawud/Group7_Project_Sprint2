@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import { ValueContext } from "../../context/ValueContext";
 
-const ProductContent = ({ product = {} }) => {
+const ProductContent = ({ product = {}, onVariantChange }) => {
   const {
     _id,
     Name,
@@ -118,7 +118,10 @@ const ProductContent = ({ product = {} }) => {
             return (
               <button
                 key={v._id}
-                onClick={() => setSelectedColor(v._id)}
+                onClick={() => {
+                  setSelectedColor(v._id);
+                  onVariantChange?.(v._id);
+                }}
                 aria-pressed={isSelected}
                 title={v.color || "color"}
                 className={`w-6 h-6 border rounded-full cursor-pointer focus:outline-none ${
