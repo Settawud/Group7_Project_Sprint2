@@ -26,7 +26,8 @@ export default function HomePage() {
   const [popOffset, setPopOffset] = useState(0);
   const popLimit = 4;
   const [categoryCounts, setCategoryCounts] = useState({ Chairs: 0, Tables: 0, Accessories: 0 });
-  
+  const { setIsAdmin } = useContext(ValueContext)
+
   useEffect(() => {
     const obs = new IntersectionObserver(
       ([entry]) => setVpVisible(entry.isIntersecting),
@@ -35,6 +36,15 @@ export default function HomePage() {
 
     const target = vpRef.current; // snapshot อ้างอิงเดียว
     if (target) obs.observe(target);
+
+    (async () => {
+      try {
+        const { data } = await api.get("/users/me");
+        const role = data?.user?.role || data?.role;
+        setIsAdmin(role === "admin");
+      } catch {
+      }
+    })()
 
     return () => {
       if (target) obs.unobserve(target);

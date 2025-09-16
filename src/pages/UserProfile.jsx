@@ -13,16 +13,16 @@ export default function UserProfile() {
   const [couponRefreshKey, setCouponRefreshKey] = useState(0);
   const {setIsAdmin, isAdmin} = useContext(ValueContext)
 
-    useEffect(() => {
-    (async () => {
-      try {
-        const { data } = await api.get("/users/me");
-        const role = data?.user?.role || data?.role;
-        setIsAdmin(role === "admin");
-      } catch {
-      }
-    })();
-    }, []);
+    // useEffect(() => {
+    // (async () => {
+    //   try {
+    //     const { data } = await api.get("/users/me");
+    //     const role = data?.user?.role || data?.role;
+    //     setIsAdmin(role === "admin");
+    //   } catch {
+    //   }
+    // })();
+    // }, []);
   
   return (
     <div className="min-h-screen flex flex-col bg-[#faf6f1]">
