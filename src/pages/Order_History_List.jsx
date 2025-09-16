@@ -15,11 +15,13 @@ const Order_History_List = () => {
   const [filters, setFilters] = useState({
     orderNumber: "",
     keyword: "",
+    status: "",
     dateFrom: "",
     dateTo: "",
   });
 
   useEffect(() => {
+
     const fetchOrdersAndProducts = async () => {
       try {
         const orderRes = await api.get("/orders");
@@ -65,7 +67,6 @@ const Order_History_List = () => {
 
     if (
       filters.orderNumber &&
-      !order.orderId.toLowerCase().includes(filters.orderNumber.toLowerCase())
       !order.orderId?.toLowerCase().includes(filters.orderNumber.toLowerCase())
     ) {
       return false;
@@ -96,7 +97,7 @@ const Order_History_List = () => {
 
             {filteredOrders.length > 0 ? (
               filteredOrders.map((order) => (
-                <OrderCard key={order._id} order={order} />
+                <OrderCard key={order.id} order={order} />
               ))
             ) : (
               <p className="text-center text-gray-500 mt-6">No orders found</p>
