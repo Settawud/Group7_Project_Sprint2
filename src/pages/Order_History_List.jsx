@@ -43,7 +43,13 @@ const Order_History_List = () => {
               price: variant.price,
             };
           }),
-          total: order.subtotalAmount,
+          subtotalAmount: order.subtotalAmount || 0,
+          installationFee: order.installationFee || 0,
+          discountAmount: order.discountAmount || 0,
+          total:
+            (order.subtotalAmount || 0) +
+            (order.installationFee || 0) -
+            (order.discountAmount || 0),
         }));
 
         setOrders(mappedOrders);
