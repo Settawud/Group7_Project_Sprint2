@@ -10,11 +10,29 @@ export default function OrderconfirmPage() {
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // ฟังก์ชันช่วยเหลือ
+  const safeNumber = (value) => Number(value) || 0;
+
+  const formatDateTimeTH = (isoString) => {
+    if (!isoString) return "-";
+    const date = new Date(isoString);
+    if (isNaN(date.getTime())) return "-";
+    return date.toLocaleString("th-TH", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
+  };
+
   // ดึงข้อมูล Order
   useEffect(() => {
     const fetchOrder = async () => {
       try {
         const res = await api.get(`/orders/${orderId}`);
+        console.log("Order data:", res.data?.item); // ตรวจสอบ field จริง
         setOrder(res.data?.item || null);
       } catch (err) {
         console.error("Failed to fetch order:", err);
@@ -43,12 +61,7 @@ export default function OrderconfirmPage() {
     );
   }
 
-  // ✅ Validate + Sanitize ตัวเลขก่อนใช้
-  const safeNumber = (value) => {
-    const n = Number(value);
-    return isNaN(n) ? 0 : n;
-  };
-
+  // คำนวณราคา
   const subtotal = safeNumber(order?.subtotalAmount);
   const discount = safeNumber(order?.discountAmount);
   const installationFee = safeNumber(order?.installationFee);
@@ -61,13 +74,13 @@ export default function OrderconfirmPage() {
         {/* Confirmation Message */}
         <section className="bg-yellow-50 text-yellow-800 p-4 rounded-md mx-auto mt-6 max-w-4xl shadow-sm text-center">
           <h1 className="text-2xl md:text-3xl font-bold text-yellow-700">
-            ✅ สั่งซื้อสำเร็จ!
+            ✅ Order Successful!
           </h1>
           <p className="text-yellow-700 font-bold mt-2">
-            ขอบคุณที่เลือกซื้อสินค้ากับเรา
+            Thank you! Your order has been placed successfully
           </p>
           <p className="text-lg font-semibold text-yellow-800 mt-1">
-            เลขที่คำสั่งซื้อ: {order?.orderNumber || "-"}
+            Order Number: {order?.orderNumber || "-"}
           </p>
         </section>
 
@@ -82,9 +95,9 @@ export default function OrderconfirmPage() {
             {/* Products */}
             <div className="mb-6">
               <div className="grid grid-cols-[100px_1fr_auto] gap-6 items-center font-semibold text-gray-600 border-b-2 border-gray-300 pb-2">
-                <div>สินค้า</div>
-                <div>ชื่อสินค้า</div>
-                <div className="text-right">ราคา</div>
+                <div>Product</div>
+                <div>Product Name</div>
+                <div className="text-right">Price</div>
               </div>
 
               {order?.items?.length > 0 ? (
@@ -113,13 +126,13 @@ export default function OrderconfirmPage() {
                         <p className="text-sm text-gray-500">
                           {item?.variant?.trial && (
                             <span className="text-amber-600 font-medium mr-2">
-                              สินค้าทดลองใช้ (7 วัน)
+                              Trial Product (7 Days)
                             </span>
                           )}
                           Color: {item?.variant?.variantOption || "-"}
                         </p>
                         <p className="text-sm text-gray-500">
-                          จำนวน {qty} รายการ
+                          Quantity {qty} Items
                         </p>
                       </div>
 
@@ -132,7 +145,7 @@ export default function OrderconfirmPage() {
                 })
               ) : (
                 <p className="text-center text-gray-500 mt-4">
-                  ไม่มีสินค้าในคำสั่งซื้อ
+                  No items in your order
                 </p>
               )}
             </div>
@@ -140,25 +153,25 @@ export default function OrderconfirmPage() {
             {/* Price Breakdown */}
             <div className="space-y-2 text-gray-700 mb-6">
               <div className="flex justify-between">
-                <span>ยอดรวมสินค้า</span>
+                <span>Subtotal</span>
                 <span className="font-medium">
                   ฿{subtotal.toLocaleString()}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span>ส่วนลด</span>
+                <span>Discount</span>
                 <span className="font-medium text-red-600">
                   -฿{discount.toLocaleString()}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span>ค่าบริการประกอบสินค้า</span>
+                <span>InstallationFee</span>
                 <span className="font-medium">
                   ฿{installationFee.toLocaleString()}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span>ค่าจัดส่ง</span>
+                <span>Shipping Fee</span>
                 <span className="font-medium">฿0</span>
               </div>
             </div>
@@ -166,7 +179,7 @@ export default function OrderconfirmPage() {
             {/* Total */}
             <div className="flex justify-between items-center border-t-2 border-gray-300 pt-4">
               <span className="text-xl font-bold text-gray-800">
-                รวมยอดชำระ
+                TotalAmount
               </span>
               <span className="text-2xl font-extrabold text-black">
                 ฿{totalAmount.toLocaleString()}
@@ -177,23 +190,29 @@ export default function OrderconfirmPage() {
           {/* Shipping Address */}
           <div className="w-full md:w-1/2 bg-white p-6 rounded-xl shadow-lg border border-gray-200">
             <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
-              ที่อยู่จัดส่ง
+              Shipping Address
             </h2>
 
             <div className="space-y-4 text-gray-700">
               <div>
-                <p className="font-semibold text-lg mb-1">ชื่อผู้รับ</p>
+                <p className="font-semibold text-lg mb-1">Recipient Name</p>
                 <p className="text-gray-800">{order?.name || "-"}</p>
               </div>
               <div>
-                <p className="font-semibold text-lg mb-1">ที่อยู่</p>
+                <p className="font-semibold text-lg mb-1">Address</p>
                 <p className="text-gray-800">
                   {order?.shipping?.address || "ไม่พบที่อยู่"}
                 </p>
               </div>
               <div>
-                <p className="font-semibold text-lg mb-1">เบอร์โทรศัพท์</p>
+                <p className="font-semibold text-lg mb-1">Phone Number</p>
                 <p className="text-gray-800">{order?.phone || "-"}</p>
+              </div>
+              <div>
+                <p className="font-semibold text-lg mb-1">Date / Time</p>
+                <p className="text-gray-800">
+                  {formatDateTimeTH(order.updatedAt)}
+                </p>
               </div>
             </div>
           </div>
