@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from "react"; // Import useContext
+import React, { useEffect, useState, useContext, useCallback } from "react"; // Import useCallback
 import { Copy, TicketPercent, ShieldCheck, AlertTriangle, Trash2 } from "lucide-react"; // Import Trash2
 import Button from "../atoms/Button";
 import { api } from "../../lib/api";
@@ -12,47 +12,49 @@ export default function UserCoupon({ refreshKey }) {
   const [error, setError] = useState("");
   const { isAdmin } = useContext(ValueContext); // Get isAdmin from context
 
+  // Define loadCoupons using useCallback
+  const loadCoupons = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError("");
+      const { data } = await api.get("/discounts");
+      const items = Array.isArray(data?.items) ? data.items : [];
+
+      // Filter out duplicate codes, prioritizing user-specific over global
+      const uniqueCoupons = [];
+      const seenCodes = new Set();
+
+      // First, add all user-specific coupons
+      items.forEach(coupon => {
+        if (!coupon.isGlobal) { // This is a user-specific coupon
+          if (!seenCodes.has(coupon.code)) {
+            uniqueCoupons.push(coupon);
+            seenCodes.add(coupon.code);
+          }
+        }
+      });
+
+      // Then, add global coupons only if a coupon with that code hasn't been added yet
+      items.forEach(coupon => {
+        if (coupon.isGlobal) {
+          if (!seenCodes.has(coupon.code)) {
+            uniqueCoupons.push(coupon);
+            seenCodes.add(coupon.code);
+          }
+        }
+      });
+
+      setCoupons(uniqueCoupons);
+    } catch (e) {
+      setError(e?.response?.data?.message || e?.message || "Failed to load coupons");
+    } finally {
+      setLoading(false);
+    }
+  }, []); // Empty dependency array because it doesn't depend on any external state that changes
+
   useEffect(() => {
-    const loadCoupons = async () => {
-      try {
-        setLoading(true);
-        setError("");
-        const { data } = await api.get("/discounts");
-        const items = Array.isArray(data?.items) ? data.items : [];
-
-        // Filter out duplicate codes, prioritizing user-specific over global
-        const uniqueCoupons = [];
-        const seenCodes = new Set();
-
-        // First, add all user-specific coupons
-        items.forEach(coupon => {
-          if (!coupon.isGlobal) { // This is a user-specific coupon
-            if (!seenCodes.has(coupon.code)) {
-              uniqueCoupons.push(coupon);
-              seenCodes.add(coupon.code);
-            }
-          }
-        });
-
-        // Then, add global coupons only if a coupon with that code hasn't been added yet
-        items.forEach(coupon => {
-          if (coupon.isGlobal) {
-            if (!seenCodes.has(coupon.code)) {
-              uniqueCoupons.push(coupon);
-              seenCodes.add(coupon.code);
-            }
-          }
-        });
-
-        setCoupons(uniqueCoupons);
-      } catch (e) {
-        setError(e?.response?.data?.message || e?.message || "Failed to load coupons");
-      } finally {
-        setLoading(false);
-      }
-    };
     loadCoupons();
-  }, [refreshKey]);
+  }, [refreshKey, loadCoupons]); // Add loadCoupons to useEffect dependencies
 
   const handleCopy = (code) => {
     navigator.clipboard.writeText(code);
