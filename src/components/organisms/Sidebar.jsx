@@ -93,12 +93,12 @@ const Sidebar = () => {
             {[
               { label: "Profile", icon: <User className="w-4 h-4" />, onClick: () => { document.getElementById("profile")?.scrollIntoView({ behavior: "smooth", block: "center" }); } },
               { label: "Address", icon: <MapPin className="w-4 h-4" />, onClick: () => { document.getElementById("address")?.scrollIntoView({ behavior: "smooth", block: "center" }); } },
-
-              { label: "Coupons", icon: <TicketPercent className="w-4 h-4" />, onClick: () => { document.getElementById("coupons")?.scrollIntoView({ behavior: "smooth" }); } },
               ...(isAdmin ? [
                 { label: "Product Management", icon: <Store className="w-4 h-4" />, onClick: () => navigate("/adminproductmanagement") },
                 { label: "Add Coupon", icon: <TicketPercent className="w-4 h-4" />, onClick: () => { document.getElementById("create-coupon")?.scrollIntoView({ behavior: "smooth" }); } },
               ] : []),
+              { label: "Coupons", icon: <TicketPercent className="w-4 h-4" />, onClick: () => { document.getElementById("coupons")?.scrollIntoView({ behavior: "smooth" }); } },
+              
               { label: "Order History", icon: <Wallet className="w-4 h-4" />, onClick: () => navigate("/orderhistory") },
             ].map(({ label, icon, onClick }) => (
               <button
