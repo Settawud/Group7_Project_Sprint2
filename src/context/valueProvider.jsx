@@ -23,7 +23,12 @@ export const ValueProvider = ({ children }) => {
   const login = (payload) => {
     const u = payload || { name: "User", email: "user@example.com", role: "user"};
     setUser(u);
-    try { localStorage.setItem("user", JSON.stringify(u)); } catch {}
+    try {
+      localStorage.setItem("user", JSON.stringify(u));
+      //setIsAdmin(u.role === "admin")
+     } catch { }
+      
+    
   };
 
   const logout = () => {

@@ -74,7 +74,8 @@ html, body, #root {
 }
 @layer base {
   html {
-    font-family: "Inter", "IBM Plex Sans Thai", Helvetica, sans-serif; /* Applies Poppins globally */
+    font-family: "Inter", "IBM Plex Sans Thai", Helvetica, sans-serif;
+    color: var(--color-charcoal); /* Applies Poppins globally */
   }
   h1 {
     font-size: var(--text-2xl);
