@@ -8,21 +8,36 @@ import { useContext, useEffect, useState } from "react";
 import Sidebar from "../components/organisms/Sidebar";
 import { api } from "../lib/api";
 import { ValueContext } from "../context/ValueContext";
+import { useLocation } from "react-router-dom";
 
 export default function UserProfile() {
   const [couponRefreshKey, setCouponRefreshKey] = useState(0);
   const {setIsAdmin, isAdmin} = useContext(ValueContext)
 
-    // useEffect(() => {
-    // (async () => {
-    //   try {
-    //     const { data } = await api.get("/users/me");
-    //     const role = data?.user?.role || data?.role;
-    //     setIsAdmin(role === "admin");
-    //   } catch {
-    //   }
-    // })();
-    // }, []);
+  const location = useLocation();
+
+    useEffect(() => {
+      if (location.hash) {
+        const id = location.hash.replace("#", "");
+        const el = document.getElementById(id);
+        if (el) {
+          setTimeout(() => {
+            el.scrollIntoView({ behavior: "smooth", block: "center" });
+          }, 100);
+        }
+      }
+    }, [location]);
+
+    useEffect(() => {
+    (async () => {
+      try {
+        const { data } = await api.get("/users/me");
+        const role = data?.user?.role || data?.role;
+        setIsAdmin(role === "admin");
+      } catch {
+      }
+    })();
+    }, []);
   
   return (
     <div className="min-h-screen flex flex-col bg-[#faf6f1]">

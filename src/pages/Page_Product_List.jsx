@@ -27,7 +27,7 @@ const Page_Product_List = () => {
   const [hydrated, setHydrated] = useState(false);
   const [totalPages, setTotalPages] = useState(1);
 
-  const [sort, setSort] = useState("Price High to Low");
+  const [sort, setSort] = useState("New In");
 
   const handleFiltersChange = (updater) => {
     setPage(1);
@@ -68,7 +68,6 @@ const Page_Product_List = () => {
     return map[eng] || eng;
   };
 
-  // Sync category from URL to filters (normalize lowercase to proper case for backend)
   useEffect(() => {
     const cat = searchParams.get("category");
     const normalized = normalizeCategoryToBackend(cat);
@@ -86,9 +85,9 @@ const Page_Product_List = () => {
   }, [searchParams]);
 
   const getSortQuery = (sortValue) => {
-    if (sortValue === "Price High to Low") return "";
-    if (sortValue === "Price Low to High") return "";
-    if (sortValue === "New In") return "";
+    if (sortValue === "Price High to Low") return "variants.price:desc";
+    if (sortValue === "Price Low to High") return "variants.price:asc";
+    if (sortValue === "New In") return "createdAt:desc";
     return null;
   };
 
@@ -123,16 +122,13 @@ const Page_Product_List = () => {
         query.search = search.trim();
       }
 
-      // Sync URL query string with current filters
       const current = new URLSearchParams(searchParams);
-
       const urlParams = { ...query };
 
-      // Keep label like Chairs(เก้าอี้) in URL
       if (filters.category) {
         urlParams.category = filters.category;
       } else {
-        current.delete("category"); // ✅ Important fix here
+        current.delete("category");
       }
 
       Object.entries(urlParams).forEach(([k, v]) => current.set(k, String(v)));
@@ -152,14 +148,7 @@ const Page_Product_List = () => {
             : 0,
         }));
 
-        let sorted = withPrice.slice();
-        if (sort === "Price High to Low") {
-          sorted.sort((a, b) => (b.__minPrice || 0) - (a.__minPrice || 0));
-        } else if (sort === "Price Low to High") {
-          sorted.sort((a, b) => (a.__minPrice || 0) - (b.__minPrice || 0));
-        }
-
-        setProducts(sorted);
+        setProducts(withPrice);
         setTotalPages(Math.ceil((data.total || 0) / 9));
       } catch (err) {
         console.error("Error fetching products:", err);
@@ -171,9 +160,9 @@ const Page_Product_List = () => {
     };
 
     fetchProducts();
-  }, [filters, sort, page, search, hydrated]);
+    }, [filters, sort, page, search, hydrated]);
 
-  const mappedProducts = products.map((product) => {
+    const mappedProducts = products.map((product) => {
     const thumb = Array.isArray(product?.thumbnails) ? product.thumbnails[0] : null;
     const thumbUrl = typeof thumb === "string" ? thumb : thumb?.url;
     const variantWithImage = Array.isArray(product?.variants)
@@ -188,9 +177,14 @@ const Page_Product_List = () => {
     const safeSize = [d.width, d.height, d.depth].every((n) => Number.isFinite(n))
       ? `${d.width}x${d.height}x${d.depth} cm`
       : "";
-    const priceNum = Array.isArray(product?.variants) && product.variants[0]?.price
-      ? Number(product.variants[0].price)
+
+    const variantsNotTrial = Array.isArray(product?.variants)
+      ? product.variants.filter((v) => v.trial === false)
+      : [];
+    const priceNum = variantsNotTrial.length
+      ? Math.min(...variantsNotTrial.map((v) => Number(v.price || 0)))
       : 0;
+
     const trial = !!(product?.trial || (Array.isArray(product?.variants) && product.variants.some((v) => !!v.trial)));
 
     return {
@@ -206,7 +200,6 @@ const Page_Product_List = () => {
     };
   });
 
-  // Reset page when category changes
   useEffect(() => {
     setPage(1);
   }, [filters.category]);

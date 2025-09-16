@@ -17,12 +17,15 @@ export default function CouponCreateForm({ onCreated }) {
     return d.toISOString().slice(0, 10);
   });
   const [submitting, setSubmitting] = useState(false);
+  const [targetUserEmail, setTargetUserEmail] = useState("");
+  const [isGlobal, setIsGlobal] = useState(false);
 
   const disabled = useMemo(() => {
     if (!code || !type || !value || !startDate || !endDate) return true;
     if (new Date(endDate) < new Date(startDate)) return true;
+    if (!isGlobal && !targetUserEmail.trim()) return true; // If not global, target email is required
     return submitting;
-  }, [code, type, value, startDate, endDate, submitting]);
+  }, [code, type, value, startDate, endDate, submitting, isGlobal, targetUserEmail]);
 
   const onSubmit = async (e) => {
     e.preventDefault();
@@ -34,10 +37,15 @@ export default function CouponCreateForm({ onCreated }) {
         value: Number(value),
         startDate,
         endDate,
+        isGlobal, // Add isGlobal to payload
       };
       if (Number(maxDiscount) > 0) payload.maxDiscount = Number(maxDiscount);
       if (Number(minOrderAmount) > 0) payload.minOrderAmount = Number(minOrderAmount);
       if (description) payload.description = description;
+      if (!isGlobal && targetUserEmail.trim()) { // Only add targetUserEmail if not global and provided
+        payload.targetUserEmail = targetUserEmail.trim();
+      }
+
       await api.post("/discounts", payload);
       toast.success("Coupon created");
       setCode("");
@@ -47,6 +55,8 @@ export default function CouponCreateForm({ onCreated }) {
       setMinOrderAmount(0);
       setStartDate(new Date().toISOString().slice(0, 10));
       const d = new Date(); d.setDate(d.getDate() + 30); setEndDate(d.toISOString().slice(0, 10));
+      setTargetUserEmail(""); // Reset new state
+      setIsGlobal(false); // Reset new state
       onCreated?.();
     } catch (err) {
       const msg = err?.response?.data?.message || err?.message || "Create failed";
@@ -95,6 +105,31 @@ export default function CouponCreateForm({ onCreated }) {
           <label className="block text-sm font-medium text-gray-700">End</label>
           <input type="date" className="w-full px-4 py-2 rounded-xl border border-gray-300 bg-white" value={endDate} onChange={(e)=>setEndDate(e.target.value)} required />
         </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Target User Email (optional, if not global)</label>
+          <input
+            type="email"
+            className="w-full px-4 py-2 rounded-xl border border-gray-300 bg-white"
+            value={targetUserEmail}
+            onChange={(e) => setTargetUserEmail(e.target.value)}
+            placeholder="user@example.com"
+            disabled={isGlobal} // Disable if global
+          />
+        </div>
+
+        <div className="md:col-span-2">
+          <label className="flex items-center text-sm font-medium text-gray-700">
+            <input
+              type="checkbox"
+              className="mr-2"
+              checked={isGlobal}
+              onChange={(e) => setIsGlobal(e.target.checked)}
+            />
+            Global Coupon (usable by all users)
+          </label>
+        </div>
+
         <div className="md:col-span-2 flex justify-end mt-2">
           <Button type="submit" disabled={disabled}>{submitting ? "Creating..." : "Create"}</Button>
         </div>

@@ -1,13 +1,16 @@
-import React, { useEffect, useState } from "react";
-import { Copy, TicketPercent, ShieldCheck, AlertTriangle } from "lucide-react";
+import React, { useEffect, useState, useContext } from "react"; // Import useContext
+import { Copy, TicketPercent, ShieldCheck, AlertTriangle, Trash2 } from "lucide-react"; // Import Trash2
 import Button from "../atoms/Button";
 import { api } from "../../lib/api";
+import { ValueContext } from "../../context/ValueContext"; // Import ValueContext
+import { toast } from "sonner"; // Import toast
 
 export default function UserCoupon({ refreshKey }) {
   const [coupons, setCoupons] = useState([]);
   const [copiedCode, setCopiedCode] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const { isAdmin } = useContext(ValueContext); // Get isAdmin from context
 
   useEffect(() => {
     const loadCoupons = async () => {
@@ -16,7 +19,32 @@ export default function UserCoupon({ refreshKey }) {
         setError("");
         const { data } = await api.get("/discounts");
         const items = Array.isArray(data?.items) ? data.items : [];
-        setCoupons(items);
+
+        // Filter out duplicate codes, prioritizing user-specific over global
+        const uniqueCoupons = [];
+        const seenCodes = new Set();
+
+        // First, add all user-specific coupons
+        items.forEach(coupon => {
+          if (!coupon.isGlobal) { // This is a user-specific coupon
+            if (!seenCodes.has(coupon.code)) {
+              uniqueCoupons.push(coupon);
+              seenCodes.add(coupon.code);
+            }
+          }
+        });
+
+        // Then, add global coupons only if a coupon with that code hasn't been added yet
+        items.forEach(coupon => {
+          if (coupon.isGlobal) {
+            if (!seenCodes.has(coupon.code)) {
+              uniqueCoupons.push(coupon);
+              seenCodes.add(coupon.code);
+            }
+          }
+        });
+
+        setCoupons(uniqueCoupons);
       } catch (e) {
         setError(e?.response?.data?.message || e?.message || "Failed to load coupons");
       } finally {
@@ -29,6 +57,20 @@ export default function UserCoupon({ refreshKey }) {
   const handleCopy = (code) => {
     navigator.clipboard.writeText(code);
     setCopiedCode(code); // จำว่ารหัสไหนถูก copy ล่าสุด
+  };
+
+  const handleDelete = async (couponId) => {
+    if (window.confirm("Are you sure you want to delete this coupon?")) {
+      try {
+        await api.delete(`/discounts/${couponId}`);
+        toast.success("Coupon deleted successfully!"); // Success toast
+        loadCoupons(); // Refresh coupons after deletion
+      } catch (e) {
+        console.error("Failed to delete coupon:", e);
+        const msg = e?.response?.data?.message || e?.message || "Failed to delete coupon. You may not have permission or the coupon does not exist.";
+        toast.error(msg); // Error toast
+      }
+    }
   };
 
   return (
@@ -64,13 +106,24 @@ export default function UserCoupon({ refreshKey }) {
                   <div className="flex-1">
                     <p className="text-lg font-semibold text-[#B29674]">{c.code}</p>
                     {c.description ? <p className="text-sm text-gray-700">{c.description}</p> : null}
+                    <p className="text-sm text-gray-700">
+                      Discount: {c.type === "percentage" ? `${c.value}%` : `฿${c.value.toLocaleString()}`}
+                    </p>
                     <p className="text-xs text-gray-500 mt-1">{range}</p>
                     <div className="mt-1">{badge}</div>
                   </div>
-                  <div>
+                  <div className="flex flex-col gap-2"> {/* Use flex-col for buttons */}
                     <Button onClick={() => handleCopy(c.code)} className="flex items-center gap-1">
                       <Copy size={16} /> {copiedCode === c.code ? "Copied!" : "Copy"}
                     </Button>
+                    {isAdmin && ( // Conditionally render delete button for admins
+                      <Button
+                        onClick={() => handleDelete(c._id)}
+                        className="flex items-center gap-1 bg-red-500 hover:bg-red-600 text-white"
+                      >
+                        <Trash2 size={16} /> Delete
+                      </Button>
+                    )}
                   </div>
                 </div>
               );

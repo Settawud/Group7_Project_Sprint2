@@ -12,6 +12,20 @@ const Sidebar = () => {
   const navigate = useNavigate();
   const {isAdmin} = useContext(ValueContext)
 
+  const handleNavigateAndScroll = (id, path = "/userprofile") => {
+    if (location.pathname === path) {
+
+      const el = document.getElementById(id);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+      setIsMobileOpen(false);
+    } else {
+      navigate(`${path}#${id}`);
+      setIsMobileOpen(false);
+    }
+  };
+
   // Handle ESC key to close sidebar on mobile
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -93,12 +107,12 @@ const Sidebar = () => {
             {[
               { label: "Profile", icon: <User className="w-4 h-4" />, onClick: () => { document.getElementById("profile")?.scrollIntoView({ behavior: "smooth", block: "center" }); } },
               { label: "Address", icon: <MapPin className="w-4 h-4" />, onClick: () => { document.getElementById("address")?.scrollIntoView({ behavior: "smooth", block: "center" }); } },
-
-              { label: "Coupons", icon: <TicketPercent className="w-4 h-4" />, onClick: () => { document.getElementById("coupons")?.scrollIntoView({ behavior: "smooth" }); } },
               ...(isAdmin ? [
                 { label: "Product Management", icon: <Store className="w-4 h-4" />, onClick: () => navigate("/adminproductmanagement") },
-                { label: "Add Coupon", icon: <TicketPercent className="w-4 h-4" />, onClick: () => { document.getElementById("create-coupon")?.scrollIntoView({ behavior: "smooth" }); } },
+                { label: "Add Coupon", icon: <TicketPercent className="w-4 h-4" />, onClick: () => handleNavigateAndScroll("create-coupon") },
               ] : []),
+              { label: "Coupons", icon: <TicketPercent className="w-4 h-4" />, onClick: () => { document.getElementById("coupons")?.scrollIntoView({ behavior: "smooth" }); } },
+              
               { label: "Order History", icon: <Wallet className="w-4 h-4" />, onClick: () => navigate("/orderhistory") },
             ].map(({ label, icon, onClick }) => (
               <button
