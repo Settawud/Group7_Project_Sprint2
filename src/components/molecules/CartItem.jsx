@@ -33,7 +33,7 @@ const CartItem = ({ item }) => {
                           alt={item.name} /></td>
                       <td className="p-4 text-sm break-words">
                           <div className="grid grid-cols-2 grid-rows-[1fr_auto] sm:block">
-                              <div className="col-span-2 mx-2">{item.name} <br /> <span className='font-semibold'>{item.trial ? "สินค้าทดลอง" : ""}</span> สี: {item.color} </div>
+                              <div className="col-span-2 mx-2">{item.name} <br /> <span className='font-semibold'>{item.trial ? "Trial Product" : ""}</span> Color: {item.color} </div>
                               <div
                                   className="mt-2 mx-2 font-semibold row-start-2 sm:text-center sm:hidden self-end">
                       ฿{subtotal}</div>
