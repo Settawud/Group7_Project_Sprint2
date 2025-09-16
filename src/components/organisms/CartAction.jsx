@@ -3,6 +3,7 @@ import CheckboxWithText from "../atoms/CheckboxWithText";
 import Button from "../atoms/Button";
 import { ValueContext } from "../../context/ValueContext";
 import { Link, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 
 const CartAction = ({ className = "" }) => {
@@ -52,7 +53,7 @@ const CartAction = ({ className = "" }) => {
     if (countItemChecked) {
         navigate('/checkout')
     } else {
-      alert("Please select at least one item")
+      toast.error("Please select at least one item")
       }
     }
     
