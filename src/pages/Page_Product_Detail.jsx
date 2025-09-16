@@ -22,6 +22,13 @@ const Page_Product_Detail = () => {
   const [reviewsLoading, setReviewsLoading] = useState(true);
   const [reviewsError, setReviewsError] = useState(null);
 
+  const handleVariantChange = (variantId) => {
+    const foundVariant = productData?.variants?.find(v => v._id === variantId);
+    if (foundVariant?.image) {
+      setSelectedImage(foundVariant.image);
+    }
+  };
+
   useEffect(() => {
     const fetchProduct = async () => {
       try {
@@ -159,7 +166,7 @@ const Page_Product_Detail = () => {
           <StickyImage src={selectedImage} />
         </div>
         <div className="w-full lg:w-1/3">
-          <ProductContent product={productData} />
+          <ProductContent product={productData} onVariantChange={handleVariantChange} />
         </div>
       </div>
 

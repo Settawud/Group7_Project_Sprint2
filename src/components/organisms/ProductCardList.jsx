@@ -51,8 +51,8 @@ const ProductCardList = ({ _id, imageSrc, title, tag, size, price, trial = false
           <span className="text-2xl font-semibold text-black">฿{price}</span>
         </div>
         <div className="flex flex-col sm:flex-row justify-between gap-2 text-white">
-          <div className="flex items-center justify-center w-full h-12 bg-[#B29675] rounded-lg hover:bg-[#B2967590] transition">
-            <button className="text-lg" onClick={() => clickAddToCart(_id)}>Add to Cart</button>
+          <div className="flex items-center justify-center w-full h-12 bg-[#B29675] rounded-lg hover:bg-[#B2967590] transition" onClick={() => clickAddToCart(_id)}>
+            <button className="text-lg">Add to Cart</button>
           </div>
         </div>
       </div>
