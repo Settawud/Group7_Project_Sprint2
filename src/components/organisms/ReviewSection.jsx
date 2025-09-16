@@ -81,7 +81,7 @@ const ReviewSection = ({ productId, orderStatus }) => {
     }
   };
 
-  if (orderStatus !== "Complete") {
+  if (orderStatus !== "Delivered") {
     return (
       <p className="text-red-500 text-sm mt-2 text-right">
         You can review only after order is completed
