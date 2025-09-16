@@ -16,7 +16,7 @@ const Page_Product_List = () => {
     availability: null,
   });
 
-  const { isModalOpen, setIsModalOpen, product } = useContext(ValueContext)
+  const { isModalOpen, setIsModalOpen, product } = useContext(ValueContext);
 
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -28,11 +28,21 @@ const Page_Product_List = () => {
   const [totalPages, setTotalPages] = useState(1);
 
   const [sort, setSort] = useState("Price High to Low");
+
+  const handleFiltersChange = (updater) => {
+    setPage(1);
+    setFilters(updater);
+  };
+
+  const handleSortChange = (updater) => {
+    setPage(1);
+    setSort(updater);
+  }
   const search = searchParams.get("search") || "";
+
   const normalizeCategoryToBackend = (val) => {
     const s = String(val || "").trim().toLowerCase();
     if (!s) return null;
-    // Strip parentheses content
     const base = s.split("(")[0].trim();
     const dict = new Map([
       ["chairs", "Chairs"],
@@ -57,20 +67,25 @@ const Page_Product_List = () => {
     const map = { Chairs: "Chairs", Tables: "Tables", Accessories: "Accessories" };
     return map[eng] || eng;
   };
+
   // Sync category from URL to filters (normalize lowercase to proper case for backend)
   useEffect(() => {
     const cat = searchParams.get("category");
-    if (cat && cat !== filters.category) {
-      const eng = normalizeCategoryToBackend(cat) || String(cat).split("(")[0].trim();
-      const label = displayLabelFromBackend(eng);
+    const normalized = normalizeCategoryToBackend(cat);
+    const label = displayLabelFromBackend(normalized || cat);
+
+    if (cat && filters.category !== label) {
       setFilters((prev) => ({ ...prev, category: label }));
     }
-    // Mark filters as hydrated from URL on first pass
+
+    if (!cat && filters.category) {
+      setFilters((prev) => ({ ...prev, category: null }));
+    }
+
     setHydrated(true);
   }, [searchParams]);
 
   const getSortQuery = (sortValue) => {
-    // We sort client-side; keep backend sort empty for now
     if (sortValue === "Price High to Low") return "";
     if (sortValue === "Price Low to High") return "";
     if (sortValue === "New In") return "";
@@ -78,14 +93,14 @@ const Page_Product_List = () => {
   };
 
   useEffect(() => {
-    if (!hydrated) return; // wait until filters are synced from URL
+    if (!hydrated) return;
+
     const fetchProducts = async () => {
       setLoading(true);
       setError("");
       const query = { page };
 
       if (filters.category) {
-        // Convert user-friendly label or Thai/English synonyms to backend value
         const eng = normalizeCategoryToBackend(filters.category);
         if (eng) query.category = eng;
       }
@@ -108,13 +123,18 @@ const Page_Product_List = () => {
         query.search = search.trim();
       }
 
-      // Update URL only when derived query differs from current params
+      // Sync URL query string with current filters
       const current = new URLSearchParams(searchParams);
-      // Keep display label for category in URL (e.g., "Chairs(เก้าอี้)")
+
       const urlParams = { ...query };
+
+      // Keep label like Chairs(เก้าอี้) in URL
       if (filters.category) {
         urlParams.category = filters.category;
+      } else {
+        current.delete("category"); // ✅ Important fix here
       }
+
       Object.entries(urlParams).forEach(([k, v]) => current.set(k, String(v)));
       const nextStr = current.toString();
       if (nextStr !== searchParams.toString()) {
@@ -125,7 +145,6 @@ const Page_Product_List = () => {
         const { data } = await api.get("/products", { params: query });
         const items = Array.isArray(data?.items) ? data.items : [];
 
-        // Keep backend order; only sort by price if selected
         const withPrice = items.map((p) => ({
           ...p,
           __minPrice: Array.isArray(p.variants) && p.variants.length
@@ -155,7 +174,6 @@ const Page_Product_List = () => {
   }, [filters, sort, page, search, hydrated]);
 
   const mappedProducts = products.map((product) => {
-    // Normalize image: prefer product thumbnail url, otherwise a variant image, otherwise fallback
     const thumb = Array.isArray(product?.thumbnails) ? product.thumbnails[0] : null;
     const thumbUrl = typeof thumb === "string" ? thumb : thumb?.url;
     const variantWithImage = Array.isArray(product?.variants)
@@ -188,6 +206,11 @@ const Page_Product_List = () => {
     };
   });
 
+  // Reset page when category changes
+  useEffect(() => {
+    setPage(1);
+  }, [filters.category]);
+
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [page, filters]);
@@ -198,9 +221,9 @@ const Page_Product_List = () => {
       <Container className="min-h-screen py-10">
         <ProductFilterSortTags
           filters={filters}
-          setFilters={setFilters}
+          setFilters={handleFiltersChange}
           sort={sort}
-          setSort={setSort}
+          setSort={handleSortChange}
         />
         {loading ? (
           <div className="py-20 text-center text-stone-600">Loading products…</div>
@@ -218,8 +241,8 @@ const Page_Product_List = () => {
         )}
       </Container>
 
-        <div>
-                            {isModalOpen && (
+      <div>
+        {isModalOpen && (
           <div
             className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
             onClick={() => setIsModalOpen(false)}
@@ -230,7 +253,7 @@ const Page_Product_List = () => {
             >
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="absolute top-4 right-4 text-black bg-white  border-black border-1 rounded-3xl w-8 h-8 flex items-center justify-center hover:bg-pink-200 transition"
+                className="absolute top-4 right-4 text-black bg-white border-black border-1 rounded-3xl w-8 h-8 flex items-center justify-center hover:bg-pink-200 transition"
               >
                 ✖
               </button>
@@ -238,7 +261,7 @@ const Page_Product_List = () => {
             </div>
           </div>
         )}
-</div>
+      </div>
     </div>
   );
 };

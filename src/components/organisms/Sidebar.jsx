@@ -116,17 +116,6 @@ const Sidebar = () => {
             ))}
           </nav>
 
-          {/* Logout */}
-          <div
-            className={`
-              mt-auto flex items-center rounded py-2 text-sm text-white hover:bg-[#A8A8A880] cursor-pointer w-full
-              ${isCollapsed ? "justify-center" : "justify-start gap-2 indent-2"}
-            `}
-          >
-            <LogOut className="w-4 h-4" />
-            {!isCollapsed && showContent && <span>Log out</span>}
-          </div>
-
         </div>
       </aside>
     </>
