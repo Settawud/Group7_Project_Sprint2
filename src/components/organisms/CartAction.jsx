@@ -3,6 +3,7 @@ import CheckboxWithText from "../atoms/CheckboxWithText";
 import Button from "../atoms/Button";
 import { ValueContext } from "../../context/ValueContext";
 import { Link, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 
 const CartAction = ({ className = "" }) => {
@@ -52,7 +53,7 @@ const CartAction = ({ className = "" }) => {
     if (countItemChecked) {
         navigate('/checkout')
     } else {
-      alert("Please select at least one item")
+      toast.warning("Please select at least one item")
       }
     }
     
@@ -70,7 +71,7 @@ const CartAction = ({ className = "" }) => {
         />
       </div>
       <div className="flex justify-between py-2 sm:mx-4 mx-2">
-        <div className="flex my-2 items-center">
+        <div className="flex my-2 items-center flex-col sm:flex-row">
           <CheckboxWithText
             name="selectAll"
             text="Select All"
@@ -82,7 +83,7 @@ const CartAction = ({ className = "" }) => {
           />
           <Button
             variant="secondary"
-            className="p-2 mx-4 inline-flex"
+            className="p-2 mx-2 sm:mx-4 inline-flex"
             onClick={() => handleDeleteCartItem(cart)}
             //disabled={!cart.some((i) => i.checked)}
           >
@@ -90,12 +91,12 @@ const CartAction = ({ className = "" }) => {
           </Button>
         </div>
 
-        <div className="flex">
-          <p className="mr-4 my-5 hidden sm:block">Total ฿{total}</p>
-          <p className="mr-2 my-5 sm:hidden">฿{total}</p>
+        <div className="flex flex-col sm:flex-row sm:mx-4 mx-2">
+          <p className="mr-4 my-5 hidden sm:block text-[16px]">Total ฿{total}</p>
+          <p className="mr-2 mt-2 sm:hidden text-[16px] ">฿{total}</p>
 
-          <Button variant="primary" className="py-2 px-3 my-2" onClick={startOrder}>
-            checkout
+          <Button variant="primary" className="py-2 px-3 sm:my-2" onClick={startOrder}>
+            Checkout
             </Button>
 
         </div>
