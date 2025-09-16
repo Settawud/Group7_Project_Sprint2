@@ -21,8 +21,6 @@ const StickyImage = ({ src, alt = "Product Image", className = "" }) => {
   //   setLoaded(false);
   // }, [url]);
 
-  console.log(loaded)
-
   return (
     <div className={`w-full ${className} lg:sticky lg:top-20 self-start`}>
       <div className="w-full flex items-center justify-center">

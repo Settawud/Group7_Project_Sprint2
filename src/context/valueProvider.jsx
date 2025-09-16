@@ -101,7 +101,7 @@ export const ValueProvider = ({ children }) => {
       //console.log("Added to cart success:", res.data);
     } catch (error) {
       //console.error("Add to cart error:", error);
-      alert("Error Please Try again");
+      toast.error("Please Login");
     }
   } // <-- Add this closing brace to properly end addToCart
 

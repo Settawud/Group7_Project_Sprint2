@@ -7,6 +7,7 @@ import { ValueContext } from "../../context/ValueContext";
 const Sidebar = () => {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [showContent, setShowContent] = useState(true);
  
   const navigate = useNavigate();
   const {isAdmin} = useContext(ValueContext)
