@@ -14,12 +14,14 @@ function normalizeImage(img) {
 }
 
 const StickyImage = ({ src, alt = "Product Image", className = "" }) => {
-  const [loaded, setLoaded] = useState(false);
+  const [loaded, setLoaded] = useState(true);
   const url = normalizeImage(src) || "/images/logoCutBackground2.png";
 
-  useEffect(() => {
-    setLoaded(false);
-  }, [url]);
+  // useEffect(() => {
+  //   setLoaded(false);
+  // }, [url]);
+
+  console.log(loaded)
 
   return (
     <div className={`w-full ${className} lg:sticky lg:top-20 self-start`}>
@@ -40,6 +42,7 @@ const StickyImage = ({ src, alt = "Product Image", className = "" }) => {
           alt={alt}
           role="img"
           aria-label={alt}
+          loading="lazy"
           decoding="async"
           className={`w-auto h-auto object-contain rounded-xl shadow-lg transition-opacity duration-300 ${
             loaded ? "opacity-100 block" : "opacity-0 hidden"
