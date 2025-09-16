@@ -4,7 +4,6 @@ const FilterOrder = ({ onFilterChange }) => {
   const [form, setForm] = useState({
     orderNumber: "",
     keyword: "",
-    status: "",
     dateFrom: "",
     dateTo: "",
   });
