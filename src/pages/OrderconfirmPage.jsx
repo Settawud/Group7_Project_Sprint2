@@ -10,11 +10,29 @@ export default function OrderconfirmPage() {
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // ฟังก์ชันช่วยเหลือ
+  const safeNumber = (value) => Number(value) || 0;
+
+  const formatDateTimeTH = (isoString) => {
+    if (!isoString) return "-";
+    const date = new Date(isoString);
+    if (isNaN(date.getTime())) return "-";
+    return date.toLocaleString("th-TH", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
+  };
+
   // ดึงข้อมูล Order
   useEffect(() => {
     const fetchOrder = async () => {
       try {
         const res = await api.get(`/orders/${orderId}`);
+        console.log("Order data:", res.data?.item); // ตรวจสอบ field จริง
         setOrder(res.data?.item || null);
       } catch (err) {
         console.error("Failed to fetch order:", err);
@@ -43,12 +61,7 @@ export default function OrderconfirmPage() {
     );
   }
 
-  // ✅ Validate + Sanitize ตัวเลขก่อนใช้
-  const safeNumber = (value) => {
-    const n = Number(value);
-    return isNaN(n) ? 0 : n;
-  };
-
+  // คำนวณราคา
   const subtotal = safeNumber(order?.subtotalAmount);
   const discount = safeNumber(order?.discountAmount);
   const installationFee = safeNumber(order?.installationFee);
@@ -194,6 +207,12 @@ export default function OrderconfirmPage() {
               <div>
                 <p className="font-semibold text-lg mb-1">เบอร์โทรศัพท์</p>
                 <p className="text-gray-800">{order?.phone || "-"}</p>
+              </div>
+              <div>
+                <p className="font-semibold text-lg mb-1">วัน / เวลา</p>
+                <p className="text-gray-800">
+                  {formatDateTimeTH(order.updatedAt)}
+                </p>
               </div>
             </div>
           </div>
