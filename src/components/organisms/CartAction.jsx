@@ -63,7 +63,7 @@ const CartAction = ({ className = "" }) => {
       <div className="flex sm:justify-end px-2 sm:px-4 pt-4 pb-2 border-b border-gray-400">
         <CheckboxWithText
           name="install"
-          text="Installation Service ฿200"
+          text="Assembly Service ฿200"
           className="text-end"
           onChange={handleInstallationChecked}
           checked={installChecked}

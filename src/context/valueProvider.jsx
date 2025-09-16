@@ -125,7 +125,7 @@ const removeChecked = async (cart) => {
       }));
 
     if (itemsToDelete.length === 0) {
-      console.log("No items selected for deletion.");
+      toast.warning("No items selected for deletion.");
       return;
     }
     

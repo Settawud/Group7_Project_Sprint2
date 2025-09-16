@@ -30,11 +30,11 @@ export default function OrderSummary({
 
       {/* Price breakdown */}
       <div className="grid grid-cols-[1fr_auto] gap-4 text-gray-700 mb-6 border-t-2 border-gray-300 pt-4">
-        <span>ยอดรวมสินค้า</span>
+        <span>Subtotal</span>
         <span className="font-medium text-right">฿{subtotal}</span>
-        <span>ค่าบริการประกอบสินค้า</span>
+        <span>Assembly Service Fee</span>
         <span className="font-medium text-right">฿{assemblyFee}</span>
-        <span>ค่าจัดส่ง</span>
+        <span>Shipping Fee</span>
         <span className="font-medium text-right">฿{shippingFee}</span>
         <span>ส่วนลด</span>
         <span className="font-medium text-right">฿{discount}</span>
@@ -42,7 +42,7 @@ export default function OrderSummary({
 
       {/* Grand total */}
       <div className="flex justify-between items-center border-t-2 border-gray-300 pt-4">
-        <span className="text-xl font-bold text-gray-800">รวมยอดชำระ</span>
+        <span className="text-xl font-bold text-gray-800">Total Amount</span>
         <span className="text-2xl font-extrabold text-black">฿{total}</span>
       </div>
     </div>
