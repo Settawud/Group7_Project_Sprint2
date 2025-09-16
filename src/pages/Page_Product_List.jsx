@@ -28,6 +28,16 @@ const Page_Product_List = () => {
   const [totalPages, setTotalPages] = useState(1);
 
   const [sort, setSort] = useState("Price High to Low");
+
+  const handleFiltersChange = (updater) => {
+    setPage(1);
+    setFilters(updater);
+  };
+
+  const handleSortChange = (updater) => {
+    setPage(1);
+    setSort(updater);
+  }
   const search = searchParams.get("search") || "";
   const normalizeCategoryToBackend = (val) => {
     const s = String(val || "").trim().toLowerCase();
@@ -198,9 +208,9 @@ const Page_Product_List = () => {
       <Container className="min-h-screen py-10">
         <ProductFilterSortTags
           filters={filters}
-          setFilters={setFilters}
+          setFilters={handleFiltersChange}
           sort={sort}
-          setSort={setSort}
+          setSort={handleSortChange}
         />
         {loading ? (
           <div className="py-20 text-center text-stone-600">Loading products…</div>
