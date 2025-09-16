@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { api } from "../../lib/api";
 
-const ReviewSection = ({ productId }) => {
+const ReviewSection = ({ productId, orderStatus }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [rating, setRating] = useState(0);
   const [hovered, setHovered] = useState(0);
@@ -80,6 +80,14 @@ const ReviewSection = ({ productId }) => {
       setIsSubmitting(false);
     }
   };
+
+  if (orderStatus !== "Complete") {
+    return (
+      <p className="text-red-500 text-sm mt-2 text-right">
+        You can review only after order is completed
+      </p>
+    );
+  }
 
   return (
     <div className="review-container">

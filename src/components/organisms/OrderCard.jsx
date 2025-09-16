@@ -46,7 +46,7 @@ const OrderCard = ({ order }) => {
 
             {!alreadyRendered && (
               <div onClick={(e) => e.stopPropagation()}>
-                <ReviewSection productId={item.productId} />
+                <ReviewSection productId={item.productId} orderStatus={order.status} />
               </div>
             )}
           </div>

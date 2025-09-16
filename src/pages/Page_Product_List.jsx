@@ -28,6 +28,16 @@ const Page_Product_List = () => {
   const [totalPages, setTotalPages] = useState(1);
 
   const [sort, setSort] = useState("Price High to Low");
+
+  const handleFiltersChange = (updater) => {
+    setPage(1);
+    setFilters(updater);
+  };
+
+  const handleSortChange = (updater) => {
+    setPage(1);
+    setSort(updater);
+  }
   const search = searchParams.get("search") || "";
   const normalizeCategoryToBackend = (val) => {
     const s = String(val || "").trim().toLowerCase();
@@ -141,7 +151,7 @@ const Page_Product_List = () => {
         }
 
         setProducts(sorted);
-        setTotalPages(Math.ceil((data.total || 0) / 20));
+        setTotalPages(Math.ceil((data.total || 0) / 9));
       } catch (err) {
         console.error("Error fetching products:", err);
         setError(err?.response?.data?.message || err?.message || "Failed to load products");
@@ -188,15 +198,19 @@ const Page_Product_List = () => {
     };
   });
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [page, filters]);
+
   return (
     <div className="bg-[#fefdf9]">
       <Navbar />
       <Container className="min-h-screen py-10">
         <ProductFilterSortTags
           filters={filters}
-          setFilters={setFilters}
+          setFilters={handleFiltersChange}
           sort={sort}
-          setSort={setSort}
+          setSort={handleSortChange}
         />
         {loading ? (
           <div className="py-20 text-center text-stone-600">Loading products…</div>

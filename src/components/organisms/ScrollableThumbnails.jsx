@@ -1,3 +1,5 @@
+import { useEffect, useMemo, useRef } from "react";
+
 function normalizeImage(img) {
   if (!img) return null;
   if (typeof img === "object" && img.url) return img.url;
@@ -11,30 +13,96 @@ function normalizeImage(img) {
   return `/images/${cleaned.split("/").pop()}`;
 }
 
-const ScrollableThumbnails = ({ images = [] }) => {
-  const list = images
-    .map((it) => normalizeImage(it))
-    .filter(Boolean);
+const ScrollableThumbnails = ({
+  images = [],
+  setSelectedImage = () => {},
+  selectedImage = null,
+  horizontal = false,
+  className = "",
+}) => {
+  const list = useMemo(() => {
+    const seen = new Set();
+    return (Array.isArray(images) ? images : [])
+      .map(normalizeImage)
+      .filter(Boolean)
+      .filter((url) => {
+        if (seen.has(url)) return false;
+        seen.add(url);
+        return true;
+      });
+  }, [images]);
+
   if (list.length === 0) return null;
+
+  const normalizedSelectedImage = normalizeImage(selectedImage);
+
+  const itemRefs = useRef({});
+
+  useEffect(() => {
+    if (!normalizedSelectedImage) return;
+    const el = itemRefs.current[normalizedSelectedImage];
+    if (el && typeof el.scrollIntoView === "function") {
+      el.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });
+    }
+  }, [normalizedSelectedImage]);
+
+  const deriveAlt = (url, index) => {
+    try {
+      const parts = url.split("/");
+      const filename = parts[parts.length - 1] || `image-${index + 1}`;
+      return `Thumbnail ${index + 1} — ${filename}`;
+    } catch {
+      return `Thumbnail ${index + 1}`;
+    }
+  };
+
   return (
-    <div className="mx-auto px-10 pt-20 pb-20">
-      <div className="overflow-x-auto">
-        <div className="flex w-max gap-10">
-          {list.map((src, index) => (
-            <div key={index} className="w-96 h-96 rounded-md flex-shrink-0 bg-gray-100">
-              <img
-                src={src}
-                alt={`Thumbnail ${index + 1}`}
-                className="w-full h-full object-cover rounded-md"
-                onError={(e) => {
-                  e.currentTarget.onerror = null;
-                  e.currentTarget.src = "/images/logoCutBackground2.png";
-                }}
-              />
-            </div>
-          ))}
-        </div>
-      </div>
+    <div
+      className={`${className} ${
+        horizontal
+          ? "flex gap-3 overflow-x-auto py-2 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200"
+          : "flex flex-col overflow-y-auto lg:w-28 w-20 h-[70vh] lg:h-[75vh] sticky top-20 self-start p-1"
+      }`}
+      role="list"
+      aria-label="Product thumbnails"
+    >
+      {list.map((src, idx) => {
+        const isActive = src === normalizedSelectedImage;
+        const btnClassBase =
+          "rounded-md flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-offset-1 transition-all";
+        const sizeClasses = horizontal
+          ? "w-24 h-24 flex-shrink-0"
+          : "w-16 h-16 mb-4 lg:w-20 lg:h-20";
+        const borderClass = isActive
+          ? "ring-2 ring-black border-0 shadow-md scale-105"
+          : "border border-gray-300 hover:border-black";
+
+        return (
+          <button
+            key={src}
+            ref={(el) => (itemRefs.current[src] = el)}
+            type="button"
+            role="listitem"
+            aria-pressed={isActive}
+            title={`Thumbnail ${idx + 1}`}
+            onClick={() => setSelectedImage(src)}
+            className={`${btnClassBase} ${sizeClasses} ${borderClass}`}
+            style={{ background: "transparent" }}
+          >
+            <img
+              src={src}
+              alt={deriveAlt(src, idx)}
+              loading="lazy"
+              decoding="async"
+              className="w-full h-full object-cover rounded-md"
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = "/images/logoCutBackground2.png";
+              }}
+            />
+          </button>
+        );
+      })}
     </div>
   );
 };

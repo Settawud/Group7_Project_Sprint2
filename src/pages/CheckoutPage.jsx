@@ -13,8 +13,9 @@ export default function CheckoutPage() {
   const [contact, setContact] = useState({ name: "", phone: "" });
   const [coupon, setCoupon] = useState("");
   const [selectedAddress, setSelectedAddress] = useState(null);
-  const { cart, token } = useContext(ValueContext);
+  const { cart, installChecked } = useContext(ValueContext);
   const navigate = useNavigate();
+  const [isPlacingOrder, setIsPlacingOrder] = useState(false);
 
   const handleAddressSelect = (address) => {
     setSelectedAddress(address);
@@ -23,6 +24,10 @@ export default function CheckoutPage() {
   const handleConfirmOrder = async () => {
     if (!contact.name || !contact.phone) {
       toast.error("Please enter your contact details");
+      return;
+    }
+    if (!/^0\d{9}$/.test(contact.phone)) {
+      toast.error("Phone number must be 10 digits and start with 0.");
       return;
     }
     if (!selectedAddress) {
@@ -34,23 +39,27 @@ export default function CheckoutPage() {
       return;
     }
 
+    setIsPlacingOrder(true);
     try {
       const payload = {
         name: contact.name,
         phone: contact.phone,
         discountCode: coupon || "",
+        installationFee: installChecked ? 200 : 0,
         shipping: {
           address: selectedAddress.fullAddress || selectedAddress.address || "",
         },
       };
 
-      await api.post("/orders", payload);
+      const { data } = await api.post("/orders", payload);
 
       toast.success("Order placed successfully!");
-      navigate("/order-confirmation");
+      navigate(`/order-confirm/${data.item._id}`);
     } catch (error) {
       const msg = error?.response?.data?.message || error.message || "Order failed";
       toast.error(msg);
+    } finally {
+      setIsPlacingOrder(false);
     }
   };
 
@@ -65,9 +74,12 @@ export default function CheckoutPage() {
             <UserAddress onSelectAddress={handleAddressSelect} />
           </div>
           <OrderSummary
+            cart={cart}
             coupon={coupon}
             setCoupon={setCoupon}
             onConfirmOrder={handleConfirmOrder}
+            installationFee={installChecked ? 200 : 0}
+            isPlacingOrder={isPlacingOrder}
           />
         </div>
       </main>

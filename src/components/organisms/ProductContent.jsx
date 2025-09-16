@@ -1,15 +1,14 @@
 import { useContext, useEffect, useState } from "react";
-import { api } from "../../lib/api";
 import { ValueContext } from "../../context/ValueContext";
 
-const ProductContent = ({ product }) => {
+const ProductContent = ({ product = {} }) => {
   const {
     _id,
     Name,
-    Description = [],
-    tag,
+    Description = "",
+    tag = [],
     material,
-    variants = [],
+    variants: rawVariants = [],
   } = product;
 
   const [selected, setSelected] = useState("buy");
@@ -17,45 +16,83 @@ const ProductContent = ({ product }) => {
   const [selectedColor, setSelectedColor] = useState(null);
   const { addToCart } = useContext(ValueContext);
 
-  const trial = variants.some((variant) => variant.trial);
+  const variants = Array.isArray(rawVariants) ? rawVariants : [];
+
+  const trialAvailable = variants.some((variant) => variant.trial === true);
 
   const filteredVariants = variants.filter((v) =>
     selected === "trial" ? v.trial === true : v.trial !== true
   );
 
   useEffect(() => {
-    if (!selectedColor && filteredVariants.length > 0) {
+    const hasSelectedInFiltered = selectedColor
+      ? filteredVariants.some((v) => v._id === selectedColor)
+      : false;
+
+    if (!hasSelectedInFiltered && filteredVariants.length > 0) {
       setSelectedColor(filteredVariants[0]._id);
     }
-  }, [filteredVariants, selectedColor]);
+  }, [filteredVariants]);
 
-  const currentVariant = selectedColor
-    ? filteredVariants.find((v) => v._id === selectedColor)
-    : filteredVariants[0] || {};
+  const safeFindVariantById = (id) =>
+    variants.find((v) => v._id === id) ||
+    filteredVariants.find((v) => v._id === id);
+
+  const currentVariant =
+    (selectedColor && safeFindVariantById(selectedColor)) ||
+    filteredVariants[0] ||
+    {};
+
+  const priceNum = Number(currentVariant?.price) || 0;
+  const formattedPrice = priceNum ? priceNum.toLocaleString() : "-";
+
+  const quantityInStock = Number(currentVariant?.quantityInStock) || 0;
+
+  const getDisplayPriceForType = (isTrial) => {
+    if (selectedColor) {
+      const v = variants.find(
+        (x) => x._id === selectedColor && (Boolean(x.trial) === Boolean(isTrial))
+      );
+      if (v && v.price != null) return Number(v.price);
+    }
+
+    if (currentVariant?.color) {
+      const v = variants.find(
+        (x) => x.color === currentVariant.color && (Boolean(x.trial) === Boolean(isTrial))
+      );
+      if (v && v.price != null) return Number(v.price);
+    }
+
+    const v = variants.find((x) => Boolean(x.trial) === Boolean(isTrial));
+    if (v && v.price != null) return Number(v.price);
+
+    return 0;
+  };
+
+  const trialPriceNum = getDisplayPriceForType(true);
+  const buyPriceNum = getDisplayPriceForType(false);
 
   const increment = () => setQuantity((prev) => prev + 1);
-  const decrement = () =>
-    setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
-
-  const quantityInStock = currentVariant.quantityInStock || 0;
-  const price = currentVariant.price || 0;
+  const decrement = () => setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
 
   return (
     <div className="flex flex-col gap-3 text-black">
       <div className="text-3xl font-semibold leading-snug">{Name}</div>
 
       <div className="flex flex-wrap gap-2">
-        {tag.map((t, index) => (
-          <div
-            key={index}
-            className="inline-block px-2 py-0.5 text-sm font-medium bg-[#849E9150] text-[#849E91] rounded"
-          >
-            {t}
-          </div>
-        ))}
+        {Array.isArray(tag) && tag.length > 0
+          ? tag.map((t, index) => (
+              <div
+                key={`${t}-${index}`}
+                className="inline-block px-2 py-0.5 text-sm font-medium bg-[#849E9150] text-[#849E91] rounded"
+              >
+                {t}
+              </div>
+            ))
+          : null}
       </div>
 
-      <div className="text-3xl font-bold">฿{price}</div>
+      <div className="text-3xl font-bold">฿{formattedPrice}</div>
 
       <hr className="my-3 border-[#B29675]" />
 
@@ -72,19 +109,26 @@ const ProductContent = ({ product }) => {
       <div>
         <div className="pb-1 text-sm font-medium">Color</div>
         <div className="flex gap-2">
-          {filteredVariants.map((v) => (
-            <div
-              key={v._id}
-              onClick={() => setSelectedColor(v._id)}
-              className={`w-6 h-6 border rounded-full cursor-pointer hover:border-black hover:border-2 ${
-                selectedColor === v._id ||
-                (!selectedColor && v === filteredVariants[0])
-                  ? "border-black border-2"
-                  : ""
-              }`}
-              style={{ backgroundColor: v.color }}
-            />
-          ))}
+          {filteredVariants.length === 0 && (
+            <div className="text-sm text-gray-500">No colors available</div>
+          )}
+          {filteredVariants.map((v) => {
+            const bg = v.color || "#D3D3D3";
+            const isSelected = selectedColor === v._id;
+            return (
+              <button
+                key={v._id}
+                onClick={() => setSelectedColor(v._id)}
+                aria-pressed={isSelected}
+                title={v.color || "color"}
+                className={`w-6 h-6 border rounded-full cursor-pointer focus:outline-none ${
+                  isSelected ? "border-black border-2" : "border-gray-300"
+                }`}
+                style={{ backgroundColor: bg }}
+                type="button"
+              />
+            );
+          })}
         </div>
       </div>
 
@@ -92,7 +136,7 @@ const ProductContent = ({ product }) => {
 
       <div className="flex flex-col gap-4 w-full">
         <div className="flex flex-col sm:flex-row gap-2 w-full">
-          {trial && (
+          {trialAvailable && (
             <button
               onClick={() => {
                 setSelected("trial");
@@ -103,14 +147,9 @@ const ProductContent = ({ product }) => {
                   ? "bg-[#849E91] text-white hover:bg-[#849E9190] border-none"
                   : "border border-[#B29675] text-[#B29675] hover:bg-[#B2967590]"
               }`}
+              type="button"
             >
-              ทดลองใช้ ฿
-              {
-                variants.find(
-                  (v) =>
-                    v.trial === true && currentVariant.color === v.color
-                )?.price
-              }
+              ทดลองใช้ ฿{trialPriceNum ? trialPriceNum.toLocaleString() : "-"}
             </button>
           )}
           <button
@@ -123,14 +162,9 @@ const ProductContent = ({ product }) => {
                 ? "bg-[#849E91] text-white hover:bg-[#849E9190] border-none"
                 : "border border-[#B29675] text-[#B29675] hover:bg-[#B2967590]"
             }`}
+            type="button"
           >
-            ซื้อเดี๋ยวนี้ ฿
-            {
-              variants.find(
-                (v) =>
-                  v.trial !== true && currentVariant.color === v.color
-              )?.price
-            }
+            ซื้อเดี๋ยวนี้ ฿{buyPriceNum ? buyPriceNum.toLocaleString() : "-"}
           </button>
         </div>
       </div>
@@ -153,6 +187,7 @@ const ProductContent = ({ product }) => {
                 ? "text-gray-400 cursor-not-allowed"
                 : "hover:bg-[#B2967590]"
             }`}
+            type="button"
           >
             −
           </button>
@@ -165,20 +200,27 @@ const ProductContent = ({ product }) => {
                 ? "text-gray-400 cursor-not-allowed"
                 : "hover:bg-[#B2967590]"
             }`}
+            type="button"
           >
             +
           </button>
         </div>
         <button
           onClick={() =>
-            addToCart(_id, currentVariant._id, quantity, selectedColor)
+            addToCart(
+              _id,
+              currentVariant?._id || null,
+              quantity,
+              currentVariant?.color || null
+            )
           }
-          disabled={quantityInStock === 0}
+          disabled={quantityInStock === 0 || !currentVariant?._id}
           className={`h-12 px-4 py-2 rounded text-sm w-full lg:w-1/2 transition ${
-            quantityInStock === 0
+            quantityInStock === 0 || !currentVariant?._id
               ? "bg-[#B2967590] text-white cursor-not-allowed"
               : "bg-[#B29675] text-white hover:bg-[#B2967590]"
           }`}
+          type="button"
         >
           {quantityInStock === 0 ? "Sold Out" : "Add to Cart"}
         </button>
@@ -187,7 +229,8 @@ const ProductContent = ({ product }) => {
       <div className="pt-4">
         <div className="pb-2 font-semibold">Product Information</div>
         <ul className="list-disc list-inside text-sm text-[#A8A8A8]">
-          {currentVariant.dimensions &&
+          {currentVariant?.dimensions &&
+            typeof currentVariant.dimensions === "object" &&
             Object.entries(currentVariant.dimensions)
               .filter(([k]) => k !== "unit")
               .map(([key, value]) => {

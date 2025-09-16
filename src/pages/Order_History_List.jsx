@@ -44,7 +44,7 @@ const Order_History_List = () => {
             };
           }),
           total: order.subtotalAmount,
-        })).reverse();
+        }));
 
         setOrders(mappedOrders);
       } catch (err) {
@@ -84,21 +84,23 @@ const Order_History_List = () => {
   });
 
   return (
-    <div>
+    <div className="min-h-screen flex flex-col bg-[#faf6f1]">
       <Navbar />
-      <div className="flex flex-col lg:flex-row gap-8 mx-auto">
+      <div className="flex flex-1">
         <Sidebar />
-        <main className="flex-1 p-4">
-          <FilterOrder onFilterChange={setFilters} />
-          <StatusFilter currentStatus={status} onStatusChange={setStatus} />
+        <main className="flex-1 py-10 px-4">
+          <div className="max-w-4xl mx-auto space-y-10">
+            <FilterOrder onFilterChange={setFilters} />
+            <StatusFilter currentStatus={status} onStatusChange={setStatus} />
 
-          {filteredOrders.length > 0 ? (
-            filteredOrders.map((order) => (
-              <OrderCard key={order.id} order={order} />
-            ))
-          ) : (
-            <p className="text-center text-gray-500 mt-6">No orders found</p>
-          )}
+            {filteredOrders.length > 0 ? (
+              filteredOrders.map((order) => (
+                <OrderCard key={order.id} order={order} />
+              ))
+            ) : (
+              <p className="text-center text-gray-500 mt-6">No orders found</p>
+            )}
+          </div>
         </main>
       </div>
       <Footer />

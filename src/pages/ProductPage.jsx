@@ -1,12 +1,16 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import Navbar from "../components/organisms/Navbar";
 import Footer from "../components/organisms/Footer";
-import { api, postForm } from "../lib/api";
+import { api, patchForm, postForm, putForm } from "../lib/api";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
-export const AddProductPage = () => {
+import { extractPublicId } from 'cloudinary-build-url'
+
+export const ProductPage = () => {
   const navigate = useNavigate();
+    const { id: editProductId } = useParams(); // Get productId from URL params
+  const isEditing = !!editProductId; // Determine if it's an edit operation
 
   // --- Role-based Access Control ---
   useEffect(() => {
@@ -53,6 +57,59 @@ export const AddProductPage = () => {
       },
     ],
   });
+
+  const [initialThumbnails, setInitialThumbnails] = useState([]);
+  //console.log(initialThumbnails)
+
+      const fetchProductData = useCallback(async () => {
+    if (!editProductId) return; // Only fetch if we have a productId
+        try {
+      const productId = editProductId
+      const { data } = await api.get(`/products/${productId}`); // Assuming your API endpoint for single product is /products/:id
+      // Format data to match the form state structure
+      const formattedData = {
+        name: data.item.name,
+        description: data.item.description,
+        category: data.item.category,
+        tags: data.item.tags.join(", "), // Join tags back into a string
+        material: data.item.material,
+        trial: data.item.trial,
+        thumbnails: data.item.thumbnails.map(thumb => thumb.url),
+        thumbnailsPublicId: data.item.thumbnails.map(thumb => thumb.publicId),// Will be handled separately if needed, or assume API returns URLs
+        dimension: {
+          width: data.item.dimension?.width || "",
+          height: data.item.dimension?.height || "",
+          depth: data.item.dimension?.depth || "",
+          weight: data.item.dimension?.weight || "",
+        },
+        variants: data.item.variants.map((v) => ({
+          _id: v._id, // Keep variant ID for potential updates
+          colorId: v.colorId,
+          price: v.price,
+          quantityInStock: v.quantityInStock,
+          trial: v.trial,
+          image: v.image.url, 
+        })),
+      };
+
+      setInitialThumbnails(formattedData.thumbnailsPublicId)
+      setFormData(formattedData);
+
+    } catch (err) {
+      const status = err?.response?.status;
+      const msg = err?.response?.data?.message || err?.message || "Failed to fetch product data";
+      toast.error(`Failed to load product: ${msg}`);
+      if (status === 404) {
+        alert("Product not found")
+        console.error("404 not found :", err)
+        navigate("/products"); // Redirect if product not found
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchProductData();
+  }, [fetchProductData, editProductId]);
 
   // === Field Handlers ===
   const handleChange = (e) => {
@@ -186,6 +243,19 @@ export const AddProductPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+      // --- Thumbnail Validation ---
+// Check if it's a new product OR if it's an edit and no thumbnails are present
+  // const isNewProduct = !isEditing;
+    // const hasThumbnails = formData.thumbnails.length > 0;
+    
+  const allVariantsHaveImages = formData.variants.every(v => v.image !== null && v.image !== "")
+
+  if (!formData.thumbnails.length || !allVariantsHaveImages) {
+  toast.error("Please upload image");
+  setSubmitting(false); // Stop submission
+  return;
+  }
+
     try {
       setSubmitting(true);
       // 1) เตรียม payload JSON ให้ตรงกับ backend
@@ -202,10 +272,12 @@ export const AddProductPage = () => {
       };
 
       const variants = formData.variants.map((v) => ({
+        ...(v._id && { _id: v._id }),
         colorId: v.colorId,
         price: Number(v.price || 0),
         quantityInStock: Number(v.quantityInStock || 0),
         trial: !!v.trial,
+        //image: v.image instanceof File ? null : v.image
       }));
 
       if (!variants.length) {
@@ -223,57 +295,116 @@ export const AddProductPage = () => {
         category: formData.category,
         trial: !!formData.trial,
         tags,
-        material: formData.material,
-        thumbnails: [], // อัปโหลดทีหลัง
+        material: formData.material,// อัปโหลดทีหลัง
         dimension,
         variants,
       };
 
       // 2) สร้างสินค้า (JSON)
-      const createRes = await api.post("/products", payload);
-      const productId = createRes?.data?.item?._id;
-      const createdVariants = createRes?.data?.item?.variants || [];
+      let productId = isEditing ? editProductId : null
+      const productRes = isEditing ? await api.patch(`/products/${productId}`, payload) : await api.post("/products", payload);
+      productId = productRes?.data?.item?._id;
+      const createdVariants = productRes?.data?.item?.variants || [];
       if (!productId) throw new Error("Missing productId in response");
 
       // 3) อัปโหลดรูปหลัก (thumbnails) ทีละไฟล์ (ไม่ให้ล้มเหลวทั้งงาน)
+      // if (formData.thumbnails.length > 0) {
+      //   for (const file of formData.thumbnails) {
+      //     try {
+      //       const fd = new FormData();
+      //       fd.append("image", file);
+      //       await postForm(`/products/${productId}/images`, fd);
+      //     } catch (err) {
+      //       const status = err?.response?.status;
+      //       const msg = err?.response?.data?.message || err?.message || "Upload failed";
+      //       console.warn("Thumbnail upload failed:", status, msg);
+      //       // แจ้งเตือนแบบไม่หยุดการทำงาน
+      //       try { toast.warning(`Some images failed: ${msg}`); } catch {}
+      //     }
+      //   }
+      // }
+
       if (formData.thumbnails.length > 0) {
-        for (const file of formData.thumbnails) {
-          try {
-            const fd = new FormData();
-            fd.append("image", file);
-            await postForm(`/products/${productId}/images`, fd);
-          } catch (err) {
-            const status = err?.response?.status;
-            const msg = err?.response?.data?.message || err?.message || "Upload failed";
-            console.warn("Thumbnail upload failed:", status, msg);
-            // แจ้งเตือนแบบไม่หยุดการทำงาน
-            try { toast.warning(`Some images failed: ${msg}`); } catch {}
+        const thumbnailFormData = new FormData();
+        const publicIdsToKeep = [];
+
+        formData.thumbnails.forEach(fileOrUrl => {
+          if (fileOrUrl instanceof File) {
+            // Append new files under the "images" key, as the backend expects an array
+            thumbnailFormData.append("images", fileOrUrl);
+          } else if (typeof fileOrUrl === 'string') {
+            // Extract publicId from URL and add to a list
+            const publicId = extractPublicId(fileOrUrl);
+            if (publicId) {
+              publicIdsToKeep.push(publicId);
+            }
           }
+        });
+
+        // Append the list of public IDs as a JSON string
+        thumbnailFormData.append("currentPublicIds", JSON.stringify(publicIdsToKeep));
+
+        // Send a single PATCH request to the backend
+        try {
+          await patchForm(`/products/${productId}/images`, thumbnailFormData);
+          // Success message for the user
+          //toast.success("Thumbnails updated successfully!");
+        } catch (err) {
+          const status = err?.response?.status;
+          const msg = err?.response?.data?.message || err?.message || "Upload failed";
+          console.warn("Thumbnail update failed:", status, msg);
+          toast.error(`Some images failed to update: ${msg}`);
         }
       }
 
       // 4) อัปโหลดรูปของแต่ละ variant หากมี (แม็พตาม index) — ไม่ให้ล้มทั้งงาน
-      for (let i = 0; i < formData.variants.length; i++) {
-        try {
-          const file = formData.variants[i]?.image;
-          const variantId = createdVariants[i]?._id;
-          if (file && variantId) {
-            const fd = new FormData();
-            fd.append("image", file);
-            await postForm(`/products/${productId}/variants/${variantId}/images`, fd);
-          }
-        } catch (err) {
-          const status = err?.response?.status;
-          const msg = err?.response?.data?.message || err?.message || "Upload failed";
-          console.warn("Variant image upload failed:", status, msg);
-          try { toast.warning(`Variant image failed: ${msg}`); } catch {}
-        }
-      }
+for (let i = 0; i < formData.variants.length; i++) {
+  try {
+    const fileOrUrl = formData.variants[i]?.image;
+    const variantId = createdVariants[i]?._id;
+
+    if (!variantId) {
+      //console.warn(`Variant at index ${i} has no ID. Skipping image upload.`);
+      continue;
+    }
+    // Case 1: The user selected a new file. Use a PUT request.
+    if (fileOrUrl instanceof File) {
+      const fd = new FormData();
+      fd.append("image", fileOrUrl);
+
+      // ✅ Use a PUT request to replace the image
+      await putForm(`/products/${productId}/variants/${variantId}/images`, fd);
+    } 
+
+  } catch (err) {
+    const status = err?.response?.status;
+    const msg = err?.response?.data?.message || err?.message || "Upload failed";
+    console.warn("Variant image upload failed:", status, msg);
+
+  }
+}
+      
+      // for (let i = 0; i < formData.variants.length; i++) {
+      //   try {
+      //     const file = formData.variants[i]?.image;
+      //     const variantId = createdVariants[i]?._id;
+      //     if (file && variantId) {
+      //       const fd = new FormData();
+      //       fd.append("image", file);
+      //       await postForm(`/products/${productId}/variants/${variantId}/images`, fd);
+      //     }
+      //   } catch (err) {
+      //     const status = err?.response?.status;
+      //     const msg = err?.response?.data?.message || err?.message || "Upload failed";
+      //     console.warn("Variant image upload failed:", status, msg);
+      //     try { toast.warning(`Variant image failed: ${msg}`); } catch {}
+      //   }
+      // }
 
       try { toast.success("Product created successfully"); } catch {}
       // ปิดสถานะกำลังบันทึกก่อนแจ้งเตือน blocking
       setSubmitting(false);
-      alert(`Product created! ID: ${productId}`);
+      //alert(`Product created! ID: ${productId}`);
       handleCancel();
     } catch (err) {
       const status = err?.response?.status;
@@ -292,25 +423,26 @@ export const AddProductPage = () => {
   };
 
   const handleCancel = () => {
-    setFormData({
-      name: "",
-      description: "",
-      category: "",
-      tags: "",
-      material: "",
-      trial: false,
-      thumbnails: [],
-      dimension: { width: "", height: "", depth: "", weight: "" },
-      variants: [
-        {
-          colorId: "",
-          price: "",
-          quantityInStock: "",
-          trial: false,
-          image: null,
-        },
-      ],
-    });
+    navigate('/adminproductmanagement')
+    // setFormData({
+    //   name: "",
+    //   description: "",
+    //   category: "",
+    //   tags: "",
+    //   material: "",
+    //   trial: false,
+    //   thumbnails: [],
+    //   dimension: { width: "", height: "", depth: "", weight: "" },
+    //   variants: [
+    //     {
+    //       colorId: "",
+    //       price: "",
+    //       quantityInStock: "",
+    //       trial: false,
+    //       image: null,
+    //     },
+    //   ],
+    // });
   };
 
   return (
@@ -319,9 +451,7 @@ export const AddProductPage = () => {
       <main className="flex-1">
         <div className="py-10 px-4">
           <div className="max-w-4xl mx-auto w-full">
-            <h2 className="text-3xl md:text-4xl font-light text-gray-800 mb-8 text-center tracking-wide">
-              Add New Product
-            </h2>
+
             <form onSubmit={handleSubmit} className="space-y-8 w-full">
           {/* Product Info */}
           <div className="space-y-6">
@@ -361,7 +491,8 @@ export const AddProductPage = () => {
                   name="category"
                   value={formData.category}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 border rounded-xl"
+                      className="w-full px-4 py-3 border rounded-xl"
+                      required
                 >
                   <option value="" disabled>
                     Select category
@@ -389,7 +520,8 @@ export const AddProductPage = () => {
                   name="material"
                   value={formData.material}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 border rounded-xl"
+                      className="w-full px-4 py-3 border rounded-xl"
+                      required
                 />
               </div>
             </div>
@@ -461,23 +593,32 @@ export const AddProductPage = () => {
             {/* Thumbnail Previews */}
             {formData.thumbnails.length > 0 && (
               <div className="flex flex-wrap gap-6 mt-4">
-                {formData.thumbnails.map((file, index) => (
-                  <div key={index} className="relative w-32 h-32 border rounded-lg overflow-hidden group">
-                    <img
-                      src={URL.createObjectURL(file)}
-                      alt={`Preview ${index + 1}`}
-                      className="w-full h-full object-cover"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => removeThumbnail(index)}
-                    className="absolute top-1 right-1 bg-white/80 hover:bg-white text-red-600 rounded-full px-2 py-0.5 text-xs shadow"
-                    aria-label="Remove this image"
-                  >
-                    Remove
-                  </button>
-                  </div>
-                ))}
+{formData.thumbnails.map((fileOrUrl, index) => (
+  <div key={index} className="relative w-32 h-32 border rounded-lg overflow-hidden group">
+    <img
+      // Conditionally set the src based on whether it's a File object or a URL string
+      src={fileOrUrl instanceof File ? URL.createObjectURL(fileOrUrl) : fileOrUrl}
+      alt={`Preview ${index + 1}`}
+      className="w-full h-full object-cover"
+      // Add onLoad to revoke the object URL once the image is loaded
+      onLoad={(e) => {
+        if (fileOrUrl instanceof File) {
+          URL.revokeObjectURL(e.currentTarget.src);
+        }
+      }}
+    />
+    <button
+      type="button"
+      // When removing, you'll need to distinguish between removing a new file
+      // and potentially removing an existing image (which might involve an API call)
+      onClick={() => removeThumbnail(index, fileOrUrl)}
+      className="absolute top-1 right-1 bg-white/80 hover:bg-white text-red-600 rounded-full px-2 py-0.5 text-xs shadow"
+      aria-label="Remove this image"
+    >
+      Remove
+    </button>
+  </div>
+))}
               </div>
             )}
           </div>
@@ -606,7 +747,6 @@ export const AddProductPage = () => {
             step="1"
             min="0"
             required
-            placeholder="Price (price)"
             className="w-full h-12 px-4 text-base border-2 border-[#B29674]/50 rounded-2xl focus:ring-2 focus:ring-[#B29674]/40"
           />
         </div>
@@ -627,7 +767,6 @@ export const AddProductPage = () => {
             step="1"
             min="0"
             required
-            placeholder="In stock (quantityInStock)"
             className="w-full h-12 px-4 text-base border-2 border-[#B29674]/50 rounded-2xl focus:ring-2 focus:ring-[#B29674]/40"
           />
         </div>
@@ -673,16 +812,26 @@ export const AddProductPage = () => {
             )}
           </div>
 
-          {variant.image && (
-            <div className="mt-4 w-32 h-32 border rounded-lg">
-              <img
-                src={URL.createObjectURL(variant.image)}
-                onLoad={(e) => URL.revokeObjectURL(e.currentTarget.src)}
-                alt="Variant Preview"
-                className="w-full h-full object-cover"
-              />
-            </div>
-          )}
+      {variant.image && (
+        <div className="mt-4 w-32 h-32 border rounded-lg">
+          <img
+            // Check if variant.image is a File object or a URL string
+            src={
+              variant.image instanceof File
+              ? URL.createObjectURL(variant.image)
+              : variant.image // It's already a URL string
+            }
+            // Only revoke object URLs, not string URLs
+            onLoad={(e) => {
+              if (variant.image instanceof File) {
+                URL.revokeObjectURL(e.currentTarget.src);
+              }
+            }}
+            alt="Variant Image Preview"
+            className="w-full h-full object-cover"
+          />
+        </div>
+      )}
         </div>
       </div>
     </div>
