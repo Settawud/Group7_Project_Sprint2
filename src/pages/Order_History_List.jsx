@@ -43,7 +43,13 @@ const Order_History_List = () => {
               price: variant.price,
             };
           }),
-          total: order.subtotalAmount,
+          subtotalAmount: order.subtotalAmount || 0,
+          installationFee: order.installationFee || 0,
+          discountAmount: order.discountAmount || 0,
+          total:
+            (order.subtotalAmount || 0) +
+            (order.installationFee || 0) -
+            (order.discountAmount || 0),
         }));
 
         setOrders(mappedOrders);
@@ -61,20 +67,16 @@ const Order_History_List = () => {
 
     if (
       filters.orderNumber &&
-      !order.id.toLowerCase().includes(filters.orderNumber.toLowerCase())
+      !order.orderId?.toLowerCase().includes(filters.orderNumber.toLowerCase())
     ) {
       return false;
     }
 
     if (filters.keyword) {
       const matchItem = order.items.some((item) =>
-        item.name.toLowerCase().includes(filters.keyword.toLowerCase())
+        item.name && item.name.toLowerCase().includes(filters.keyword.toLowerCase())
       );
       if (!matchItem) return false;
-    }
-
-    if (filters.status && filters.status !== "All" && order.status !== filters.status) {
-      return false;
     }
 
     if (filters.dateFrom && order.date < filters.dateFrom) return false;

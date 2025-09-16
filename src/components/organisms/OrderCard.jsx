@@ -9,6 +9,8 @@ const OrderCard = ({ order }) => {
     navigate(`/orderhistory/${order._id}`);
   };
 
+  console.log(order)
+
   return (
     <div
       onClick={handleClick}
@@ -54,9 +56,11 @@ const OrderCard = ({ order }) => {
       })}
 
       <div className="pt-4 text-right">
-        <p className="text-sm">
-          <span className="font-medium text-[#A8A8A8]">Overall Total</span>
-          <span className="pl-4 text-lg font-semibold">฿{order.total}</span>
+        <p className="text-sm text-gray-500">Subtotal: ฿{order.subtotalAmount}</p>
+        <p className="text-sm text-gray-500">Installation: +฿{order.installationFee}</p>
+        <p className="text-sm text-gray-500">Discount: −฿{order.discountAmount}</p>
+        <p className="text-lg font-semibold">
+          Total: ฿{order.total}
         </p>
       </div>
     </div>

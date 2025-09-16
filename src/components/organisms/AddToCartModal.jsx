@@ -16,7 +16,7 @@ function normalizePublicImage(p) {
   return `/images/${cleaned}`;
 }
 
-const AddToCartModal = ({ product}) => {
+const AddToCartModal = ({ product }) => {
   const {
       _id,
       imageSrc,
@@ -25,6 +25,7 @@ const AddToCartModal = ({ product}) => {
       size,
     price,
     material,
+    thumbnails,
       variants
   } = product;
   
@@ -102,7 +103,11 @@ const AddToCartModal = ({ product}) => {
         <div className="text-3xl font-semibold leading-snug">{title}</div>
 
   
-        <img src={imageSrc} alt={title} className="h-50 w-50 p-1 border-1 mx-auto rounded-sm border-gray-300 shadow-[0_2px_4px_1px_rgba(209,213,219,0.2)]"/>
+        <img 
+          src={currentVariant.image?.url || thumbnails?.[0]?.url || imageSrc} 
+          alt={title} 
+          className="h-50 w-50 p-1 border-1 mx-auto rounded-sm border-gray-300 shadow-[0_2px_4px_1px_rgba(209,213,219,0.2)]"
+        />
         <div className="pt-2">
           <ul className="list-disc list-inside text-sm text-charcoal">
             {currentVariant.dimensions &&
