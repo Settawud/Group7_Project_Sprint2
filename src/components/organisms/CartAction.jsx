@@ -8,7 +8,7 @@ import { Link, useNavigate } from "react-router-dom";
 const CartAction = ({ className = "" }) => {
   const {cart, setCart,setCheckoutItem,checkoutItem,installChecked, setInstallChecked, removeChecked} = useContext(ValueContext)
   const [total, setTotal] = useState(0);
-  const [selectAllChecked, setSelectAllChecked] = useState(false);
+  const [selectAllChecked, setSelectAllChecked] = useState(true);
   const navigate = useNavigate()
 
   useEffect(() => {
