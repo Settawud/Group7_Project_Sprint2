@@ -15,6 +15,7 @@ export default function CheckoutPage() {
   const [selectedAddress, setSelectedAddress] = useState(null);
   const { cart, installChecked } = useContext(ValueContext);
   const navigate = useNavigate();
+  const [isPlacingOrder, setIsPlacingOrder] = useState(false);
 
   const handleAddressSelect = (address) => {
     setSelectedAddress(address);
@@ -38,6 +39,7 @@ export default function CheckoutPage() {
       return;
     }
 
+    setIsPlacingOrder(true);
     try {
       const payload = {
         name: contact.name,
@@ -56,6 +58,8 @@ export default function CheckoutPage() {
     } catch (error) {
       const msg = error?.response?.data?.message || error.message || "Order failed";
       toast.error(msg);
+    } finally {
+      setIsPlacingOrder(false);
     }
   };
 
@@ -75,6 +79,7 @@ export default function CheckoutPage() {
             setCoupon={setCoupon}
             onConfirmOrder={handleConfirmOrder}
             installationFee={installChecked ? 200 : 0}
+            isPlacingOrder={isPlacingOrder}
           />
         </div>
       </main>

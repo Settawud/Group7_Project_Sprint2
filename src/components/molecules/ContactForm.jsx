@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function ContactForm({ value, onChange }) {
+export default function ContactForm({ value = { name: "", phone: "" }, onChange }) {
   const handleChange = (e) => {
     const { name, value: inputValue } = e.target;
 

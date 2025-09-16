@@ -10,6 +10,7 @@ import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { ValueContext } from "../context/ValueContext";
 import { api } from "../lib/api";
 
+
 export default function HomePage() {
   const navigate = useNavigate();
   const { addToCart } = useContext(ValueContext) || {};
@@ -25,6 +26,7 @@ export default function HomePage() {
   const [popOffset, setPopOffset] = useState(0);
   const popLimit = 4;
   const [categoryCounts, setCategoryCounts] = useState({ Chairs: 0, Tables: 0, Accessories: 0 });
+  
   useEffect(() => {
     const obs = new IntersectionObserver(
       ([entry]) => setVpVisible(entry.isIntersecting),
@@ -81,6 +83,7 @@ export default function HomePage() {
     })();
     return () => { alive = false; };
   }, []);
+
 
   function scrollCarousel(direction = 1) {
     const el = carouselRef.current;
@@ -254,6 +257,7 @@ export default function HomePage() {
                     href={p.href}
                     onAdd={() => navigate(p.href)}
                     trial={p.trial}
+                    id={p._id}
                   />
                 </div>
               ))}
@@ -384,6 +388,8 @@ export default function HomePage() {
       </div>
       </main>
       <Footer />
+
+
     </div>
   );
 }

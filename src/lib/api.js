@@ -42,6 +42,24 @@ export async function postForm(path, formData, opts = {}) {
   return data;
 }
 
+export async function patchForm(path, formData, opts = {}) {
+  const { data } = await api.patch(path, formData, opts);
+  // const { data } = await api.patch(path, formData, {
+  //   ...opts,
+  //   headers: { ...(opts.headers || {}), "Content-Type": "multipart/form-data" },
+  // });
+  return data;
+}
+
+export async function putForm(path, formData, opts = {}) {
+  const { data } = await api.put(path, formData, opts);
+  // const { data } = await api.patch(path, formData, {
+  //   ...opts,
+  //   headers: { ...(opts.headers || {}), "Content-Type": "multipart/form-data" },
+  // });
+  return data;
+}
+
 /**
  * Generic function to upload form data or JSON.
  * Handles different HTTP methods.
@@ -83,3 +101,33 @@ export const uploadForm = async (method, url, data) => {
     throw error;
   }
 };
+
+
+// const thumbnailFormData = new FormData();
+// const publicIdsToKeep = [];
+
+// formData.thumbnails.forEach(fileOrUrl => {
+//     if (fileOrUrl instanceof File) {
+//         // Append new files to the FormData
+//         thumbnailFormData.append("images", fileOrUrl);
+//     } else if (typeof fileOrUrl === 'string') {
+//         // Extract the publicId from the image URL and add it to the list
+//         const publicId = extractPublicIdFromUrl(fileOrUrl);
+//         if (publicId) {
+//             publicIdsToKeep.push(publicId);
+//         }
+//     }
+// });
+
+// // Append the list of public IDs to the FormData
+// thumbnailFormData.append("currentPublicIds", JSON.stringify(publicIdsToKeep));
+
+// // Send the PATCH request to the thumbnail API
+// try {
+//     // This is the corrected line. We use 'patch' to update the thumbnails.
+//     await uploadForm("patch", `/products/${currentProductId}/images`, thumbnailFormData);
+
+// } catch (err) {
+//     console.warn("Thumbnail update failed:", err);
+//     alert("Some thumbnails failed to update.");
+// }

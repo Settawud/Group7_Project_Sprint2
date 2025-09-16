@@ -3,6 +3,7 @@ import Button from "../atoms/Button";
 import Stars from "../atoms/Stars";
 import { Link } from "react-router-dom";
 
+
 function normalizePublicImage(img) {
   if (!img) return null;
   // Support object form { url }
@@ -22,8 +23,10 @@ function normalizePublicImage(img) {
   return `/images/${base}`;
 }
 
-export default function ProductCard({ img, name, price, rating = 0, onAdd, href, trial = false }) {
+export default function ProductCard({ img, name, price, rating = 0, onAdd, href, trial = false, id }) {
   const imgSrc = normalizePublicImage(img);
+    
+
   return (
     <Card className="p-0 ring-1 ring-black/5 hover:shadow-md transition relative">
       {trial && (
@@ -80,7 +83,7 @@ export default function ProductCard({ img, name, price, rating = 0, onAdd, href,
         <Stars value={rating} />
         <div className="flex items-center justify-between pt-2">
           <div className="font-semibold text-stone-800 mr-2">฿{price?.toLocaleString?.() ?? price}</div>
-          <Button onClick={onAdd} aria-label="add to cart" disabled={!onAdd}>add to cart</Button>
+          <Button onClick={(onAdd)} aria-label="add to cart" disabled={!onAdd}>add to cart</Button>
         </div>
       </div>
     </Card>

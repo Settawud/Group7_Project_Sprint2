@@ -149,6 +149,9 @@ export const AdminProductManagement = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [products, setProducts] = useState([]);
+  const [page, setPage] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const itemsPerPage = 9
 
 
   // จำลองการโหลดข้อมูลจาก backend
@@ -156,7 +159,13 @@ export const AdminProductManagement = () => {
     //setProducts(mockProducts);
     const fetchProduct = async () => {
           try {
-      const productResponse = await api.get("/products")
+      const productResponse = await api.get("/products", {
+      params: {
+        page
+      },
+      })
+
+      setTotalItems(productResponse.data.total);
       setProducts(productResponse.data.items)
             
     } catch (error) {
@@ -166,7 +175,9 @@ export const AdminProductManagement = () => {
 
     fetchProduct()
 
-  }, []);
+  }, [page]);
+
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
 
   // ลบจาก state (mock)
   const handleDelete = async (id) => {
@@ -232,7 +243,7 @@ export const AdminProductManagement = () => {
                     >
                       <td className="p-4">
                         <img
-                          src={p.thumbnails?.[0]?.url || "https://via.placeholder.com/100"}
+                          src={p.thumbnails?.[0]?.url}
                           alt={p.name}
                           className="w-16 h-16 object-cover rounded-lg border"
                         />
@@ -261,7 +272,29 @@ export const AdminProductManagement = () => {
               </tbody>
             </table>
           </div>
+<div className="flex justify-center mt-8">
+  {Array.from({ length: totalPages }, (_, index) => (
+    <button
+      key={index}
+      onClick={() => setPage(index + 1)}
+      // Apply conditional classes for active vs. inactive buttons
+      className={`
+        px-4 py-2 mx-1
+        text-sm font-medium
+        rounded-md transition-colors duration-200
+        ${
+          page === index + 1
+            ? 'bg-sage-green text-white shadow-md' // Active button styles
+            : 'bg-gray-200 text-gray-700 hover:bg-gray-300' // Inactive button styles
+        }
+      `}
+    >
+      {index + 1}
+    </button>
+  ))}
+</div>
         </div>
+
       </div>
     </div>
   );
