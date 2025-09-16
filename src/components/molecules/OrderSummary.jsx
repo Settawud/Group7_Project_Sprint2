@@ -93,7 +93,7 @@ export default function OrderSummary({ cart, coupon, setCoupon, onConfirmOrder, 
                   <div className="text-gray-500 text-xs">
                     {item.trial && (
                       <span className="text-amber-600 font-medium mr-2">
-                        สินค้าทดลองใช้ (7 วัน)
+                        Trial Product (7 days)
                       </span>
                     )}
                     Color: {item.color} <br />
