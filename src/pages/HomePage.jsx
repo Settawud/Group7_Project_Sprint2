@@ -190,7 +190,7 @@ export default function HomePage() {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 py-3 sm:divide-x divide-stone-200/60">
               <div className="flex items-center justify-center gap-2">
                 <Truck className="w-5 h-5 text-[#B29675]" />
-                <span className="text-sm text-[#49453A]">Nationwide Shipping</span>
+                <span className="text-sm text-[#49453A]">Free Shipping</span>
               </div>
               <div className="flex items-center justify-center gap-2">
                 <ShieldCheck className="w-5 h-5 text-[#B29675]" />
@@ -198,7 +198,7 @@ export default function HomePage() {
               </div>
               <div className="flex items-center justify-center gap-2">
                 <Headphones className="w-5 h-5 text-[#B29675]" />
-                <span className="text-sm text-[#49453A]">Expert Support</span>
+                <span className="text-sm text-[#49453A]">A 7-Day Trial</span>
               </div>
               <div className="flex items-center justify-center gap-2">
                 <Wrench className="w-5 h-5 text-[#B29675]" />
