@@ -12,6 +12,8 @@
   "dependencies": {
     "@tailwindcss/vite": "^4.1.11",
     "axios": "^1.12.1",
+    "cloudinary-build-url": "^0.2.4",
+    "dayjs": "^1.11.18",
     "lucide-react": "^0.541.0",
     "rc-slider": "^11.1.8",
     "react": "^19.1.1",

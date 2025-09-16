@@ -2,7 +2,18 @@ import React from "react";
 
 export default function ContactForm({ value, onChange }) {
   const handleChange = (e) => {
-    onChange({ ...value, [e.target.name]: e.target.value });
+    const { name, value: inputValue } = e.target;
+
+    if (name === "phone") {
+      // Allow only digits
+      const digitsOnly = inputValue.replace(/\D/g, "");
+      // And limit to 10 characters
+      if (digitsOnly.length <= 10) {
+        onChange({ ...value, [name]: digitsOnly });
+      }
+    } else {
+      onChange({ ...value, [name]: inputValue });
+    }
   };
 
   return (
@@ -17,15 +28,19 @@ export default function ContactForm({ value, onChange }) {
           onChange={handleChange}
           className="w-full px-4 py-2 rounded-xl border border-gray-300
                      focus:outline-none focus:ring-1 focus:ring-[#B29674] bg-white"
+          required
         />
         <input
-          type="text"
+          type="tel"
           name="phone"
-          placeholder="Phone"
+          placeholder="Phone (10 digits)"
           value={value.phone || ""}
           onChange={handleChange}
           className="w-full px-4 py-2 rounded-xl border border-gray-300
                      focus:outline-none focus:ring-1 focus:ring-[#B29674] bg-white"
+          required
+          pattern="^0\d{9}$"
+          title="Phone number must be 10 digits and start with 0."
         />
       </div>
     </div>

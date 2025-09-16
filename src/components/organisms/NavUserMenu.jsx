@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { User, MapPin, ShoppingBag, CreditCard, LogOut, Wallet } from "lucide-react";
+import { User, MapPin, ShoppingBag, CreditCard, LogOut, Wallet, Store } from "lucide-react";
+import { ValueContext } from "../../context/ValueContext";
 
 function Icon({ children }) {
   return <span className="inline-flex h-5 w-5 items-center justify-center">{children}</span>;
@@ -13,6 +14,8 @@ export default function NavUserMenu({
   const [open, setOpen] = useState(false);
   const btnRef = useRef(null);
   const menuRef = useRef(null);
+
+  const {isAdmin} = useContext(ValueContext)
 
   // ปิดเมื่อคลิกนอก/กด Esc
   useEffect(() => {
@@ -74,9 +77,14 @@ export default function NavUserMenu({
           </li>
           <li>
             <Link to="/orderhistory" onClick={() => setOpen(false)} className="flex items-center gap-3 rounded-xl px-3 py-2 hover:bg-stone-100" role="menuitem">
-              <Icon><Wallet className="w-4 h-4" /></Icon> <span>Purchase</span>
+              <Icon><Wallet className="w-4 h-4" /></Icon> <span>Order History</span>
             </Link>
           </li>
+          {isAdmin && <li>
+            <Link to="/adminproductmanagement" onClick={() => setOpen(false)} className="flex items-center gap-3 rounded-xl px-3 py-2 hover:bg-stone-100" role="menuitem">
+              <Icon><Store className="w-4 h-4" /></Icon> <span>Product Management</span>
+            </Link>
+          </li>}
           {/* <li>
             <Link to="/cart" onClick={() => setOpen(false)} className="flex items-center gap-3 rounded-xl px-3 py-2 hover:bg-stone-100" role="menuitem">
               <Icon><ShoppingBag className="w-4 h-4" /></Icon> <span>Cart</span>

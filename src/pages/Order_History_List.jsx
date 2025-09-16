@@ -44,7 +44,7 @@ const Order_History_List = () => {
             };
           }),
           total: order.subtotalAmount,
-        })).reverse();
+        }));
 
         setOrders(mappedOrders);
       } catch (err) {

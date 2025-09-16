@@ -18,8 +18,10 @@ export const ValueProvider = ({ children }) => {
 
   const isAuth = !!user;
 
+   const [isAdmin, setIsAdmin] = useState(false);
+
   const login = (payload) => {
-    const u = payload || { name: "User", email: "user@example.com" };
+    const u = payload || { name: "User", email: "user@example.com", role: "user"};
     setUser(u);
     try { localStorage.setItem("user", JSON.stringify(u)); } catch {}
   };
@@ -55,8 +57,8 @@ export const ValueProvider = ({ children }) => {
 
 
   async function addToCart(productId, variantId, quantity, color) {
-    if (!color || !productId) {
-      return toast.warning("Please select a color.")
+    if (!productId) {
+      return toast.warning("Product not found.")
     }
       try {
 
@@ -160,7 +162,8 @@ const removeChecked = async (cart) => {
         cartCount,
         isModalOpen,
         setIsModalOpen,
-        product, setProduct
+        product, setProduct,
+        isAdmin, setIsAdmin
       }}
     >
       {children}
