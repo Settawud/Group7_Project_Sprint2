@@ -77,7 +77,7 @@ export default function OrderconfirmPage() {
             ✅ Order Successful!
           </h1>
           <p className="text-yellow-700 font-bold mt-2">
-            Thank you! Your order has been placed successfully
+            Thank you! Your order has been placed successfully.
           </p>
           <p className="text-lg font-semibold text-yellow-800 mt-1">
             Order Number: {order?.orderNumber || "-"}
@@ -165,7 +165,7 @@ export default function OrderconfirmPage() {
                 </span>
               </div>
               <div className="flex justify-between">
-                <span>InstallationFee</span>
+                <span>Assembly Service Fee</span>
                 <span className="font-medium">
                   ฿{installationFee.toLocaleString()}
                 </span>
@@ -179,7 +179,7 @@ export default function OrderconfirmPage() {
             {/* Total */}
             <div className="flex justify-between items-center border-t-2 border-gray-300 pt-4">
               <span className="text-xl font-bold text-gray-800">
-                TotalAmount
+                Total Amount
               </span>
               <span className="text-2xl font-extrabold text-black">
                 ฿{totalAmount.toLocaleString()}
@@ -209,7 +209,7 @@ export default function OrderconfirmPage() {
                 <p className="text-gray-800">{order?.phone || "-"}</p>
               </div>
               <div>
-                <p className="font-semibold text-lg mb-1">Date / Time</p>
+                <p className="font-semibold text-lg mb-1">Order created time</p>
                 <p className="text-gray-800">
                   {formatDateTimeTH(order.updatedAt)}
                 </p>
