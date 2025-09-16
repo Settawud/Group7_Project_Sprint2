@@ -27,7 +27,7 @@ const Page_Product_List = () => {
   const [hydrated, setHydrated] = useState(false);
   const [totalPages, setTotalPages] = useState(1);
 
-  const [sort, setSort] = useState("Price High to Low");
+  const [sort, setSort] = useState("New In");
 
   const handleFiltersChange = (updater) => {
     setPage(1);
@@ -86,9 +86,9 @@ const Page_Product_List = () => {
   }, [searchParams]);
 
   const getSortQuery = (sortValue) => {
-    if (sortValue === "Price High to Low") return "";
-    if (sortValue === "Price Low to High") return "";
-    if (sortValue === "New In") return "";
+    if (sortValue === "Price High to Low") return "variants.price:desc";
+    if (sortValue === "Price Low to High") return "variants.price:asc";
+    if (sortValue === "New In") return "createdAt:desc";
     return null;
   };
 
@@ -105,34 +105,36 @@ const Page_Product_List = () => {
         if (eng) query.category = eng;
       }
 
+      // ✅ AVAILABILITY
       if (filters.availability === "In Stock") {
         query.availability = "instock";
       }
 
+      // ✅ PRICE
       if (filters.price) {
         query.minPrice = filters.price[0];
         query.maxPrice = filters.price[1];
       }
 
+      // ✅ SORT
       const sortQuery = getSortQuery(sort);
       if (sortQuery) {
         query.sort = sortQuery;
       }
 
+      // ✅ SEARCH
       if (search.trim()) {
         query.search = search.trim();
       }
 
       // Sync URL query string with current filters
       const current = new URLSearchParams(searchParams);
-
       const urlParams = { ...query };
 
-      // Keep label like Chairs(เก้าอี้) in URL
       if (filters.category) {
         urlParams.category = filters.category;
       } else {
-        current.delete("category"); // ✅ Important fix here
+        current.delete("category");
       }
 
       Object.entries(urlParams).forEach(([k, v]) => current.set(k, String(v)));
@@ -145,6 +147,7 @@ const Page_Product_List = () => {
         const { data } = await api.get("/products", { params: query });
         const items = Array.isArray(data?.items) ? data.items : [];
 
+        // ✅ DON'T sort here anymore. Already sorted from backend.
         const withPrice = items.map((p) => ({
           ...p,
           __minPrice: Array.isArray(p.variants) && p.variants.length
@@ -152,14 +155,7 @@ const Page_Product_List = () => {
             : 0,
         }));
 
-        let sorted = withPrice.slice();
-        if (sort === "Price High to Low") {
-          sorted.sort((a, b) => (b.__minPrice || 0) - (a.__minPrice || 0));
-        } else if (sort === "Price Low to High") {
-          sorted.sort((a, b) => (a.__minPrice || 0) - (b.__minPrice || 0));
-        }
-
-        setProducts(sorted);
+        setProducts(withPrice);
         setTotalPages(Math.ceil((data.total || 0) / 9));
       } catch (err) {
         console.error("Error fetching products:", err);
