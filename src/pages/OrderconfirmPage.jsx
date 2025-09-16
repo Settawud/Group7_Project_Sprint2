@@ -217,39 +217,6 @@ export default function OrderconfirmPage() {
             </div>
           </div>
         </main>
-
-        {/* Next Steps / Call to Action */}
-        <section className="max-w-4xl mx-auto mt-8 p-6 bg-white rounded-xl shadow-lg border border-gray-200 text-center space-y-4">
-          <h2 className="text-xl font-bold text-gray-800">Next Steps</h2>
-          <p className="text-gray-700">
-            You will receive an email confirmation shortly with your order details.
-          </p>
-          <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <button
-              onClick={() => navigate("/products")}
-              className="bg-[#B29674] text-white py-3 px-6 rounded-lg shadow-md hover:bg-[#A88F6F] transition"
-            >
-              Continue Shopping
-            </button>
-            <button
-              onClick={() => navigate("/orderhistory")}
-              className="bg-gray-200 text-gray-800 py-3 px-6 rounded-lg shadow-md hover:bg-gray-300 transition"
-            >
-              View Order History
-            </button>
-          </div>
-        </section>
-
-        {/* Customer Support Info */}
-        <section className="max-w-4xl mx-auto mt-8 p-6 bg-white rounded-xl shadow-lg border border-gray-200 text-center space-y-2">
-          <h2 className="text-xl font-bold text-gray-800">Need Help?</h2>
-          <p className="text-gray-700">
-            If you have any questions about your order, please contact us:
-          </p>
-          <p className="text-gray-700 font-medium">
-            Email: support@example.com | Phone: +123 456 7890
-          </p>
-        </section>
       </div>
       <Footer />
     </div>
