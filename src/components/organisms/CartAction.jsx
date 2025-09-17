@@ -53,11 +53,7 @@ const CartAction = ({ className = "" }) => {
     if (countItemChecked) {
         navigate('/checkout')
     } else {
-<<<<<<< HEAD
       toast.warning("Please select at least one item")
-=======
-      toast.error("Please select at least one item")
->>>>>>> Develop
       }
     }
     

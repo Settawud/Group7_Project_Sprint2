@@ -53,7 +53,7 @@ export default function OrderSummary({ cart, coupon, setCoupon, onConfirmOrder, 
 
     if (matched.type === "percentage" || matched.type === "PERCENT") {
       discount = Math.floor((subtotal * matched.value) / 100);
-    } else if (matched.type === "amount" || matched.type === "AMOUNT") {
+    } else if (matched.type === "fixed" || matched.type === "fixed") {
       discount = matched.value;
     }
 
