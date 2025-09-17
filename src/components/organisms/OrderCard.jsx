@@ -9,8 +9,6 @@ const OrderCard = ({ order }) => {
     navigate(`/orderhistory/${order._id}`);
   };
 
-  console.log(order)
-
   return (
     <div
       onClick={handleClick}

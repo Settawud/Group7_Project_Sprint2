@@ -7,6 +7,7 @@ import ProductContent from "../components/organisms/ProductContent";
 import ScrollableThumbnails from "../components/organisms/ScrollableThumbnails";
 import UsersReviewSection from "../components/organisms/UsersReviewSection";
 import Navbar from "../components/organisms/Navbar";
+import Container from "../components/layout/Container";
 
 const Page_Product_Detail = () => {
   const { id } = useParams();

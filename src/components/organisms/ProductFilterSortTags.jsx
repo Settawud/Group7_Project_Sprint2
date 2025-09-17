@@ -211,7 +211,7 @@ const ProductFilterSortTags = ({ filters, setFilters, sort, setSort }) => {
 
   return (
     <div>
-      <div className="mb-6 flex flex-col md:flex-row items-center justify-between gap-4 border-b pb-4">
+      <div className="mb-6 flex flex-col sm:flex-row items-center justify-between gap-4 border-b pb-4">
         <FilterProduct filters={filters} setFilters={setFilters} />
         <SortProduct sort={sort} setSort={setSort} />
       </div>

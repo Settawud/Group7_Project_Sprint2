@@ -9,6 +9,7 @@ import OrderHistory from "../components/organisms/OrderHistory";
 import Sidebar from "../components/organisms/Sidebar";
 import Navbar from "../components/organisms/Navbar";
 import Footer from "../components/organisms/Footer";
+import Container from "../components/layout/Container";
 
 const Order_History_Detail = () => {
   const { id } = useParams();
@@ -40,6 +41,7 @@ const Order_History_Detail = () => {
       <Navbar />
       <div className="flex flex-col lg:flex-row gap-8 mx-auto">
         <Sidebar />
+        <Container>
         <main className="flex-1">
           <OrderSummarySection
             orderNumber={order.orderNumber}
@@ -58,6 +60,7 @@ const Order_History_Detail = () => {
           />
           <OrderHistory orders={order.orderHistory} />
         </main>
+        </Container>
       </div>
       <Footer />
     </div>

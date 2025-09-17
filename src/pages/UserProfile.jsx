@@ -42,7 +42,7 @@ export default function UserProfile() {
   return (
     <div className="min-h-screen flex flex-col bg-[#faf6f1]">
       <Navbar />
-      <div className="flex flex-1">
+      <div className="flex flex-1 flex-col lg:flex-row">
         <Sidebar />
         <main className="flex-1 py-10 px-4">
           <div className="max-w-4xl mx-auto space-y-10">
