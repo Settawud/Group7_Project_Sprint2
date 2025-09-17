@@ -199,38 +199,51 @@ export const ProductPage = () => {
     };
 
     const handleVariantChange = (e, index) => {
-        const { name, value, type, checked } = e.target;
-        
-        let newVariants = [...formData.variants];
-        const currentVariant = newVariants[index];
+    
+    toast.dismiss()
+    const { name, value, type, checked } = e.target;
+    
+    let newVariants = [...formData.variants];
+    const currentVariant = newVariants[index];
 
-        // Store the original colorId before the change is applied
-        const originalColorId = currentVariant.colorId;
+    // Store the original colorId before the change is applied
+    const originalColorId = currentVariant.colorId;
 
-        // Apply the change to the newVariants array
-        currentVariant[name] = type === "checkbox" ? checked : type === "number" ? Number(value) : value;
+    // Apply the change to the newVariants array
+    currentVariant[name] = type === "checkbox" ? checked : type === "number" ? Number(value) : value;
 
-        // NEW LOGIC: Check if the color of a standard product has been changed
-        if (name === "colorId" && !currentVariant.trial) {
-            // Count how many variants with the originalColorId still exist
-            const variantsWithOriginalColor = newVariants.filter(
-                (v, i) => v.colorId === originalColorId
+    // NEW LOGIC: Check if the color of a standard product has been changed
+    if (name === "colorId" && !currentVariant.trial) {
+        // Check for duplicate colors among other non-trial products
+        const isDuplicate = newVariants.filter(
+            (v, i) => i !== index && v.colorId === value && !v.trial
+        ).length > 0;
+
+        if (isDuplicate) {
+            toast.warning("This color is already existed in another variant. Please choose another color.");
+            // Revert the color change by setting it back to the original color
+            currentVariant.colorId = "";
+            setFormData({ ...formData, variants: newVariants });
+            return; // Stop further execution
+        }
+
+        // Existing logic for removing a trial variant if its parent's color is changed
+        const variantsWithOriginalColor = newVariants.filter(
+            (v, i) => v.colorId === originalColorId
+        );
+
+        if (variantsWithOriginalColor.length === 1 && variantsWithOriginalColor[0].trial) {
+            const trialVariantIndex = newVariants.findIndex(
+                v => v.colorId === originalColorId && v.trial
             );
-
-            // If there's only one remaining variant of that color,
-            // and it is a trial product, we should remove it.
-            if (variantsWithOriginalColor.length === 1 && variantsWithOriginalColor[0].trial) {
-                const trialVariantIndex = newVariants.findIndex(
-                    v => v.colorId === originalColorId && v.trial
-                );
-                if (trialVariantIndex !== -1) {
-                    newVariants = newVariants.filter((_, i) => i !== trialVariantIndex);
-                }
+            if (trialVariantIndex !== -1) {
+                newVariants = newVariants.filter((_, i) => i !== trialVariantIndex);
             }
         }
-        
-        setFormData({ ...formData, variants: newVariants });
-    };
+    }
+    
+    setFormData({ ...formData, variants: newVariants });
+};
 
     const handleVariantImageChange = (e, index) => {
         const file = e.target.files[0] || null;
@@ -257,6 +270,12 @@ export const ProductPage = () => {
 
     // --- NEW: Trial Product Logic ---
     const handleAddTrialVariant = (baseVariant) => {
+
+        if (!baseVariant.colorId) {
+            toast.warning('Please select a color')
+            return;
+        }
+
         const originalPrice = Number(baseVariant.price || 0);
         // Calculate 10% of the original price, ensuring it's not less than 0.01 if original price is very small
         const trialPrice = originalPrice > 0 ? Math.max(originalPrice * 0.10, 0.01) : 0.01;
@@ -267,7 +286,7 @@ export const ProductPage = () => {
             colorId: baseVariant.colorId, // Keep the original color ID
             price: trialPrice.toFixed(2), // Set to 10% of the price, formatted to 2 decimal places
             quantityInStock: "", // Trial products typically don't have stock managed this way
-            image: null, // Reset image for trial variant
+            image: baseVariant.image, // Reset image for trial variant
         };
 
         setFormData(prevData => ({
@@ -336,7 +355,7 @@ export const ProductPage = () => {
                 name: formData.name,
                 description: formData.description,
                 category: formData.category,
-                trial: !!formData.trial,
+                trial: variants.some((v) => v.trial),
                 tags,
                 material: formData.material,
                 dimension,
@@ -509,7 +528,7 @@ export const ProductPage = () => {
                                 </div>
 
                                 {/* Trial Checkbox */}
-                                <div className="flex items-center space-x-2 mt-4">
+                                {/* <div className="flex items-center space-x-2 mt-4">
                                     <input
                                         type="checkbox"
                                         name="trial"
@@ -518,7 +537,7 @@ export const ProductPage = () => {
                                         className="h-4 w-4"
                                     />
                                     <label className="text-gray-700">Trial product</label>
-                                </div>
+                                </div> */}
 
                                 {/* Dimensions (dimension) */}
                                 <div>
@@ -632,7 +651,7 @@ export const ProductPage = () => {
                                                         disabled={variant.trial} // Disable color selection for trial products
                                                         className="flex-1 min-w-0 h-12 px-4 text-base border-2 border-[#B29674]/50 rounded-2xl focus:ring-2 focus:ring-[#B29674]/40 disabled:bg-gray-200 disabled:cursor-not-allowed"
                                                     >
-                                                        <option value="" disabled>Select color (colorId)</option>
+                                                        <option value="" disabled>Select color</option>
                                                         {colors.map((c) => (
                                                             <option key={c._id} value={c._id}>
                                                                 {c.name_th || c.name_en || c.hex || c._id}
@@ -811,7 +830,7 @@ export const ProductPage = () => {
                                                     }}
                                                     onMouseLeave={hideTooltip}
                                                 >
-                                                   + Add Trial Product
+                                                   {hasTrialVariant(variant.colorId) ? "Trial Product for this color added" : "+ Add Trial Product for this color"}
                                                 </button>
                                             </div>
                                         )}

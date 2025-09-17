@@ -2,6 +2,7 @@ import { ValueContext } from './ValueContext';
 import { useMemo, useState, useEffect } from "react";
 import { Toaster, toast } from 'sonner';
 import { api } from '../lib/api';
+import { useNavigate } from 'react-router-dom';
 
 export const ValueProvider = ({ children }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -18,7 +19,8 @@ export const ValueProvider = ({ children }) => {
 
   const isAuth = !!user;
 
-   const [isAdmin, setIsAdmin] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  //const navigate = useNavigate()
 
   const login = (payload) => {
     const u = payload || { name: "User", email: "user@example.com", role: "user"};
@@ -83,7 +85,7 @@ export const ValueProvider = ({ children }) => {
         next[index] = { ...next[index], quantity: (next[index].quantity || 0) + quantity };
        
         return next;
-      }
+        }
       
       return [
         ...prev,

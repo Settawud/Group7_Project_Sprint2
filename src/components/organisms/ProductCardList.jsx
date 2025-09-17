@@ -1,13 +1,13 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ValueContext } from "../../context/ValueContext";
 import { useContext } from "react";
 
 const ProductCardList = ({ _id, imageSrc, title, tag, size, price, trial = false }) => {
 
   const { isModalOpen, setIsModalOpen, setProduct } = useContext(ValueContext)
-
+  
     const clickAddToCart = (id) => {
-    setIsModalOpen(true)
+      setIsModalOpen(true)
     //console.log(id)
     setProduct(id)
   }

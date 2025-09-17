@@ -1,6 +1,8 @@
 import { useContext, useState, useEffect } from "react";
 import { ValueContext } from "../../context/ValueContext";
 import { api } from "../../lib/api";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 function normalizePublicImage(p) {
   if (!p) return null;
@@ -36,6 +38,7 @@ const AddToCartModal = ({ product }) => {
 
   // Check if product has any trial variants
   const hasTrial = variants.some((variant) => variant.trial);
+
 
   // Fetch color hex codes for variants on mount
   useEffect(() => {
@@ -83,6 +86,7 @@ const AddToCartModal = ({ product }) => {
 
   const quantityInStock = currentVariant.quantityInStock || 0;
   const currentPrice = currentVariant.price || 0;
+
 
   return (
     <div className="flex flex-col gap-3 text-black">

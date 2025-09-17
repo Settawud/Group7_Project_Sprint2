@@ -22,6 +22,7 @@ import { ValueContext } from "./context/ValueContext";
 import { Toaster } from "sonner";
 import { AdminProductManagement } from "./pages/AdminProductManagement";
 import ScrollToTop from "../ScrollToTop";
+import AddToCartModal from "./components/organisms/AddToCartModal";
 
 export default function App() {
   return (
@@ -51,6 +52,7 @@ export default function App() {
         <Route path="/pageproductdetail" element={<Page_Product_Detail />} />
         <Route path="/pageproductlist" element={<Page_Product_List />} />
         <Route path="/products/edit/:id" element={<ProductPage />} />
+        <Route path="/shopnow" element={<AddToCartModal />} />
         
 
         {/* TODO: category pages, product detail, cart, etc. */}
