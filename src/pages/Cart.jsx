@@ -12,55 +12,40 @@ const Cart = () => {
 
   const { cart, setCart } = useContext(ValueContext)
 
-  const getProduct = async (productId, variantId) => {
-    try {
-      const productData = await api.get(`/products/${productId}`)
-      const product = productData.data.item
-      const variant = product.variants.find(variant => variant._id === variantId)
+  // const getProduct = async (productId, variantId) => {
+  //   try {
+  //     const productData = await api.get(`/products/${productId}`)
+  //     const product = productData.data.item
+  //     const variant = product.variants.find(variant => variant._id === variantId)
 
-      if (!variant) {
-        //console.warn(`Variant ${variantId} not found for product ${productId}`);
-        console.warn(`Variant not found for product `);
-      return null; 
-    }
-      const colorData = await api.get(`/colors/${variant.colorId}`)
+  //     if (!variant) {
+  //       //console.warn(`Variant ${variantId} not found for product ${productId}`);
+  //       console.warn(`Variant not found for product `);
+  //     return null; 
+  //   }
+  //     const colorData = await api.get(`/colors/${variant.colorId}`)
 
-      return [product.name, variant, colorData.data.item.name_en]
-          } catch (error) {
-            console.error(`Error fetching details for product:`, error);
-            return null;
+  //     return [product.name, variant, colorData.data.item.name_en]
+  //         } catch (error) {
+  //           console.error(`Error fetching details for product:`, error);
+  //           return null;
             
-          }
-        }
+  //         }
+  //       }
   
   useEffect(() => {
     async function fetchCart() {
       try {
           
         const cartData = await api.get("/cart")
-        //console.log(data)
         
-        const cart = cartData.data.cart.items
-        const cartPromise = cart.map(async (item) => {
-          const [name, variant, color] = await getProduct(item.productId, item.variantId)
-          if (name && variant && color) {
-             return { productId: item.productId, variantId: item.variantId, name: name, trial: variant.trial, color: color, price: Number(variant.price), image: variant.image.url, quantity: item.quantity, checked: true }
-          }
-          
-          return null;
-
-        })
-
-        const settleCart = await Promise.all(cartPromise)
+        const cart = cartData.data.cart.map(item => ({...item, checked: true, }));
         
-        const finalCart = settleCart.filter(item => item !== null)
-
-        //console.log(finalCart)
-
-        setCart(finalCart)
+        //console.log(cart)
+        setCart(cart)
       }
       catch (error) {
-        console.error("Failed to fetch note:", error);
+        console.error("Failed to fetch cart:", error);
       
       }
     }

@@ -92,8 +92,8 @@ const CartAction = ({ className = "" }) => {
         </div>
 
         <div className="flex flex-col sm:flex-row sm:mx-4 mx-2">
-          <p className="mr-4 my-5 hidden sm:block text-[16px]">Total ฿{total}</p>
-          <p className="mr-2 mt-2 sm:hidden text-[16px] ">฿{total}</p>
+          <p className="mr-4 my-5 hidden sm:block text-[16px]">Total ฿{total.toLocaleString()}</p>
+          <p className="mr-2 mt-2 sm:hidden text-[16px] ">฿{total.toLocaleString()}</p>
 
           <Button variant="primary" className="py-2 px-3 sm:my-2" onClick={startOrder}>
             Checkout
