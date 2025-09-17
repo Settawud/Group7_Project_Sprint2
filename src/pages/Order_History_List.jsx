@@ -10,12 +10,11 @@ import Footer from "../components/organisms/Footer";
 
 const Order_History_List = () => {
   const [orders, setOrders] = useState([]);
-  const [status, setStatus] = useState("All");
 
   const [filters, setFilters] = useState({
     orderNumber: "",
     keyword: "",
-    status: "",
+    status: "All",
     dateFrom: "",
     dateTo: "",
   });
@@ -31,7 +30,7 @@ const Order_History_List = () => {
           _id: order._id,
           orderId: order.orderNumber,
           date: new Date(order.createdAt).toISOString().split("T")[0],
-          status: order.orderStatus,
+          status: order.shipping?.deliveryStatus || "Pending",
           items: order.items.map((item) => {
             const variant = item.variant;
             return {
@@ -63,7 +62,10 @@ const Order_History_List = () => {
   }, []);
 
   const filteredOrders = orders.filter((order) => {
-    if (status !== "All" && order.status !== status) return false;
+
+    if (filters.status && filters.status !== "All" && order.status !== filters.status) {
+      return false;
+    }
 
     if (
       filters.orderNumber &&
@@ -93,7 +95,12 @@ const Order_History_List = () => {
         <main className="flex-1 py-10 px-4">
           <div className="max-w-4xl mx-auto space-y-10">
             <FilterOrder onFilterChange={setFilters} />
-            <StatusFilter currentStatus={status} onStatusChange={setStatus} />
+            <StatusFilter
+              currentStatus={filters.status}
+              onStatusChange={(newStatus) =>
+                setFilters((prev) => ({ ...prev, status: newStatus }))
+              }
+            />
 
             {filteredOrders.length > 0 ? (
               filteredOrders.map((order) => (
