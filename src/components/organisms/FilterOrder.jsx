@@ -4,23 +4,22 @@ const FilterOrder = ({ onFilterChange }) => {
   const [form, setForm] = useState({
     orderNumber: "",
     keyword: "",
-    status: "",
     dateFrom: "",
     dateTo: "",
   });
 
   const handleChange = (e) => {
     const { id, value } = e.target;
-    const newForm = { ...form, [id]: value };
-    setForm(newForm);
+    setForm((prev) => ({ ...prev, [id]: value }));
   };
 
-  const handleSearch = () => {
+  const handleSearch = (e) => {
+    e.preventDefault();
     onFilterChange(form);
   };
 
   return (
-    <div className="rounded text-sm text-[#A8A8A8]">
+    <form onSubmit={handleSearch} className="rounded text-sm text-[#A8A8A8]">
       <div className="flex flex-col lg:flex-row justify-end items-stretch lg:items-end gap-4 pt-4">
         <div className="flex flex-col lg:w-64">
           <label htmlFor="orderNumber" className="mb-1">Order Number</label>
@@ -70,14 +69,14 @@ const FilterOrder = ({ onFilterChange }) => {
 
         <div className="w-full lg:w-auto">
           <button
-            onClick={handleSearch}
+            type="submit"
             className="w-full lg:w-auto rounded bg-[#B29675] px-6 py-3 text-white hover:bg-[#9e8460] transition-colors duration-200"
           >
             Search
           </button>
         </div>
       </div>
-    </div>
+    </form>
   );
 };
 
