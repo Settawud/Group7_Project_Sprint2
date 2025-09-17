@@ -157,7 +157,7 @@ const Page_Product_Detail = () => {
   return (
     <div className="bg-[#fefdf9]">
       <Navbar />
-      <div className="flex flex-col lg:flex-row gap-10 mx-auto px-4 py-10">
+      <div className="flex flex-col lg:flex-row gap-10 mx-auto px-4 py-10 max-w-7xl">
         <div className="w-full lg:w-2/3 flex flex-row gap-5">
           <ScrollableThumbnails
             images={images}
