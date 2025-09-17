@@ -218,15 +218,6 @@ export const ProductPage = () => {
         const isDuplicate = newVariants.filter(
             (v, i) => i !== index && v.colorId === value && !v.trial
         ).length > 0;
-
-        if (isDuplicate) {
-            toast.warning("This color is already existed in another variant. Please choose another color.");
-            // Revert the color change by setting it back to the original color
-            currentVariant.colorId = "";
-            setFormData({ ...formData, variants: newVariants });
-            return; // Stop further execution
-        }
-
         // Existing logic for removing a trial variant if its parent's color is changed
         const variantsWithOriginalColor = newVariants.filter(
             (v, i) => v.colorId === originalColorId
@@ -239,6 +230,11 @@ export const ProductPage = () => {
             if (trialVariantIndex !== -1) {
                 newVariants = newVariants.filter((_, i) => i !== trialVariantIndex);
             }
+        }
+        if (isDuplicate) {
+            toast.warning("This color is already existed in another variant. Please choose another color.");
+            // Revert the color change by setting it back to the original color
+            currentVariant.colorId = "";
         }
     }
     
