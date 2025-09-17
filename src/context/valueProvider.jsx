@@ -63,9 +63,9 @@ export const ValueProvider = ({ children }) => {
   const [installChecked, setInstallChecked] = useState(false);
 
 
-  async function addToCart(productId, variantId, quantity, color) {
+  async function addToCart(productId, variantId, quantity, color = '') {
     if (!productId) {
-      return toast.warning("Product not found.")
+      return toast.error("Product not found.")
     }
       try {
 
@@ -77,6 +77,11 @@ export const ValueProvider = ({ children }) => {
           quantity: quantity,
         }
         );
+
+              console.log(isModalOpen)
+        if (isModalOpen) {
+          setIsModalOpen(false)
+        }
 
       setCart((prev) => {
       const index = prev.findIndex((cartItem) => cartItem.variantId === variantId);
@@ -101,7 +106,7 @@ export const ValueProvider = ({ children }) => {
           checked: false,
         },
       ];
-    });
+      });
         
       toast.success('Added to cart', {duration: 1000})
 
