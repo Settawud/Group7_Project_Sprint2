@@ -81,6 +81,7 @@ function mapOrderData(data) {
       name: item.productName,
       quantity: item.variant.quantity,
       unitPrice: item.variant.price,
+      trial: item.variant.trial || false,
     })),
 
     shippingAddress: {

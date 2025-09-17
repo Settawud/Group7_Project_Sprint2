@@ -25,35 +25,40 @@ const OrderCard = ({ order }) => {
       </div>
 
       {order.items.map((item, idx) => {
-        const alreadyRendered = reviewedProducts.has(item.productId);
-        if (!alreadyRendered) reviewedProducts.add(item.productId);
+      const alreadyRendered = reviewedProducts.has(item.productId);
+      if (!alreadyRendered) reviewedProducts.add(item.productId);
 
-        return (
-          <div key={idx}>
-            <div className="flex items-start gap-4 pt-4">
-              <img
-                src={item.image}
-                alt={item.name}
-                className="h-48 w-48 rounded-md border object-cover"
-              />
-              <div className="flex-1 space-y-2">
-                <p className="font-semibold">{item.name}</p>
-                <p className="text-sm text-[#A8A8A8]">Color: {item.color}</p>
-                <p className="text-sm text-[#A8A8A8]">
-                  Quantity: {item.quantity}
-                </p>
-              </div>
-              <p className="text-sm font-semibold">฿{item.price}</p>
+      return (
+        <div key={idx}>
+          <div className="flex items-start gap-4 pt-4">
+            <img
+              src={item.image}
+              alt={item.name}
+              className="h-48 w-48 rounded-md border object-cover"
+            />
+            <div className="flex-1 space-y-2">
+              <p className="font-semibold">
+                {item.name}{" "}
+                {item.trial && (
+                  <span className="ml-2 inline-block rounded bg-yellow-200 px-2 py-0.5 text-xs font-semibold text-yellow-800">
+                    Trial (เช่าระยะเวลา 7 วัน)
+                  </span>
+                )}
+              </p>
+              <p className="text-sm text-[#A8A8A8]">Color: {item.color}</p>
+              <p className="text-sm text-[#A8A8A8]">Quantity: {item.quantity}</p>
             </div>
-
-            {!alreadyRendered && (
-              <div onClick={(e) => e.stopPropagation()}>
-                <ReviewSection productId={item.productId} orderStatus={order.status} />
-              </div>
-            )}
+            <p className="text-sm font-semibold">฿{item.price}</p>
           </div>
-        );
-      })}
+
+          {!alreadyRendered && (
+            <div onClick={(e) => e.stopPropagation()}>
+              <ReviewSection productId={item.productId} orderStatus={order.status} />
+            </div>
+          )}
+        </div>
+      );
+    })}
 
       <div className="pt-4 text-right">
         <p className="text-sm text-gray-500">Subtotal: ฿{order.subtotalAmount}</p>

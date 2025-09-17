@@ -20,11 +20,18 @@ const ProductDetails = ({ products, discountAmount = 0, installationFee = 0 }) =
             </tr>
           </thead>
           <tbody className="bg-white">
-            {products.map(({ id, name, quantity, unitPrice }) => {
+            {products.map(({ id, name, quantity, unitPrice, trial }) => {
               const totalPrice = quantity * unitPrice;
               return (
                 <tr key={id}>
-                  <td className="px-6 py-4 text-left">{name}</td>
+                  <td className="px-6 py-4 text-left">
+                    {name}{" "}
+                    {trial && (
+                      <span className="ml-2 inline-block rounded bg-yellow-200 px-2 py-0.5 text-xs font-semibold text-yellow-800">
+                        Trial (เช่าระยะเวลา 7 วัน)
+                      </span>
+                    )}
+                  </td>
                   <td className="px-6 py-4 text-center">{quantity}</td>
                   <td className="px-6 py-4 text-right">{unitPrice.toLocaleString()}</td>
                   <td className="px-6 py-4 text-right">{totalPrice.toLocaleString()}</td>

@@ -40,6 +40,7 @@ const Order_History_List = () => {
               color: variant.variantOption,
               quantity: variant.quantity,
               price: variant.price,
+              trial: variant.trial || false,
             };
           }),
           subtotalAmount: order.subtotalAmount || 0,
