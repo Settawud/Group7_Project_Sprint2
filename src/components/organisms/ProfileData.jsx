@@ -116,7 +116,7 @@ export default function ProfileData() {
       setOriginalData(formData);
       setIsEditing(false);
 
-      console.log("Profile updated!");
+      
     } catch (error) {
       console.error("Error updating profile:", error);
     } finally {

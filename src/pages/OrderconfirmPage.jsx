@@ -32,7 +32,6 @@ export default function OrderconfirmPage() {
     const fetchOrder = async () => {
       try {
         const res = await api.get(`/orders/${orderId}`);
-        console.log("Order data:", res.data?.item); // ตรวจสอบ field จริง
         setOrder(res.data?.item || null);
       } catch (err) {
         console.error("Failed to fetch order:", err);

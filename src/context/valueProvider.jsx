@@ -78,7 +78,7 @@ export const ValueProvider = ({ children }) => {
         }
         );
 
-              console.log(isModalOpen)
+              
         if (isModalOpen) {
           setIsModalOpen(false)
         }
